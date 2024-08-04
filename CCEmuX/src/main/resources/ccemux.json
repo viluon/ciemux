@@ -1,0 +1,10 @@
+{
+	"termWidth": 51,
+	"termHeight": 19,
+	"termScale": 3,
+	"renderer": "AWT",
+
+	"maxComputerCapacity": 1000000,
+
+	"pluginBlacklist": []
+}

@@ -1,0 +1,27 @@
+USAGE
+
+* emu close
+Closes the current emulated computer, without affecting the others. Can be called from within programs via ccemux.closeEmu().
+
+* emu open [id]
+Opens a new emulated computer, with the given ID (if specified) or with the next ID. Can be called from within programs via ccemux.openEmu() or ccemux.openEmu(id)
+
+* emu data
+This will open the CCEmuX data dir (where config files and computer save folders are stored) in your default file browser. Can be called from within programs via ccemux.openDataDir(). Note that it may fail on some Linux systems (i.e. if you don't have a DE installed)
+
+* emu config
+Opens an interface to edit the CCEmuX configuration. Note that not all rendering backends support this.
+
+CREDITS
+
+* Lignum - developer
+* apemanzilla - developer
+* Lemmmy - contributions to ccemux API and program
+* SquidDev - CCTweaks support and general help during development
+* BombBloke - created and allowed us to use the HD font
+
+LICENSE INFORMATION
+
+CCEmuX is licensed under the MIT license. The complete source code and license for CCEmuX can be found at https://github.com/Lignum/CCEmuX
+
+CCEmuX is designed around and includes ComputerCraft, a Minecraft modification by Daniel "dan200" Ratcliffe, which is licensed under the ComputerCraft Public License. The complete source code and license for ComputerCraft can be found at https://github.com/dan200/ComputerCraft
