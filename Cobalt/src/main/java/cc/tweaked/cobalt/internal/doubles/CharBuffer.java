@@ -21,7 +21,7 @@ public interface CharBuffer {
 	 *
 	 * @param chr The character to append.
 	 */
-	void append(char chr);
+	CharBuffer append(char chr);
 
 	/**
 	 * Append a slice of characters to this buffer.
@@ -31,5 +31,5 @@ public interface CharBuffer {
 	 * @param length The length of the slice to append.
 	 * @throws ArrayIndexOutOfBoundsException If the slice extends beyond the array's bounds.
 	 */
-	void append(char[] chars, int offset, int length);
+	CharBuffer append(char[] chars, int offset, int length);
 }

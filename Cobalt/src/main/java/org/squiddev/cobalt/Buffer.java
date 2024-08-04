@@ -92,9 +92,10 @@ public final class Buffer implements CharBuffer {
 	 *
 	 * @param b The byte to append
 	 */
-	public void append(byte b) {
+	public Buffer append(byte b) {
 		ensure(1);
 		bytes[length++] = b;
+		return this;
 	}
 
 	/**
@@ -102,10 +103,11 @@ public final class Buffer implements CharBuffer {
 	 *
 	 * @param b The bytes to append
 	 */
-	public void append(byte[] b) {
+	public Buffer append(byte[] b) {
 		ensure(b.length);
 		System.arraycopy(b, 0, bytes, length, b.length);
 		length += b.length;
+		return this;
 	}
 
 	/**
@@ -127,9 +129,10 @@ public final class Buffer implements CharBuffer {
 	 *
 	 * @param c The byte to append
 	 */
-	public void append(char c) {
+	public Buffer append(char c) {
 		ensure(1);
 		bytes[length++] = c < 256 ? (byte) c : 63;
+		return this;
 	}
 
 	/**
@@ -139,7 +142,7 @@ public final class Buffer implements CharBuffer {
 	 * @param start  The start index
 	 * @param length The number of values to append
 	 */
-	public void append(char[] chars, int start, int length) {
+	public Buffer append(char[] chars, int start, int length) {
 		ensure(length);
 		int j = this.length;
 		for (int i = start; i < start + length; i++, j++) {
@@ -147,6 +150,7 @@ public final class Buffer implements CharBuffer {
 			bytes[j] = c < 256 ? (byte) c : 63;
 		}
 		this.length += length;
+		return this;
 	}
 
 	/**
