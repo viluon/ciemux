@@ -16,15 +16,7 @@ allprojects {
 
 	repositories {
 		mavenCentral()
-
-		exclusiveContent {
-			forRepository {
-				maven("https://squiddev.cc/maven")
-			}
-			filter {
-				includeGroup("cc.tweaked")
-			}
-		}
+		mavenLocal()
 	}
 
 	gradle.projectsEvaluated {
