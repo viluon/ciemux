@@ -70,6 +70,13 @@ public final class LuaState {
 	public LuaTable threadMetatable;
 
 	/**
+	 * The recorded program trace
+	 */
+	public LuaTable trace;
+
+	public boolean tracingInProgress = false;
+
+	/**
 	 * The compiler for this threstate
 	 */
 	public final LoadState.FunctionFactory compiler;

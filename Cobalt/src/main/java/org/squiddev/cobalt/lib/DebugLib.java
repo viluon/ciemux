@@ -26,9 +26,27 @@ package org.squiddev.cobalt.lib;
 
 
 import cc.tweaked.cobalt.internal.LegacyEnv;
-import org.squiddev.cobalt.*;
-import org.squiddev.cobalt.debug.*;
-import org.squiddev.cobalt.function.*;
+import org.squiddev.cobalt.Buffer;
+import org.squiddev.cobalt.ErrorFactory;
+import org.squiddev.cobalt.LuaError;
+import org.squiddev.cobalt.LuaState;
+import org.squiddev.cobalt.LuaString;
+import org.squiddev.cobalt.LuaTable;
+import org.squiddev.cobalt.LuaThread;
+import org.squiddev.cobalt.LuaUserdata;
+import org.squiddev.cobalt.LuaValue;
+import org.squiddev.cobalt.Prototype;
+import org.squiddev.cobalt.Varargs;
+import org.squiddev.cobalt.debug.DebugFrame;
+import org.squiddev.cobalt.debug.DebugHelpers;
+import org.squiddev.cobalt.debug.DebugState;
+import org.squiddev.cobalt.debug.FunctionDebugHook;
+import org.squiddev.cobalt.debug.ObjectName;
+import org.squiddev.cobalt.function.LibFunction;
+import org.squiddev.cobalt.function.LocalVariable;
+import org.squiddev.cobalt.function.LuaClosure;
+import org.squiddev.cobalt.function.LuaFunction;
+import org.squiddev.cobalt.function.RegisteredFunction;
 
 import static org.squiddev.cobalt.Constants.*;
 import static org.squiddev.cobalt.ValueFactory.valueOf;
@@ -92,6 +110,8 @@ public final class DebugLib {
 			RegisteredFunction.ofV("traceback", DebugLib::traceback),
 			RegisteredFunction.ofV("upvalueid", DebugLib::upvalueId),
 			RegisteredFunction.ofV("upvaluejoin", DebugLib::upvalueJoin),
+			RegisteredFunction.ofV("begintrace", DebugLib::beginTrace),
+			RegisteredFunction.ofV("endtrace", DebugLib::endTrace),
 		}));
 	}
 
@@ -382,5 +402,25 @@ public final class DebugLib {
 
 		closure1.setUpvalue(upvalue1, closure2.getUpvalue(upvalue2));
 		return NONE;
+	}
+
+	private static Varargs beginTrace(LuaState state, Varargs args) {
+		state.trace = new LuaTable(4_096, 0);
+		state.tracingInProgress = true;
+		return NONE;
+	}
+
+	private static Varargs endTrace(LuaState state, Varargs args) {
+		final var inProgress = state.tracingInProgress;
+		final var trace = state.trace;
+
+		state.trace = null;
+		state.tracingInProgress = false;
+
+		if (trace == null || !inProgress) {
+			return NIL;
+		}
+
+		return trace;
 	}
 }

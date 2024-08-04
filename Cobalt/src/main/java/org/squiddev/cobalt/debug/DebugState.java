@@ -24,12 +24,24 @@
  */
 package org.squiddev.cobalt.debug;
 
-import org.squiddev.cobalt.*;
+import org.squiddev.cobalt.Buffer;
+import org.squiddev.cobalt.LuaError;
+import org.squiddev.cobalt.LuaState;
+import org.squiddev.cobalt.NonResumableException;
+import org.squiddev.cobalt.Prototype;
+import org.squiddev.cobalt.Resumable;
+import org.squiddev.cobalt.UnwindThrowable;
+import org.squiddev.cobalt.Varargs;
 import org.squiddev.cobalt.function.Dispatch;
 
 import java.util.Arrays;
 
-import static org.squiddev.cobalt.debug.DebugFrame.*;
+import static org.squiddev.cobalt.debug.DebugFrame.FLAG_ANY_HOOK;
+import static org.squiddev.cobalt.debug.DebugFrame.FLAG_CALL_HOOK;
+import static org.squiddev.cobalt.debug.DebugFrame.FLAG_INSN_HOOK;
+import static org.squiddev.cobalt.debug.DebugFrame.FLAG_JAVA_STACK;
+import static org.squiddev.cobalt.debug.DebugFrame.FLAG_LINE_HOOK;
+import static org.squiddev.cobalt.debug.DebugFrame.FLAG_RETURN_HOOK;
 
 /**
  * DebugState is associated with a Thread
@@ -327,6 +339,22 @@ public final class DebugState {
 	 * @throws UnwindThrowable If the hook transfers control to another coroutine.
 	 */
 	public void onInstruction(DebugFrame frame, int pc) throws LuaError, UnwindThrowable {
+		if (state.tracingInProgress) {
+			final var prototype = frame.closure.getPrototype();
+			final var trace = state.trace;
+			final var entry = new Buffer();
+
+			entry
+				.append("pc: " + frame.pc).append('\n')
+				.append("line: " + prototype.lineAt(frame.pc)).append('\n')
+				.append("column: " + prototype.columnAt(frame.pc)).append('\n')
+			;
+
+			DebugHelpers.traceback(entry, state.getCurrentThread(), 0);
+
+			trace.rawset(trace.length(), entry.toLuaString());
+		}
+
 		// TODO: Can we avoid the inhook here?
 		if (inhook || (hookMask & (HOOK_LINE | HOOK_COUNT)) != 0) onInstructionWorker(frame, pc);
 	}
