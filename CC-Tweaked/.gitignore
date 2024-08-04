@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2017 The CC: Tweaked Developers
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# Build directories
+/classes
+/logs
+/build
+/projects/*/logs
+/projects/fabric/fabricloader.log
+/projects/*/build
+/projects/*/src/test/generated_tests/
+/buildSrc/build
+/out
+/buildSrc/out
+/jars
+/doc/out/
+/node_modules
+.jqwik-database
+
+# Runtime directories
+/run
+/projects/*/run
+
+*.ipr
+*.iws
+*.iml
+.idea
+.gradle
+*.DS_Store
+
+/.classpath
+/.project
+/.settings
+/.vscode
+*.launch
+
+/projects/*/src/generated/resources/.cache

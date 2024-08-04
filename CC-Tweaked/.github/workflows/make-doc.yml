@@ -1,0 +1,35 @@
+name: Build documentation
+
+on:
+  push:
+    branches:
+    - mc-*
+
+jobs:
+  make_doc:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Clone repository
+      uses: actions/checkout@v4
+
+    - name: 📥 Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+
+    - name: 📥 Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: ${{ !startsWith(github.ref, 'refs/heads/mc-') }}
+
+    - name: ⚒️ Generate documentation
+      run: ./gradlew docWebsite --no-daemon
+
+    - name: 📤 Upload Jar
+      uses: actions/upload-artifact@v4
+      with:
+        name: Documentation
+        path: ./projects/web/build/site/
