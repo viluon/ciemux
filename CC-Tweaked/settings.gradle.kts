@@ -72,6 +72,8 @@ include(":lints")
 include(":standalone")
 include(":web")
 
+includeBuild("../Cobalt")
+
 for (project in rootProject.children) {
     project.projectDir = file("projects/${project.name}")
 }
