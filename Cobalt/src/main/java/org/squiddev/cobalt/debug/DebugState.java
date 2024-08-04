@@ -352,7 +352,7 @@ public final class DebugState {
 
 			DebugHelpers.traceback(entry, state.getCurrentThread(), 0);
 
-			trace.rawset(trace.length(), entry.toLuaString());
+			trace.rawset(trace.length() + 1, entry.toLuaString());
 		}
 
 		// TODO: Can we avoid the inhook here?
