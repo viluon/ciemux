@@ -43,6 +43,7 @@ dependencies {
 
 	implementation("commons-cli:commons-cli:1.4")
 	implementation("org.apache.commons:commons-lang3:3.6")
+	implementation("org.fusesource.jansi:jansi:2.4.1")
 
 	implementation("com.google.code.gson:gson:2.8.1")
 
