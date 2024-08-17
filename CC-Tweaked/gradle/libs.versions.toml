@@ -83,7 +83,7 @@ asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
 autoService = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 checkerFramework = { module = "org.checkerframework:checker-qual", version.ref = "checkerFramework" }
-cobalt = { module = "cc.tweaked:cobalt", version.ref = "cobalt" }
+cobalt = { module = "me.viluon:cobalt", version.ref = "cobalt" }
 commonsCli = { module = "commons-cli:commons-cli", version.ref = "commonsCli" }
 fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 forgeSpi = { module = "net.minecraftforge:forgespi", version.ref = "forgeSpi" }

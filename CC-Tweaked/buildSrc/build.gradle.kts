@@ -12,6 +12,7 @@ plugins {
 // Duplicated in settings.gradle.kts
 repositories {
     mavenCentral()
+    mavenLocal()
     gradlePluginPortal()
 
     maven("https://maven.minecraftforge.net") {

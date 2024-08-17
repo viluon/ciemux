@@ -6,6 +6,7 @@ pluginManagement {
     // Duplicated in buildSrc/build.gradle.kts
     repositories {
         mavenCentral()
+        mavenLocal()
         gradlePluginPortal()
 
         maven("https://maven.minecraftforge.net") {
@@ -71,8 +72,6 @@ include(":forge")
 include(":lints")
 include(":standalone")
 include(":web")
-
-includeBuild("../Cobalt")
 
 for (project in rootProject.children) {
     project.projectDir = file("projects/${project.name}")

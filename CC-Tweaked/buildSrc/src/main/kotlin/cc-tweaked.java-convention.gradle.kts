@@ -37,6 +37,7 @@ java {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 
     val mainMaven = maven("https://maven.squiddev.cc/mirror") {
         name = "SquidDev"

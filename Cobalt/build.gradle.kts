@@ -5,7 +5,7 @@ plugins {
 	`maven-publish`
 }
 
-group = "cc.tweaked"
+group = "me.viluon"
 version = "0.9.4-SNAPSHOT"
 
 java {
