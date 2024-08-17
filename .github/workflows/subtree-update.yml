@@ -1,0 +1,49 @@
+name: update subtrees
+
+on:
+  schedule:
+    - cron: '45 6 * * 3'
+  workflow_dispatch:
+
+jobs:
+  update-subtrees:
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - subtree: Cobalt
+            url: git@github.com:cc-tweaked/Cobalt.git
+            branch: master
+          - subtree: CC-Tweaked
+            url: git@github.com:cc-tweaked/CC-Tweaked.git
+            branch: mc-1.20.x
+          - subtree: CCEmuX
+            url: git@github.com:CCEmuX/CCEmuX.git
+            branch: revival
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: configure identity
+        run: |
+          git config --global user.email git@viluon.me
+          git config --global user.name "Andrew Kvapil"
+      - name: add ${{ matrix.subtree }} remote
+        run: git remote add ${{ matrix.subtree }} ${{ matrix.url }}
+      - name: check remotes
+        run: git remote -v
+      - name: fetch ${{ matrix.subtree }}
+        run: git fetch ${{ matrix.subtree }}
+      - name: pull from master branch
+        run: git subtree pull --prefix=${{ matrix.subtree }} ${{ matrix.subtree }} ${{ matrix.branch }}
+      - name: open a pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: update/${{ matrix.subtree }}
+          delete-branch: true
+          title: Sync ${{ matrix.subtree }} with `${{ matrix.branch }}`
