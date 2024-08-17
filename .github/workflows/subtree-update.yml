@@ -15,13 +15,13 @@ jobs:
       matrix:
         include:
           - subtree: Cobalt
-            url: git@github.com:cc-tweaked/Cobalt.git
+            url: https://github.com/cc-tweaked/Cobalt.git
             branch: master
           - subtree: CC-Tweaked
-            url: git@github.com:cc-tweaked/CC-Tweaked.git
+            url: https://github.com/cc-tweaked/CC-Tweaked.git
             branch: mc-1.20.x
           - subtree: CCEmuX
-            url: git@github.com:CCEmuX/CCEmuX.git
+            url: https://github.com/CCEmuX/CCEmuX.git
             branch: revival
     runs-on: ubuntu-latest
     steps:
