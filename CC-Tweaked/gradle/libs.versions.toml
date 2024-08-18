@@ -25,7 +25,7 @@ slf4j = "2.0.16"
 # Core dependencies (independent of Minecraft)
 asm = "9.7"
 autoService = "1.1.1"
-checkerFramework = "3.42.0"
+checkerFramework = "3.46.0"
 cobalt = "0.9.4-SNAPSHOT"
 commonsCli = "1.6.0"
 jetbrainsAnnotations = "24.1.0"
