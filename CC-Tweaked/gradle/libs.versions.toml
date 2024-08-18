@@ -52,7 +52,7 @@ create-fabric = "0.5.1-f-build.1467+mc1.20.1"
 # Testing
 hamcrest = "3.0"
 jqwik = "1.9.0"
-junit = "5.10.1"
+junit = "5.11.0"
 jmh = "1.37"
 
 # Build tools
