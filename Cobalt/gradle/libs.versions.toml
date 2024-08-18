@@ -10,7 +10,7 @@ kotlin-coroutines = "1.8.1"
 
 jmh = "1.23"
 junit = "5.9.2"
-hamcrest = "2.2"
+hamcrest = "3.0"
 
 [libraries]
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
