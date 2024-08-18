@@ -46,6 +46,7 @@ dependencies {
 	implementation("org.fusesource.jansi:jansi:2.4.1")
 
 	implementation("com.google.code.gson:gson:2.8.1")
+	implementation("com.googlecode.lanterna:lanterna:3.1.2")
 
 	compileOnly("com.google.auto.service:auto-service:1.0.1")
 	annotationProcessor("com.google.auto.service:auto-service:1.0.1")

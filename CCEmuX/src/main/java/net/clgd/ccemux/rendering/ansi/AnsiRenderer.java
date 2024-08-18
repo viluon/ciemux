@@ -1,6 +1,10 @@
 package net.clgd.ccemux.rendering.ansi;
 
-import net.clgd.ccemux.api.Utils;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.ansi.UnixTerminal;
 import net.clgd.ccemux.api.emulation.EmulatedComputer;
 import net.clgd.ccemux.api.emulation.EmulatedPalette;
 import net.clgd.ccemux.api.emulation.EmulatedTerminal;
@@ -14,8 +18,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -24,7 +28,7 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 
 	private final List<Listener> listeners = new ArrayList<>();
 
-	private final Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+	private final Terminal terminal;
 
 	private final Writer output;
 
@@ -33,6 +37,13 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 
 		AnsiConsole.systemInstall();
 		output = new OutputStreamWriter(System.out, StandardCharsets.UTF_8);
+
+		try {
+			terminal = new UnixTerminal(System.in, System.out, StandardCharsets.UTF_8);
+			terminal.enterPrivateMode();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
 		computer.terminal.addListener(this);
 		computer.terminal.getPalette().addListener(this);
@@ -62,14 +73,60 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 	@Override
 	public void dispose() {
 		AnsiConsole.systemUninstall();
+		try {
+			terminal.exitPrivateMode();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
 	public void onAdvance(double dt) {
-		while (scanner.hasNext()) {
-			for (char ch : scanner.next().toCharArray()) {
-				computer.queueEvent("char", new Object[]{String.valueOf(ch)});
+		try {
+			final var input = terminal.pollInput();
+			if (input != null) {
+
+				if (input.getKeyType() == KeyType.EOF) {
+					computer.queueEvent("terminate", new Object[0]);
+				} else {
+					queueKeyEvents(input);
+				}
 			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void queueKeyEvents(KeyStroke input) {
+		final var keyCodes = new ArrayList<Integer>();
+
+		if (input.isShiftDown()) {
+			keyCodes.add(340); // left shift
+		}
+		if (input.isCtrlDown()) {
+			keyCodes.add(341); // left ctrl
+		}
+		if (input.isAltDown()) {
+			keyCodes.add(342); // left alt
+		}
+
+		if (CCKeys.controlKeys.containsKey(input.getKeyType())) {
+			keyCodes.add(CCKeys.controlKeys.get(input.getKeyType()));
+		} else if (CCKeys.characterKeys.containsKey(input.getCharacter())) {
+			keyCodes.add(CCKeys.characterKeys.get(input.getCharacter()));
+		}
+
+		for (final var code : keyCodes) {
+			computer.queueEvent("key", new Object[]{code});
+		}
+
+		if (input.getKeyType() == KeyType.Character) {
+			computer.queueEvent("char", new Object[]{input.getCharacter().toString()});
+		}
+
+		Collections.reverse(keyCodes);
+		for (final var code : keyCodes) {
+			computer.queueEvent("key_up", new Object[]{code});
 		}
 	}
 
@@ -86,33 +143,48 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 	public void write(@Nonnull String text) {
 		final var term = computer.terminal;
 		final var palette = term.getPalette();
-		final var fg = palette.getColour(term.getTextColour());
-		final var bg = palette.getColour(term.getBackgroundColour());
+		final var fg = palette.getColour(15 - term.getTextColour());
+		final var bg = palette.getColour(15 - term.getBackgroundColour());
 
-		write(ansi()
-			.fgRgb((int) (fg[0] * 255), (int) (fg[1] * 255), (int) (fg[2] * 255))
-			.bgRgb((int) (bg[0] * 255), (int) (bg[1] * 255), (int) (bg[2] * 255))
-			.a(text.replace('\n', ' ').replace('\r', ' '))
-		);
+		try {
+			terminal.setBackgroundColor(new TextColor.RGB((int) (bg[0] * 255), (int) (bg[1] * 255), (int) (bg[2] * 255)));
+			terminal.setForegroundColor(new TextColor.RGB((int) (fg[0] * 255), (int) (fg[1] * 255), (int) (fg[2] * 255)));
+			terminal.putString(text);
+			terminal.flush();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
 	public void setCursorPos(int x, int y) {
-		write(ansi().cursor(x, y));
+		try {
+			terminal.setCursorPosition(x, y);
+			terminal.flush();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
 	public void clear() {
-		write(ansi().eraseScreen());
+		try {
+			terminal.clearScreen();
+			terminal.flush();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
 	public void clearLine() {
+		// FIXME
 		write(ansi().eraseLine());
 	}
 
 	@Override
 	public void scroll(int yDiff) {
+		// FIXME
 		write(yDiff > 0 ? ansi().scrollUp(yDiff) : ansi().scrollDown(yDiff));
 	}
 
@@ -126,18 +198,20 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 		final var term = computer.terminal;
 		final var palette = term.getPalette();
 
-		var ansi = ansi();
-		for (var i = 0; i < fixedText.length(); i++) {
-			final var bg = palette.getColour(Integer.parseInt(String.valueOf(backgroundColour.charAt(i)), 16));
-			final var fg = palette.getColour(Integer.parseInt(String.valueOf(textColour.charAt(i)), 16));
-			final var ch = fixedText.charAt(i);
+		try {
+			for (var i = 0; i < fixedText.length(); i++) {
+				final var bg = palette.getColour(15 - Integer.parseInt(String.valueOf(backgroundColour.charAt(i)), 16));
+				final var fg = palette.getColour(15 - Integer.parseInt(String.valueOf(textColour.charAt(i)), 16));
+				final var ch = fixedText.charAt(i);
 
-			ansi = ansi
-				.fgRgb((int) (fg[0] * 255), (int) (fg[1] * 255), (int) (fg[2] * 255))
-				.bgRgb((int) (bg[0] * 255), (int) (bg[1] * 255), (int) (bg[2] * 255))
-				.a(ch);
+				terminal.setBackgroundColor(new TextColor.RGB((int) (bg[0] * 255), (int) (bg[1] * 255), (int) (bg[2] * 255)));
+				terminal.setForegroundColor(new TextColor.RGB((int) (fg[0] * 255), (int) (fg[1] * 255), (int) (fg[2] * 255)));
+				terminal.putCharacter(ch);
+			}
+
+			terminal.flush();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-
-		write(ansi);
 	}
 }
