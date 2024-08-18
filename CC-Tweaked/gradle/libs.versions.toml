@@ -50,7 +50,7 @@ create-forge = "0.5.1.f-33"
 create-fabric = "0.5.1-f-build.1467+mc1.20.1"
 
 # Testing
-hamcrest = "2.2"
+hamcrest = "3.0"
 jqwik = "1.8.2"
 junit = "5.10.1"
 jmh = "1.37"
