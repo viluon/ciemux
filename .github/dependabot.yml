@@ -12,10 +12,6 @@ updates:
   - package-ecosystem: gradle
     schedule:
       interval: daily
-    groups:
-      gradle:
-        patterns:
-          - '*'
     directories:
       - "/CC-Tweaked/"
       - "/CCEmuX/"
