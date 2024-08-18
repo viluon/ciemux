@@ -1,16 +1,16 @@
 [versions]
-asm = "9.3"
-slf4j = "2.0.6"
+asm = "9.7"
+slf4j = "2.0.16"
 
 checkerFramework-plugin = "0.6.17"
-checkerFramework = "3.36.0"
+checkerFramework = "3.46.0"
 
-kotlin = "1.8.10"
-kotlin-coroutines = "1.6.4"
+kotlin = "2.0.10"
+kotlin-coroutines = "1.8.1"
 
-jmh = "1.23"
-junit = "5.9.2"
-hamcrest = "2.2"
+jmh = "1.37"
+junit = "5.11.0"
+hamcrest = "3.0"
 
 [libraries]
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }

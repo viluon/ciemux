@@ -1,7 +1,7 @@
 plugins {
 	application
-	id("com.github.johnrengelman.shadow") version "7.1.2"
-	id("org.openjfx.javafxplugin") version "0.0.13"
+	id("com.github.johnrengelman.shadow") version "8.1.1"
+	id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 val ccVersion: String by extra
@@ -39,19 +39,19 @@ application {
 dependencies {
 	implementation(project(":plugin-api"))
 
-	runtimeOnly("org.slf4j:slf4j-simple:2.0.6")
+	runtimeOnly("org.slf4j:slf4j-simple:2.0.16")
 
-	implementation("commons-cli:commons-cli:1.4")
-	implementation("org.apache.commons:commons-lang3:3.6")
+	implementation("commons-cli:commons-cli:1.9.0")
+	implementation("org.apache.commons:commons-lang3:3.16.0")
 	implementation("org.fusesource.jansi:jansi:2.4.1")
 
-	implementation("com.google.code.gson:gson:2.8.1")
+	implementation("com.google.code.gson:gson:2.11.0")
 	implementation("com.googlecode.lanterna:lanterna:3.1.2")
 
-	compileOnly("com.google.auto.service:auto-service:1.0.1")
-	annotationProcessor("com.google.auto.service:auto-service:1.0.1")
+	compileOnly("com.google.auto.service:auto-service:1.1.1")
+	annotationProcessor("com.google.auto.service:auto-service:1.1.1")
 
-	testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
 }
 
 javafx {
