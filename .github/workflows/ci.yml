@@ -35,13 +35,23 @@ jobs:
       working-directory: CCEmuX
       run: ./gradlew build --no-daemon
 
+    - name: upload artifact
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: build artifacts
+        path: |
+          */build/libs/*.jar
+
     - name: delete release
+      if: ${{ github.ref_name == 'main' }}
       continue-on-error: true
       run: gh release delete latest --cleanup-tag
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
     - name: create release
+      if: ${{ github.ref_name == 'main' }}
       uses: softprops/action-gh-release@v2
       id: create-release
       with:
@@ -54,6 +64,7 @@ jobs:
         tag_name: latest
 
     - name: publish release
+      if: ${{ github.ref_name == 'main' }}
       uses: eregon/publish-release@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
