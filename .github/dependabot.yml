@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    groups:
+      actions:
+        patterns:
+          - '*'
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gradle
+    schedule:
+      interval: daily
+    groups:
+      gradle:
+        patterns:
+          - '*'
+    directories:
+      - "/CC-Tweaked/"
+      - "/CCEmuX/"
+      - "/Cobalt/"
