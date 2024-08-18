@@ -142,13 +142,12 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 	@Override
 	public void write(@Nonnull String text) {
 		final var term = computer.terminal;
-		final var palette = term.getPalette();
-		final var fg = palette.getColour(15 - term.getTextColour());
-		final var bg = palette.getColour(15 - term.getBackgroundColour());
+
+		final var fg = term.getTextColour();
+		final var bg = term.getBackgroundColour();
 
 		try {
-			terminal.setBackgroundColor(new TextColor.RGB((int) (bg[0] * 255), (int) (bg[1] * 255), (int) (bg[2] * 255)));
-			terminal.setForegroundColor(new TextColor.RGB((int) (fg[0] * 255), (int) (fg[1] * 255), (int) (fg[2] * 255)));
+			setColorsFromPalette(fg, bg);
 			terminal.putString(text);
 			terminal.flush();
 		} catch (IOException e) {
@@ -195,17 +194,14 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 	@Override
 	public void blit(@Nonnull String text, @Nonnull String textColour, @Nonnull String backgroundColour) {
 		String fixedText = text.replace('\r', ' ').replace('\n', ' ');
-		final var term = computer.terminal;
-		final var palette = term.getPalette();
 
 		try {
 			for (var i = 0; i < fixedText.length(); i++) {
-				final var bg = palette.getColour(15 - Integer.parseInt(String.valueOf(backgroundColour.charAt(i)), 16));
-				final var fg = palette.getColour(15 - Integer.parseInt(String.valueOf(textColour.charAt(i)), 16));
+				final var fg = Integer.parseInt(String.valueOf(textColour.charAt(i)), 16);
+				final var bg = Integer.parseInt(String.valueOf(backgroundColour.charAt(i)), 16);
 				final var ch = fixedText.charAt(i);
 
-				terminal.setBackgroundColor(new TextColor.RGB((int) (bg[0] * 255), (int) (bg[1] * 255), (int) (bg[2] * 255)));
-				terminal.setForegroundColor(new TextColor.RGB((int) (fg[0] * 255), (int) (fg[1] * 255), (int) (fg[2] * 255)));
+				setColorsFromPalette(fg, bg);
 				terminal.putCharacter(ch);
 			}
 
@@ -213,5 +209,14 @@ public class AnsiRenderer implements Renderer, EmulatedTerminal.Listener, Emulat
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void setColorsFromPalette(int textColor, int backgroundColor) throws IOException {
+		final var palette = computer.terminal.getPalette();
+		final var fg = palette.getColour(15 - textColor);
+		final var bg = palette.getColour(15 - backgroundColor);
+
+		terminal.setBackgroundColor(new TextColor.RGB((int) (bg[0] * 255), (int) (bg[1] * 255), (int) (bg[2] * 255)));
+		terminal.setForegroundColor(new TextColor.RGB((int) (fg[0] * 255), (int) (fg[1] * 255), (int) (fg[2] * 255)));
 	}
 }
