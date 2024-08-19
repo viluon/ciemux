@@ -41,7 +41,7 @@ dependencies {
 
 	runtimeOnly("org.slf4j:slf4j-simple:2.0.6")
 
-	implementation("commons-cli:commons-cli:1.4")
+	implementation("commons-cli:commons-cli:1.9.0")
 	implementation("org.apache.commons:commons-lang3:3.6")
 	implementation("org.fusesource.jansi:jansi:2.4.1")
 
