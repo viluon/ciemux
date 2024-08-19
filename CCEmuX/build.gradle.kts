@@ -39,7 +39,7 @@ application {
 dependencies {
 	implementation(project(":plugin-api"))
 
-	runtimeOnly("org.slf4j:slf4j-simple:2.0.6")
+	runtimeOnly("org.slf4j:slf4j-simple:2.0.16")
 
 	implementation("commons-cli:commons-cli:1.4")
 	implementation("org.apache.commons:commons-lang3:3.6")
