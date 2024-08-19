@@ -9,7 +9,7 @@ kotlin = "1.8.10"
 kotlin-coroutines = "1.8.1"
 
 jmh = "1.37"
-junit = "5.9.2"
+junit = "5.11.0"
 hamcrest = "3.0"
 
 [libraries]
