@@ -51,7 +51,7 @@ dependencies {
 	compileOnly("com.google.auto.service:auto-service:1.0.1")
 	annotationProcessor("com.google.auto.service:auto-service:1.0.1")
 
-	testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
 }
 
 javafx {
