@@ -1,5 +1,5 @@
 [versions]
-asm = "9.3"
+asm = "9.7"
 slf4j = "2.0.16"
 
 checkerFramework-plugin = "0.6.17"
