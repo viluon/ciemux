@@ -1,6 +1,6 @@
 name: Java CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -8,19 +8,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clone repository
-      uses: actions/checkout@v3
+    - name: 📥 Clone repository
+      uses: actions/checkout@v4
 
-    - name: Set up Java
-      uses: actions/setup-java@v3
+    - name: 📥 Set up Java
+      uses: actions/setup-java@v4
       with:
         java-version: 17
         distribution: 'temurin'
 
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        cache-read-only: ${{ !startsWith(github.ref, 'refs/heads/mc-') }}
+    - name: 📥 Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
 
-    - name: Build with Gradle
+    - name: ⚒️ Build with Gradle
       run: ./gradlew build
+
+    - name: 📦 Package artifacts
+      run: |
+        SHA=$(git rev-parse HEAD | cut -b-8)
+        mkdir -p "out/$SHA"
+        cp $(find build/libs -type f -name '*-cct.jar') "out/$SHA/CCEmuX-cct.jar"
+        echo "$SHA" > out/latest
+
+    - name: 📤 Upload Jar
+      uses: actions/upload-artifact@v4
+      with:
+        name: Jars
+        path: ./out
+        retention-days: 1
