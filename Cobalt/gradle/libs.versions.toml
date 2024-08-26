@@ -5,7 +5,7 @@ slf4j = "2.0.16"
 checkerFramework-plugin = "0.6.17"
 checkerFramework = "3.46.0"
 
-kotlin = "2.0.10"
+kotlin = "2.0.20"
 kotlin-coroutines = "1.8.1"
 
 jmh = "1.37"
