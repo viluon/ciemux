@@ -42,7 +42,7 @@ dependencies {
 	runtimeOnly("org.slf4j:slf4j-simple:2.0.16")
 
 	implementation("commons-cli:commons-cli:1.9.0")
-	implementation("org.apache.commons:commons-lang3:3.16.0")
+	implementation("org.apache.commons:commons-lang3:3.17.0")
 	implementation("org.fusesource.jansi:jansi:2.4.1")
 
 	implementation("com.google.code.gson:gson:2.11.0")
