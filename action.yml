@@ -1,0 +1,33 @@
+name: ciemux
+author: viluon
+description: Run CCEmuX in CI, with additional features.
+branding:
+  icon: terminal
+  color: yellow
+
+runs:
+  using: composite
+  steps:
+    - name: setup java
+      uses: actions/setup-java@v4
+      with:
+        distribution: zulu
+        java-package: jre
+        java-version: 17
+    - name: download ciemux release jar
+      uses: robinraju/release-downloader@v1
+      with:
+        fileName: ciemux.jar
+        out-file-path: /tmp/ciemux.jar
+        repository: viluon/ciemux
+        tag: latest
+    - name: prepare environment
+      run: |
+        mkdir -p ~/.local/share/ccemux/computer/
+        ln -s $(pwd) ~/.local/share/ccemux/computer/0
+        echo "print 'hello world'; os.shutdown()" > startup.lua
+      shell: bash
+    - name: run ciemux
+      run: java -jar /tmp/ciemux.jar --renderer=ANSI
+      shell: bash
+      timeout-minutes: 1
