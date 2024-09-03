@@ -51,6 +51,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
+    - name: rename jar
+      if: ${{ github.ref_name == 'main' }}
+      run: mv CCEmuX/build/libs/CCEmuX*-cct.jar ciemux.jar
+
     - name: create release
       if: ${{ github.ref_name == 'main' }}
       uses: softprops/action-gh-release@v2
@@ -59,7 +63,7 @@ jobs:
         draft: true
         fail_on_unmatched_files: true
         files: |
-          CCEmuX/build/libs/CCEmuX*.jar
+          ciemux.jar
         name: ciemux
         prerelease: false
         tag_name: latest
