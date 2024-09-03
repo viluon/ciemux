@@ -86,4 +86,4 @@ jobs:
     - name: install act
       run: curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
     - name: run act
-      run: act -W gh-test/.github/workflows/sample.yml
+      run: ./bin/act -W gh-test/.github/workflows/sample.yml
