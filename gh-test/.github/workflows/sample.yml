@@ -1,0 +1,8 @@
+name: ciemux hello world
+on: [push]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: run ciemux
+        uses: viluon/ciemux@latest

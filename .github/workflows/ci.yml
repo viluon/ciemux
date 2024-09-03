@@ -75,3 +75,15 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         release_id: ${{ steps.create-release.outputs.id }}
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install act
+      run: curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+    - name: run act
+      run: act -W gh-test/.github/workflows/sample.yml
