@@ -15,12 +15,9 @@ runs:
         java-package: jre
         java-version: 17
     - name: download ciemux release jar
-      uses: robinraju/release-downloader@v1
-      with:
-        fileName: ciemux.jar
-        out-file-path: /tmp/ciemux.jar
-        repository: viluon/ciemux
-        tag: latest
+      run: |
+        curl -L https://github.com/viluon/ciemux/releases/download/latest/ciemux.jar -o /tmp/ciemux.jar
+      shell: bash
     - name: prepare environment
       run: |
         mkdir -p ~/.local/share/ccemux/computer/
@@ -30,5 +27,3 @@ runs:
     - name: run ciemux
       run: java -jar /tmp/ciemux.jar --renderer=ANSI
       shell: bash
-      # unsupported by act
-      #timeout-minutes: 1
