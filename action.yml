@@ -30,4 +30,5 @@ runs:
     - name: run ciemux
       run: java -jar /tmp/ciemux.jar --renderer=ANSI
       shell: bash
-      timeout-minutes: 1
+      # unsupported by act
+      #timeout-minutes: 1
