@@ -9,3 +9,4 @@ jobs:
     steps:
     - name: run ciemux
       uses: viluon/ciemux@latest
+      timeout-minutes: 1
