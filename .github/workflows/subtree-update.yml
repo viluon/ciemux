@@ -42,7 +42,7 @@ jobs:
       - name: pull from master branch
         run: git subtree pull --prefix=${{ matrix.subtree }} ${{ matrix.subtree }} ${{ matrix.branch }}
       - name: open a pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           branch: update/${{ matrix.subtree }}
           delete-branch: true
