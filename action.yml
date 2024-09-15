@@ -36,5 +36,5 @@ runs:
         echo "print 'hello world'; os.shutdown()" > startup.lua
       shell: bash
     - name: run ciemux
-      run: timeout 30 java -jar /tmp/ciemux.jar --renderer=ANSI
+      run: timeout 30 tmux -c 'java -jar /tmp/ciemux.jar --renderer=ANSI'
       shell: bash
