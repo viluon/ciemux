@@ -23,6 +23,8 @@ runs:
         mkdir -p ~/.local/share/ccemux/computer/
         ln -s $(pwd) ~/.local/share/ccemux/computer/0
         echo "print 'hello world'; os.shutdown()" > startup.lua
+        # prepare stty
+        sudo ln -s $(which stty) /bin/stty
       shell: bash
     - name: run ciemux
       run: timeout 30 java -jar /tmp/ciemux.jar --renderer=ANSI
