@@ -95,5 +95,9 @@ jobs:
         path: /tmp/
     - name: install act
       run: curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+    - name: override action revision
+      run: |
+        # override ciemux@latest with the current SHA in sample.yml
+        sed -i "s/ciemux@latest/ciemux@${{ github.sha }}/g" gh-test/.github/workflows/sample.yml
     - name: run act
-      run: echo | ./bin/act -W gh-test/.github/workflows/sample.yml --input jar-path=/tmp/ciemux.jar
+      run: echo | ./bin/act --verbose --workflows gh-test/.github/workflows/sample.yml --input jar-path=/tmp/ciemux.jar
