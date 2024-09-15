@@ -4,6 +4,11 @@ description: Run CCEmuX in CI, with additional features.
 branding:
   icon: terminal
   color: yellow
+inputs:
+  jar-path:
+    description: Path to the CCEmuX jar file. If not set, will download the latest release.
+    required: false
+    type: string
 
 runs:
   using: composite
@@ -15,8 +20,14 @@ runs:
         java-package: jre
         java-version: 17
     - name: download ciemux release jar
+      if: ${{ inputs.jar-path == '' }}
       run: |
         curl -L https://github.com/viluon/ciemux/releases/download/latest/ciemux.jar -o /tmp/ciemux.jar
+      shell: bash
+    - name: copy ciemux jar
+      if: ${{ inputs.jar-path != '' && inputs.jar-path != '/tmp/ciemux.jar' }}
+      run: |
+        cp ${{ inputs.jar-path }} /tmp/ciemux.jar
       shell: bash
     - name: prepare environment
       run: |
