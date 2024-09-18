@@ -43,22 +43,11 @@ public class EmulatedPalette extends Palette {
 	 */
 	@Override
 	public void setColour(int i, double r, double g, double b) {
-		// The delegate is null when initially creating the object, which means
-		// resetColours causes an NPE. Hence this null check.
+		// The delegate is null when initially creating the object.
 		if (delegate == null) return;
 		delegate.setColour(i, r, g, b);
 		setChanged(true);
 		for (ColorChangeListener listener : listeners) listener.setColour(i, r, g, b);
-	}
-
-	/**
-	 * Resets a color to its default value
-	 */
-	@Override
-	public void resetColour(int i) {
-		if (delegate == null) return;
-		delegate.resetColour(i);
-		setChanged(true);
 	}
 
 	/**
