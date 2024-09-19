@@ -35,8 +35,8 @@ runs:
         ln -s $(pwd) ~/.local/share/ccemux/computer/0
         echo "print 'hello world'; os.shutdown()" > startup.lua
         sudo apt-get update
-        sudo apt-get install -y tmux
+        sudo apt-get install -y screen
       shell: bash
     - name: run ciemux
-      run: timeout 30 tmux -c 'java -jar /tmp/ciemux.jar --renderer=ANSI'
+      run: timeout 30 screen 'java -jar /tmp/ciemux.jar --renderer=ANSI'
       shell: bash
