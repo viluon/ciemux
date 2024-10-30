@@ -24,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Holds additional state for a pocket computer. This includes pocket computer upgrade,
@@ -177,7 +178,9 @@ public final class PocketBrain implements IPocketAccess {
      */
     @Override
     public void setUpgrade(@Nullable UpgradeData<IPocketUpgrade> upgrade) {
-        this.upgrade = upgrade;
+        if (Objects.equals(this.upgrade, upgrade)) return;
+
+        this.upgrade = UpgradeData.copyOf(upgrade);
         dirty = true;
         invalidatePeripheral();
     }

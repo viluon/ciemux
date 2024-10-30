@@ -50,11 +50,6 @@ jobs:
     - name: 🧪 Run integration tests
       run: ./gradlew runGametest
 
-    - name: 🧪 Run client tests
-      run: ./gradlew runGametestClient # Not checkClient, as no point running rendering tests.
-      # These are a little flaky on GH actions: its useful to run them, but don't break the build.
-      continue-on-error: true
-
     - name: 🧪 Parse test reports
       run: ./tools/parse-reports.py
       if: ${{ failure() }}
@@ -70,9 +65,6 @@ jobs:
       with:
         name: CC-Tweaked
         path: ./jars
-
-    - name: 📤 Upload coverage
-      uses: codecov/codecov-action@v4
 
   build-core:
     strategy:

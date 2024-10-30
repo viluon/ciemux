@@ -4,7 +4,6 @@
 
 package dan200.computercraft.core.apis.http.request;
 
-import dan200.computercraft.core.Logging;
 import dan200.computercraft.core.apis.handles.ArrayByteChannel;
 import dan200.computercraft.core.apis.handles.ReadHandle;
 import dan200.computercraft.core.apis.http.HTTPRequestException;
@@ -162,7 +161,7 @@ public final class HttpRequestHandler extends SimpleChannelInboundHandler<HttpOb
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        LOG.error(Logging.HTTP_ERROR, "Error handling HTTP response", cause);
+        ctx.close();
         request.failure(NetworkUtils.toFriendlyError(cause));
     }
 
