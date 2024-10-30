@@ -33,7 +33,6 @@
 
 package cc.tweaked.cobalt.internal.doubles;
 
-import org.checkerframework.checker.signedness.qual.SignednessGlb;
 import org.checkerframework.checker.signedness.qual.Unsigned;
 
 import java.util.Arrays;
@@ -256,7 +255,7 @@ final class DecimalRepBuf {
 	 */
 	public void zeroExtend(int targetLength) {
 		if (length < targetLength) {
-			Arrays.fill((@SignednessGlb char[]) buffer, length, targetLength, '0');
+			Arrays.fill(buffer, length, targetLength, '0');
 			length = targetLength;
 		}
 	}
