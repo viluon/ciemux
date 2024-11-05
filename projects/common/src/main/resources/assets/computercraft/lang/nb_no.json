@@ -32,8 +32,6 @@
     "commands.computercraft.generic.additional_rows": "%d flere rader…",
     "commands.computercraft.generic.exception": "Uhåndtert unntak (%s)",
     "commands.computercraft.generic.no": "N",
-    "commands.computercraft.generic.no_position": "<ingen posisjon>",
-    "commands.computercraft.generic.position": "%s, %s, %s",
     "commands.computercraft.generic.yes": "J",
     "commands.computercraft.help.desc": "Viser denne hjelpemeldingen",
     "commands.computercraft.help.no_children": "%s har ingen underkommandoer",

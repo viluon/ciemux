@@ -24,8 +24,6 @@
     "chat.computercraft.wired_modem.peripheral_disconnected": "El periférico \"%s\" se desconectó de la red",
     "commands.computercraft.generic.additional_rows": "%d filas adicionales…",
     "commands.computercraft.generic.no": "N",
-    "commands.computercraft.generic.no_position": "<sin pos>",
-    "commands.computercraft.generic.position": "%s, %s, %s",
     "commands.computercraft.generic.yes": "Y",
     "commands.computercraft.help.desc": "Muestra este mensaje de ayuda",
     "commands.computercraft.help.no_command": "Sin comando '%s'",
