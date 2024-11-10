@@ -62,7 +62,7 @@ public class WebsocketHandle {
             ? environment.startTimer(Math.round(checkFinite(0, timeout.get()) / 0.05))
             : -1;
 
-        return new ReceiveCallback(timeoutId).pull;
+        return new ReceiveCallback(environment, timeoutId).pull;
     }
 
     /**
@@ -110,18 +110,22 @@ public class WebsocketHandle {
 
     private final class ReceiveCallback implements ILuaCallback {
         final MethodResult pull = MethodResult.pullEvent(null, this);
+        private final IAPIEnvironment environment;
         private final int timeoutId;
 
-        ReceiveCallback(int timeoutId) {
+        ReceiveCallback(IAPIEnvironment environment, int timeoutId) {
             this.timeoutId = timeoutId;
+            this.environment = environment;
         }
 
         @Override
         public MethodResult resume(Object[] event) {
             if (event.length >= 3 && Objects.equals(event[0], MESSAGE_EVENT) && Objects.equals(event[1], address)) {
+                environment.cancelTimer(timeoutId);
                 return MethodResult.of(Arrays.copyOfRange(event, 2, event.length));
             } else if (event.length >= 2 && Objects.equals(event[0], CLOSE_EVENT) && Objects.equals(event[1], address) && websocket.isClosed()) {
                 // If the socket is closed abort.
+                environment.cancelTimer(timeoutId);
                 return MethodResult.of();
             } else if (event.length >= 2 && timeoutId != -1 && Objects.equals(event[0], TIMER_EVENT)
                 && event[1] instanceof Number id && id.intValue() == timeoutId) {
