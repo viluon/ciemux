@@ -14,7 +14,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * The redstone relay is a peripheral that allows reading and outputting redstone signals.
+ * The redstone relay is a peripheral that allows reading and outputting redstone signals. While this is not very useful
+ * on its own (as computers have the same functionality [built-in][`redstone`]), this can be used with [wired
+ * modems][`modem`] to interact with multiple redstone signals from the same computer.
  * <p>
  * The peripheral provides largely identical methods to a computer's built-in {@link RedstoneAPI} API, allowing setting
  * signals on all six sides of the block ("top", "bottom", "left", "right", "front" and "back").
