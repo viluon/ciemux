@@ -27,7 +27,7 @@ import java.util.function.Consumer;
  *
  * <h2>Example</h2>
  *
- * <pre>{@code
+ * <pre class="language language-java">{@code
  * public class MyPeripheral implements IPeripheral {
  *     private final AttachedComputerSet computers = new ComputerCollection();
  *
