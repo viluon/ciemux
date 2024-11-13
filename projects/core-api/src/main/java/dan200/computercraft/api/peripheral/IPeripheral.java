@@ -4,19 +4,28 @@
 
 package dan200.computercraft.api.peripheral;
 
+import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaFunction;
+import dan200.computercraft.api.lua.LuaTask;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
- * The interface that defines a peripheral.
+ * A peripheral is an external device that a computer can interact with.
  * <p>
- * In order to expose a peripheral for your block or block entity, you should either attach a capability (Forge) or
- * use the block lookup API (Fabric). This interface <em>cannot</em> be implemented directly on the block entity.
+ * Peripherals can be supplied by both a block (or block entity), or from
+ * {@linkplain dan200.computercraft.api.turtle.ITurtleUpgrade#createPeripheral(dan200.computercraft.api.turtle.ITurtleAccess, dan200.computercraft.api.turtle.TurtleSide) turtle}
+ * or {@linkplain dan200.computercraft.api.pocket.IPocketUpgrade#createPeripheral(dan200.computercraft.api.pocket.IPocketAccess) pocket}
+ * upgrades.
  * <p>
- * Peripherals should provide a series of methods to the user, either using {@link LuaFunction} or by implementing
- * {@link IDynamicPeripheral}.
+ * See the {@linkplain dan200.computercraft.api.peripheral package documentation} for more information on registering peripherals.
+ * <p>
+ * Peripherals should provide a series of methods to the user, typically by annotating Java methods with
+ * {@link LuaFunction}. Alternatively, {@link IDynamicPeripheral} may be used to provide a dynamic set of methods.
+ * Remember that peripheral methods are called on the <em>computer</em> thread, and so it is not safe to interact with
+ * the Minecraft world by default. One should use {@link LuaFunction#mainThread()} or
+ * {@link ILuaContext#executeMainThreadTask(LuaTask)} to run code on the main server thread.
  */
 public interface IPeripheral {
     /**
@@ -24,6 +33,7 @@ public interface IPeripheral {
      * This can be queried from lua by calling {@code peripheral.getType()}
      *
      * @return A string identifying the type of peripheral.
+     * @see PeripheralType#getPrimaryType()
      */
     String getType();
 
@@ -81,7 +91,7 @@ public interface IPeripheral {
     }
 
     /**
-     * Get the object that this peripheral provides methods for. This will generally be the tile entity
+     * Get the object that this peripheral provides methods for. This will generally be the block entity
      * or block, but may be an inventory, entity, etc...
      *
      * @return The object this peripheral targets
@@ -95,7 +105,7 @@ public interface IPeripheral {
      * Determine whether this peripheral is equivalent to another one.
      * <p>
      * The minimal example should at least check whether they are the same object. However, you may wish to check if
-     * they point to the same block or tile entity.
+     * they point to the same block or block entity.
      *
      * @param other The peripheral to compare against. This may be {@code null}.
      * @return Whether these peripherals are equivalent.

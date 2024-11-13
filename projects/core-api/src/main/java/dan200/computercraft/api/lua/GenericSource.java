@@ -23,7 +23,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
  *
  * <pre>{@code
  * public class InventoryMethods implements GenericSource {
- *     \@LuaFunction( mainThread = true )
+ *     \@LuaFunction(mainThread = true)
  *     public int size(IItemHandler inventory) {
  *         return inventory.getSlots();
  *     }

@@ -96,6 +96,7 @@ public final class PeripheralType {
      * Get the name of this peripheral type. This may be {@code null}.
      *
      * @return The type of this peripheral.
+     * @see IPeripheral#getType()
      */
     @Nullable
     public String getPrimaryType() {
@@ -107,6 +108,7 @@ public final class PeripheralType {
      * a peripheral might have.
      *
      * @return All additional types.
+     * @see IPeripheral#getAdditionalTypes()
      */
     public Set<String> getAdditionalTypes() {
         return additionalTypes;
