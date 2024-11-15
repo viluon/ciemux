@@ -1,7 +1,7 @@
 New features in CC: Tweaked 1.114.0
 
 * Add redstone relay peripheral.
-* Add support for `math.atan(x, y)`.
+* Add support for `math.atan(y, x)`.
 * Update several translations.
 
 Several bug fixes:
