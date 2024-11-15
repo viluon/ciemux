@@ -1,10 +1,13 @@
-New features in CC: Tweaked 1.113.1
+New features in CC: Tweaked 1.114.0
 
-* Update Japanese translation (konumatakaki).
-* Improve performance of `textutils.urlEncode`.
+* Add redstone relay peripheral.
+* Add support for `math.atan(x, y)`.
+* Update several translations.
 
 Several bug fixes:
-* Fix overflow when converting recursive objects from Java to Lua.
-* Fix websocket compression not working under Forge.
+* Fix pocket upgrades not appearing after crafting.
+* Cancel `rednet.receive` and `Websocket.receive` timers after a message is received.
+* Fix several issues with parsing and printing large doubles.
+* Fix in-hand pocket computer being blank after changing dimension.
 
 Type "help changelog" to see the full version history.
