@@ -269,7 +269,7 @@ abstract class CCTweakedExtension(
     companion object {
         private val COMMIT_COUNTS = Pattern.compile("""^\s*[0-9]+\s+(.*)$""")
         private val IGNORED_USERS = setOf(
-            "GitHub", "Daniel Ratcliffe", "Weblate",
+            "GitHub", "Daniel Ratcliffe", "NotSquidDev", "Weblate",
         )
 
         private fun <T> gitProvider(project: Project, default: T, supplier: () -> T): Provider<T> {
