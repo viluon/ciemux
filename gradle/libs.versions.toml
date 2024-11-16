@@ -58,7 +58,6 @@ jmh = "1.37"
 # Build tools
 cctJavadoc = "1.8.3"
 checkstyle = "10.14.1"
-curseForgeGradle = "1.0.14"
 errorProne-core = "2.27.0"
 errorProne-plugin = "3.1.0"
 fabric-loom = "1.7.1"
@@ -145,7 +144,6 @@ lwjgl-glfw = { module = "org.lwjgl:lwjgl-glfw" }
 # Build tools
 cctJavadoc = { module = "cc.tweaked:cct-javadoc", version.ref = "cctJavadoc" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
-curseForgeGradle = { module = "net.darkhax.curseforgegradle:CurseForgeGradle", version.ref = "curseForgeGradle" }
 errorProne-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorProne-core" }
 errorProne-api = { module = "com.google.errorprone:error_prone_check_api", version.ref = "errorProne-core" }
 errorProne-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorProne-core" }
