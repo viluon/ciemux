@@ -1,8 +1,6 @@
-New features in CC: Tweaked 1.114.1
+New features in CC: Tweaked 1.114.2
 
-Several bug fixes:
-* Fix monitor touch events only firing from one monitor.
-* Fix crash when lectern has no item.
-* Fix cursor not blinking on monitors.
+One bug fix:
+* Fix OpenGL errors when rendering empty monitors.
 
 Type "help changelog" to see the full version history.
