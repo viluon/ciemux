@@ -176,7 +176,7 @@ public class MonitorBlockEntityRenderer implements BlockEntityRenderer<MonitorBl
                     var size = DirectFixedWidthFontRenderer.getVertexCount(terminal);
 
                     // In an ideal world we could upload these both into one buffer. However, we can't render VBOs with
-                    // and starting and ending offset, and so need to use two buffers instead.
+                    // a starting and ending offset, and so need to use two buffers instead.
 
                     renderToBuffer(backgroundBuffer, size, sink ->
                         DirectFixedWidthFontRenderer.drawTerminalBackground(sink, 0, 0, terminal, yMargin, yMargin, xMargin, xMargin));
@@ -208,10 +208,10 @@ public class MonitorBlockEntityRenderer implements BlockEntityRenderer<MonitorBl
                 foregroundBuffer.bind();
                 foregroundBuffer.drawWithShader(
                     matrix, RenderSystem.getProjectionMatrix(), RenderTypes.getTerminalShader(),
-                    // As mentioned in the above comment, render the extra cursor quad if it is visible this frame. Each
-                    // // quad has an index count of 6.
+                    // Skip the cursor quad if it is not visible this frame.
                     FixedWidthFontRenderer.isCursorVisible(terminal) && FrameInfo.getGlobalCursorBlink()
-                        ? foregroundBuffer.getIndexCount() + 6 : foregroundBuffer.getIndexCount()
+                        ? foregroundBuffer.getIndexCount()
+                        : foregroundBuffer.getIndexCount() - RenderTypes.TERMINAL.mode().indexCount(4)
                 );
 
                 // Clear state
