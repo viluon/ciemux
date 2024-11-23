@@ -1,13 +1,8 @@
-New features in CC: Tweaked 1.114.0
-
-* Add redstone relay peripheral.
-* Add support for `math.atan(y, x)`.
-* Update several translations.
+New features in CC: Tweaked 1.114.1
 
 Several bug fixes:
-* Fix pocket upgrades not appearing after crafting.
-* Cancel `rednet.receive` and `Websocket.receive` timers after a message is received.
-* Fix several issues with parsing and printing large doubles.
-* Fix in-hand pocket computer being blank after changing dimension.
+* Fix monitor touch events only firing from one monitor.
+* Fix crash when lectern has no item.
+* Fix cursor not blinking on monitors.
 
 Type "help changelog" to see the full version history.
