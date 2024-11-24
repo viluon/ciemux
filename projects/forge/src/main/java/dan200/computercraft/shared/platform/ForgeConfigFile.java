@@ -5,40 +5,25 @@
 package dan200.computercraft.shared.platform;
 
 import dan200.computercraft.shared.config.ConfigFile;
-import dan200.computercraft.shared.util.Trie;
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * A {@link ConfigFile} which wraps Forge's config implementation.
  */
-public final class ForgeConfigFile implements ConfigFile {
+public final class ForgeConfigFile extends ConfigFile {
     private final ForgeConfigSpec spec;
-    private final Trie<String, ConfigFile.Entry> entries;
 
-    public ForgeConfigFile(ForgeConfigSpec spec, Trie<String, Entry> entries) {
+    private ForgeConfigFile(ForgeConfigSpec spec, Map<String, Entry> entries) {
+        super(entries);
         this.spec = spec;
-        this.entries = entries;
     }
 
     public ForgeConfigSpec spec() {
         return spec;
-    }
-
-    @Override
-    public Stream<Entry> entries() {
-        return entries.stream();
-    }
-
-    @Nullable
-    @Override
-    public Entry getEntry(String path) {
-        return entries.getValue(SPLITTER.split(path));
     }
 
     /**
@@ -46,7 +31,6 @@ public final class ForgeConfigFile implements ConfigFile {
      */
     static class Builder extends ConfigFile.Builder {
         private final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-        private final Trie<String, ConfigFile.Entry> entries = new Trie<>();
 
         private void translation(String name) {
             builder.translation(getTranslation(name));
@@ -54,24 +38,23 @@ public final class ForgeConfigFile implements ConfigFile {
 
         @Override
         public ConfigFile.Builder comment(String comment) {
+            super.comment(comment);
             builder.comment(comment);
             return this;
         }
 
         @Override
         public void push(String name) {
+            super.push(name);
+
             translation(name);
             builder.push(name);
-            super.push(name);
         }
 
         @Override
         public void pop() {
-            var path = new ArrayList<>(groupStack);
-            entries.setValue(path, new GroupImpl(path));
-
-            builder.pop();
             super.pop();
+            builder.pop();
         }
 
         @Override
@@ -80,100 +63,63 @@ public final class ForgeConfigFile implements ConfigFile {
             return this;
         }
 
-        private <T> ConfigFile.Value<T> defineValue(ForgeConfigSpec.ConfigValue<T> value) {
-            var wrapped = new ValueImpl<>(value);
-            entries.setValue(value.getPath(), wrapped);
+        private <T> ConfigFile.Value<T> defineValue(String name, ForgeConfigSpec.ConfigValue<T> value) {
+            var wrapped = new ValueImpl<>(getPath(name), takeComment(), value);
+            groupStack.getLast().children().put(name, wrapped);
             return wrapped;
         }
 
         @Override
-        public <T> ConfigFile.Value<T> define(String path, T defaultValue) {
-            translation(path);
-            return defineValue(builder.define(path, defaultValue));
+        public <T> ConfigFile.Value<T> define(String name, T defaultValue) {
+            translation(name);
+            return defineValue(name, builder.define(name, defaultValue));
         }
 
         @Override
-        public ConfigFile.Value<Boolean> define(String path, boolean defaultValue) {
-            translation(path);
-            return defineValue(builder.define(path, defaultValue));
+        public ConfigFile.Value<Boolean> define(String name, boolean defaultValue) {
+            translation(name);
+            return defineValue(name, builder.define(name, defaultValue));
         }
 
         @Override
-        public ConfigFile.Value<Integer> defineInRange(String path, int defaultValue, int min, int max) {
-            translation(path);
-            return defineValue(builder.defineInRange(path, defaultValue, min, max));
+        public ConfigFile.Value<Integer> defineInRange(String name, int defaultValue, int min, int max) {
+            translation(name);
+            return defineValue(name, builder.defineInRange(name, defaultValue, min, max));
         }
 
         @Override
-        public <T> ConfigFile.Value<List<? extends T>> defineList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator) {
-            translation(path);
-            return defineValue(builder.defineList(path, defaultValue, elementValidator));
+        public <T> ConfigFile.Value<List<? extends T>> defineList(String name, List<? extends T> defaultValue, Predicate<Object> elementValidator) {
+            translation(name);
+            return defineValue(name, builder.defineList(name, defaultValue, elementValidator));
         }
 
         @Override
-        public <V extends Enum<V>> ConfigFile.Value<V> defineEnum(String path, V defaultValue) {
-            translation(path);
-            return defineValue(builder.defineEnum(path, defaultValue));
+        public <V extends Enum<V>> ConfigFile.Value<V> defineEnum(String name, V defaultValue) {
+            translation(name);
+            return defineValue(name, builder.defineEnum(name, defaultValue));
         }
 
         @Override
         public ConfigFile build(ConfigListener onChange) {
+            var children = groupStack.removeLast().children();
+            if (!groupStack.isEmpty()) throw new IllegalStateException("Mismatched config push/pop");
+
             var spec = builder.build();
-            entries.stream().forEach(x -> {
-                if (x instanceof ValueImpl<?> value) value.owner = spec;
-                if (x instanceof GroupImpl value) value.owner = spec;
-            });
-            return new ForgeConfigFile(spec, entries);
+            return new ForgeConfigFile(spec, children);
         }
     }
 
-    private static final class GroupImpl implements ConfigFile.Group {
-        private final List<String> path;
-        private @Nullable ForgeConfigSpec owner;
-
-        private GroupImpl(List<String> path) {
-            this.path = path;
-        }
-
-        @Override
-        public String translationKey() {
-            if (owner == null) throw new IllegalStateException("Config has not been built yet");
-            return owner.getLevelTranslationKey(path);
-        }
-
-        @Override
-        public String comment() {
-            if (owner == null) throw new IllegalStateException("Config has not been built yet");
-            return owner.getLevelComment(path);
-        }
-    }
-
-    private static final class ValueImpl<T> implements ConfigFile.Value<T> {
+    private static final class ValueImpl<T> extends Value<T> {
         private final ForgeConfigSpec.ConfigValue<T> value;
-        private @Nullable ForgeConfigSpec owner;
 
-        private ValueImpl(ForgeConfigSpec.ConfigValue<T> value) {
+        private ValueImpl(String path, String comment, ForgeConfigSpec.ConfigValue<T> value) {
+            super(path, comment);
             this.value = value;
-        }
-
-        private ForgeConfigSpec.ValueSpec spec() {
-            if (owner == null) throw new IllegalStateException("Config has not been built yet");
-            return owner.getSpec().get(value.getPath());
         }
 
         @Override
         public T get() {
             return value.get();
-        }
-
-        @Override
-        public String translationKey() {
-            return spec().getTranslationKey();
-        }
-
-        @Override
-        public String comment() {
-            return spec().getComment();
         }
     }
 }

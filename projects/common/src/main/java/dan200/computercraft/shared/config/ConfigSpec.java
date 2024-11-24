@@ -344,18 +344,18 @@ public final class ConfigSpec {
                 .push("term_sizes");
 
             builder.comment("Terminal size of computers.").push("computer");
-            computerTermWidth = builder.defineInRange("width", Config.computerTermWidth, 1, 255);
-            computerTermHeight = builder.defineInRange("height", Config.computerTermHeight, 1, 255);
+            computerTermWidth = builder.comment("Width of computer terminal").defineInRange("width", Config.computerTermWidth, 1, 255);
+            computerTermHeight = builder.comment("Height of computer terminal").defineInRange("height", Config.computerTermHeight, 1, 255);
             builder.pop();
 
             builder.comment("Terminal size of pocket computers.").push("pocket_computer");
-            pocketTermWidth = builder.defineInRange("width", Config.pocketTermWidth, 1, 255);
-            pocketTermHeight = builder.defineInRange("height", Config.pocketTermHeight, 1, 255);
+            pocketTermWidth = builder.comment("Width of pocket computer terminal").defineInRange("width", Config.pocketTermWidth, 1, 255);
+            pocketTermHeight = builder.comment("Height of pocket computer terminal").defineInRange("height", Config.pocketTermHeight, 1, 255);
             builder.pop();
 
             builder.comment("Maximum size of monitors (in blocks).").push("monitor");
-            monitorWidth = builder.defineInRange("width", Config.monitorWidth, 1, 32);
-            monitorHeight = builder.defineInRange("height", Config.monitorHeight, 1, 32);
+            monitorWidth = builder.comment("Maximum width of monitors").defineInRange("width", Config.monitorWidth, 1, 32);
+            monitorHeight = builder.comment("Maximum height of monitors").defineInRange("height", Config.monitorHeight, 1, 32);
             builder.pop();
 
             builder.pop();
