@@ -21,7 +21,11 @@ import javax.annotation.Nullable;
  * Monitors act as [terminal redirects][`term.Redirect`] and so expose the same methods, as well as several additional
  * ones, which are documented below.
  * <p>
- * Like computers, monitors come in both normal (no colour) and advanced (colour) varieties.
+ * If the monitor is resized (by adding new blocks to the monitor, or by calling {@link setTextScale}), then a
+ * [`monitor_resize`] event will be queued.
+ * <p>
+ * Like computers, monitors come in both normal (no colour) and advanced (colour) varieties. Advanced monitors be right
+ * clicked, which will trigger a [`monitor_touch`] event.
  * <p>
  * ## Recipes
  * <div class="recipe-container">
@@ -37,6 +41,9 @@ import javax.annotation.Nullable;
  * monitor.setCursorPos(1, 1)
  * monitor.write("Hello, world!")
  * }</pre>
+ *
+ * @cc.see monitor_resize Queued when a monitor is resized.
+ * @cc.see monitor_touch Queued when an advanced monitor is clicked.
  */
 public class MonitorPeripheral extends TermMethods implements IPeripheral {
     private final MonitorBlockEntity monitor;
