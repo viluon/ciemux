@@ -32,7 +32,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Generators {
+public class ForgeDataProviders {
     @SubscribeEvent
     public static void gather(GatherDataEvent event) {
         var generator = event.getGenerator();

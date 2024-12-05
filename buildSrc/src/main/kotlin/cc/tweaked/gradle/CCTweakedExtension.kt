@@ -109,14 +109,13 @@ abstract class CCTweakedExtension(
         val otherJava = otherProject.extensions.getByType(JavaPluginExtension::class.java)
         val main = otherJava.sourceSets.getByName("main")
         val client = otherJava.sourceSets.getByName("client")
-        val testMod = otherJava.sourceSets.findByName("testMod")
-        val testFixtures = otherJava.sourceSets.findByName("testFixtures")
 
         // Pull in sources from the other project.
         extendSourceSet(otherProject, main)
         extendSourceSet(otherProject, client)
-        if (testMod != null) extendSourceSet(otherProject, testMod)
-        if (testFixtures != null) extendSourceSet(otherProject, testFixtures)
+        for (sourceSet in listOf("datagen", "testMod", "testFixtures")) {
+            otherJava.sourceSets.findByName(sourceSet)?.let { extendSourceSet(otherProject, it) }
+        }
 
         // The extra source-processing tasks should include these files too.
         project.tasks.named(main.javadocTaskName, Javadoc::class.java) { source(main.allJava, client.allJava) }

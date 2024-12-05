@@ -19,26 +19,32 @@ plugins {
 val main = sourceSets["main"]
 val client = sourceSets["client"]
 
-// Both testMod and testFixtures inherit from the main and client classpath, just so we have access to Minecraft classes.
+// datagen and testMod inherit from the main and client classpath, just so we have access to Minecraft classes.
+val datagen by sourceSets.creating {
+    compileClasspath += main.compileClasspath + client.compileClasspath
+    runtimeClasspath += main.runtimeClasspath + client.runtimeClasspath
+}
+
 val testMod by sourceSets.creating {
     compileClasspath += main.compileClasspath + client.compileClasspath
     runtimeClasspath += main.runtimeClasspath + client.runtimeClasspath
 }
 
-configurations {
-    named(testMod.compileClasspathConfigurationName) {
-        shouldResolveConsistentlyWith(compileClasspath.get())
-    }
+val extraConfigurations = listOf(datagen, testMod)
 
-    named(testMod.runtimeClasspathConfigurationName) {
-        shouldResolveConsistentlyWith(runtimeClasspath.get())
+configurations {
+    for (config in extraConfigurations) {
+        named(config.compileClasspathConfigurationName) { shouldResolveConsistentlyWith(compileClasspath.get()) }
+        named(config.runtimeClasspathConfigurationName) { shouldResolveConsistentlyWith(runtimeClasspath.get()) }
     }
 }
 
 // Like the main test configurations, we're safe to depend on source set outputs.
 dependencies {
-    add(testMod.implementationConfigurationName, main.output)
-    add(testMod.implementationConfigurationName, client.output)
+    for (config in extraConfigurations) {
+        add(config.implementationConfigurationName, main.output)
+        add(config.implementationConfigurationName, client.output)
+    }
 }
 
 // Similar to java-test-fixtures, but tries to avoid putting the obfuscated jar on the classpath.

@@ -1,6 +1,6 @@
 {
     "schemaVersion": 1,
-    "id": "cctest",
+    "id": "cc-datagen",
     "version": "1.0.0",
     "entrypoints": {
         "main": [

@@ -148,7 +148,7 @@ class TagProvider {
     /**
      * A wrapper over {@link ItemTagsProvider}.
      */
-    interface ItemTagConsumer extends TagConsumer<Item> {
+    public interface ItemTagConsumer extends TagConsumer<Item> {
         void copy(TagKey<Block> block, TagKey<Item> item);
     }
 }

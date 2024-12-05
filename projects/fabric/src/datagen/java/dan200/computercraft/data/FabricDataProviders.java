@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class FabricDataGenerators implements DataGeneratorEntrypoint {
+public class FabricDataProviders implements DataGeneratorEntrypoint {
     @Override
     public void onInitializeDataGenerator(FabricDataGenerator generator) {
         var pack = new PlatformGeneratorsImpl(generator.createPack());

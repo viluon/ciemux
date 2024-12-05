@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MPL-2.0
 
-package dan200.computercraft.data;
+package dan200.computercraft.shared.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Alternative version of {@link JsonWriter} which attempts to lay out the JSON in a more compact format.
  *
- * @see PrettyDataProvider
+ * @see dan200.computercraft.data.PrettyDataProvider
  */
 public class PrettyJsonWriter extends JsonWriter {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();

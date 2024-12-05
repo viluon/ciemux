@@ -23,9 +23,6 @@
         "client": [
             "dan200.computercraft.client.ComputerCraftClient::init"
         ],
-        "fabric-datagen": [
-            "dan200.computercraft.data.FabricDataGenerators"
-        ],
         "jei_mod_plugin": [
             "dan200.computercraft.client.integration.jei.JEIComputerCraft"
         ],

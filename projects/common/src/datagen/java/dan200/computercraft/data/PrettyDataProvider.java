@@ -7,6 +7,7 @@ package dan200.computercraft.data;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import dan200.computercraft.shared.util.PrettyJsonWriter;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 
