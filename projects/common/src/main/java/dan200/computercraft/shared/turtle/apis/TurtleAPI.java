@@ -747,6 +747,7 @@ public class TurtleAPI implements ILuaAPI {
      * @throws LuaException If the slot is out of range.
      * @cc.treturn nil|table Information about the given slot, or {@code nil} if it is empty.
      * @cc.since 1.64
+     * @cc.changed 1.90.0 Added detailed parameter.
      * @cc.usage Print the current slot, assuming it contains 13 dirt.
      *
      * <pre>{@code
