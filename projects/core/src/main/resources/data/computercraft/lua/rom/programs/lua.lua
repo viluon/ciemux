@@ -104,7 +104,7 @@ while running do
             end
         else
             printError(results[2])
-            require "cc.internal.exception".report(results[2], results[3], chunk_map)
+            exception.report(results[2], results[3], chunk_map)
         end
     else
         local parser = require "cc.internal.syntax"
