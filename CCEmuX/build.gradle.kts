@@ -1,6 +1,6 @@
 plugins {
 	application
-	id("com.github.johnrengelman.shadow") version "8.1.1"
+	id("com.gradleup.shadow") version "8.3.5"
 	id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
@@ -107,6 +107,6 @@ tasks.test {
 tasks.withType(AbstractArchiveTask::class.java).configureEach {
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
-	dirMode = Integer.valueOf("755", 8)
-	fileMode = Integer.valueOf("664", 8)
+	filePermissions {}
+	dirPermissions {}
 }
