@@ -8,7 +8,7 @@ SPDX-FileCopyrightText: 2021 The CC: Tweaked Developers
 SPDX-License-Identifier: MPL-2.0
 -->
 
-The [`monitor_touch`] event is fired when an adjacent or networked Advanced Monitor is right-clicked.
+The [`monitor_touch`] event is fired when an adjacent or networked [Advanced Monitor][`monitor`] is right-clicked.
 
 ## Return Values
 1. [`string`]: The event name.

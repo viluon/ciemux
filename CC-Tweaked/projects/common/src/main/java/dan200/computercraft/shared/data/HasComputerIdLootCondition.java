@@ -15,7 +15,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import java.util.Set;
 
 /**
- * A loot condition which checks if the tile entity has a non-0 ID.
+ * A loot condition which checks if the block entity has a computer ID.
  */
 public final class HasComputerIdLootCondition implements LootItemCondition {
     public static final HasComputerIdLootCondition INSTANCE = new HasComputerIdLootCondition();

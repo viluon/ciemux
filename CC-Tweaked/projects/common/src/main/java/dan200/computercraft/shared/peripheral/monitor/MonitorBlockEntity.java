@@ -485,7 +485,7 @@ public class MonitorBlockEntity extends BlockEntity {
                 var monitor = getLoadedMonitor(x, y).getMonitor();
                 if (monitor == null) continue;
 
-                computers.forEach(fun);
+                monitor.computers.forEach(fun);
             }
         }
     }

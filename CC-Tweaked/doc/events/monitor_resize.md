@@ -8,7 +8,7 @@ SPDX-FileCopyrightText: 2021 The CC: Tweaked Developers
 SPDX-License-Identifier: MPL-2.0
 -->
 
-The [`monitor_resize`] event is fired when an adjacent or networked monitor's size is changed.
+The [`monitor_resize`] event is fired when an adjacent or networked [monitor's][`monitor`] size is changed.
 
 ## Return Values
 1. [`string`]: The event name.

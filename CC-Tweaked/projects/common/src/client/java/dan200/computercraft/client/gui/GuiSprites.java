@@ -6,7 +6,6 @@ package dan200.computercraft.client.gui;
 
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.client.render.ComputerBorderRenderer;
-import dan200.computercraft.data.client.ClientDataProviders;
 import dan200.computercraft.shared.computer.core.ComputerFamily;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -113,7 +112,6 @@ public final class GuiSprites extends TextureAtlasHolder {
      * @param pocketBottom The texture for the bottom of a pocket computer.
      * @param sidebar      The texture for the computer sidebar.
      * @see ComputerBorderRenderer
-     * @see ClientDataProviders
      */
     public record ComputerTextures(
         ResourceLocation border,

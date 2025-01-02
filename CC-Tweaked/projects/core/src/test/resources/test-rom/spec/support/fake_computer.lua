@@ -50,6 +50,7 @@ local function make_computer(id, fn)
             pending_timers[t], next_timer = clock + delay, next_timer + 1
             return t
         end,
+        cancelTimer = function(id) pending_timers[id] = nil end,
         clock = function() return clock end,
         sleep = function(time)
             local timer = env.os.startTimer(time or 0)
@@ -98,7 +99,16 @@ local function make_computer(id, fn)
 
     local position = vector.new(0, 0, 0)
 
-    return { env = env, peripherals = peripherals, queue_event = queue_event, step = step, co = co, advance = advance, position = position }
+    return {
+        env = env,
+        peripherals = peripherals,
+        queue_event = queue_event,
+        step = step,
+        co = co,
+        advance = advance,
+        position = position,
+        pending_timers = pending_timers,
+    }
 end
 
 local function parse_channel(c)

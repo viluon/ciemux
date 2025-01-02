@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Now, if anywhere during this period, we use more than our allocated time slice, the executor is marked as
  * {@link State#HOT}. This means it will no longer be able to execute {@link MainThread} tasks (though will still
- * execute tile entity tasks, in order to prevent the main thread from exhausting work every tick).
+ * execute block entity tasks, in order to prevent the main thread from exhausting work every tick).
  * <p>
  * At the beginning of the next tick, we increment the budget e by {@link MainThreadConfig#maxComputerTime()} and any
  * {@link State#HOT} executors are marked as {@link State#COOLING}. They will remain cooling until their budget is fully

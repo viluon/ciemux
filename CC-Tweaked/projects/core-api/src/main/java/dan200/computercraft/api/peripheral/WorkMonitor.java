@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * Monitors "work" associated with a computer, keeping track of how much a computer has done, and ensuring every
  * computer receives a fair share of any processing time.
  * <p>
- * This is primarily intended for work done by peripherals on the main thread (such as on a tile entity's tick), but
+ * This is primarily intended for work done by peripherals on the main thread (such as on a block entity's tick), but
  * could be used for other purposes (such as complex computations done on another thread).
  * <p>
  * Before running a task, one should call {@link #canWork()} to determine if the computer is currently allowed to

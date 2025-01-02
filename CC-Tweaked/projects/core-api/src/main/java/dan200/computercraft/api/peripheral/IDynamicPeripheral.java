@@ -10,7 +10,6 @@ import dan200.computercraft.api.lua.*;
  * A peripheral whose methods are not known at runtime.
  * <p>
  * This behaves similarly to {@link IDynamicLuaObject}, though also accepting the current {@link IComputerAccess}.
- * Generally one may use {@link LuaFunction} instead of implementing this interface.
  */
 public interface IDynamicPeripheral extends IPeripheral {
     /**

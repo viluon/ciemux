@@ -1,3 +1,27 @@
+# New features in CC: Tweaked 1.114.2
+
+One bug fix:
+* Fix OpenGL errors when rendering empty monitors.
+
+# New features in CC: Tweaked 1.114.1
+
+Several bug fixes:
+* Fix monitor touch events only firing from one monitor.
+* Fix crash when lectern has no item.
+* Fix cursor not blinking on monitors.
+
+# New features in CC: Tweaked 1.114.0
+
+* Add redstone relay peripheral.
+* Add support for `math.atan(y, x)`.
+* Update several translations.
+
+Several bug fixes:
+* Fix pocket upgrades not appearing after crafting.
+* Cancel `rednet.receive` and `Websocket.receive` timers after a message is received.
+* Fix several issues with parsing and printing large doubles.
+* Fix in-hand pocket computer being blank after changing dimension.
+
 # New features in CC: Tweaked 1.113.1
 
 * Update Japanese translation (konumatakaki).

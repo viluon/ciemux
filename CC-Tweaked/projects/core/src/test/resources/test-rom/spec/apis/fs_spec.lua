@@ -83,6 +83,10 @@ describe("The fs library", function()
             expect(fs.isDriveRoot("/rom/startup.lua")):eq(false)
             expect(fs.isDriveRoot("/rom/programs/delete.lua")):eq(false)
         end)
+
+        it("returns false for missing files", function()
+            expect(fs.isDriveRoot("does_not_exist")):eq(false)
+        end)
     end)
 
     describe("fs.list", function()
@@ -552,6 +556,22 @@ describe("The fs library", function()
 
         it("returns the capacity on the root mount", function()
             expect(fs.getCapacity("")):eq(10000000)
+        end)
+    end)
+
+    describe("fs.getDrive", function()
+        it("returns the drive for the mount roots", function()
+            expect(fs.getDrive("")):eq("hdd")
+            expect(fs.getDrive("rom")):eq("rom")
+        end)
+
+        it("returns the drive for subdirectories", function()
+            expect(fs.getDrive("rom/startup.lua")):eq("rom")
+        end)
+
+        it("returns nothing for missing files", function()
+            -- Peculiar, but we return no values, rather than nil!
+            expect(table.pack(fs.getDrive("no_such_file"))):same { n = 0 }
         end)
     end)
 

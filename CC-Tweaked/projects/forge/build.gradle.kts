@@ -7,7 +7,7 @@ import net.minecraftforge.gradle.common.util.RunConfig
 
 plugins {
     id("cc-tweaked.forge")
-    id("cc-tweaked.gametest")
+    id("cc-tweaked.mod")
     id("cc-tweaked.mod-publishing")
 }
 
@@ -57,6 +57,10 @@ minecraft {
                 "--existing", project(":common").file("src/main/resources/"),
                 "--existing", file("src/main/resources/"),
             )
+
+            mods.named("computercraft") {
+                source(sourceSets["datagen"])
+            }
         }
 
         fun RunConfig.configureForGameTest() {

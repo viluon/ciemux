@@ -680,6 +680,35 @@ class Turtle_Test {
     }
 
     /**
+     * `turtle.craft` leaves a remainder
+     *
+     * @see [#2007](https://github.com/cc-tweaked/CC-Tweaked/issues/2007)
+     */
+    @GameTest
+    fun Craft_remainder(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer {
+            callPeripheral("left", "craft", 1).assertArrayEquals(true)
+        }
+        thenExecute {
+            val turtle = helper.getBlockEntity(BlockPos(2, 2, 2), ModRegistry.BlockEntities.TURTLE_NORMAL.get())
+
+            val turtleStack = ItemStack(ModRegistry.Items.TURTLE_NORMAL.get())
+            turtleStack.orCreateTag
+
+            assertThat(
+                "Inventory is as expected.",
+                turtle.contents,
+                contains(
+                    isStack(turtleStack), isStack(Items.WET_SPONGE, 1), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
+                    isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
+                    isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
+                    isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
+                ),
+            )
+        }
+    }
+
+    /**
      * `turtle.equipLeft` equips a tool.
      */
     @GameTest

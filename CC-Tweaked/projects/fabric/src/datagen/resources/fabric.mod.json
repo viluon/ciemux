@@ -1,0 +1,13 @@
+{
+    "schemaVersion": 1,
+    "id": "cc-datagen",
+    "version": "1.0.0",
+    "entrypoints": {
+        "fabric-datagen": [
+            "dan200.computercraft.data.FabricDataProviders"
+        ]
+    },
+    "depends": {
+        "computercraft": "*"
+    }
+}

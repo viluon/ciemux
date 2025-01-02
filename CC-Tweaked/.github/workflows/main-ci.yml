@@ -30,6 +30,18 @@ jobs:
     - name: ⚒️ Build
       run: ./gradlew assemble || ./gradlew assemble
 
+    - name: 📦 Prepare Jars
+      run: |
+        # Find the main jar and append the git hash onto it.
+        mkdir -p jars
+        find projects/forge/build/libs projects/fabric/build/libs -type f -regex '.*[0-9.]+\(-SNAPSHOT\)?\.jar$' -exec bash -c 'cp {} "jars/$(basename {} .jar)-$(git rev-parse HEAD).jar"' \;
+
+    - name: 📤 Upload Jar
+      uses: actions/upload-artifact@v4
+      with:
+        name: CC-Tweaked
+        path: ./jars
+
     - name: Cache pre-commit
       uses: actions/cache@v4
       with:
@@ -53,18 +65,6 @@ jobs:
     - name: 🧪 Parse test reports
       run: ./tools/parse-reports.py
       if: ${{ failure() }}
-
-    - name: 📦 Prepare Jars
-      run: |
-        # Find the main jar and append the git hash onto it.
-        mkdir -p jars
-        find projects/forge/build/libs projects/fabric/build/libs -type f -regex '.*[0-9.]+\(-SNAPSHOT\)?\.jar$' -exec bash -c 'cp {} "jars/$(basename {} .jar)-$(git rev-parse HEAD).jar"' \;
-
-    - name: 📤 Upload Jar
-      uses: actions/upload-artifact@v4
-      with:
-        name: CC-Tweaked
-        path: ./jars
 
   build-core:
     strategy:
