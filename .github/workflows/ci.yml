@@ -27,6 +27,9 @@ jobs:
     - name: setup gradle
       uses: gradle/actions/setup-gradle@v4
 
+    - name: enable build cache
+      uses: burrunan/gradle-cache-action@v2
+
     - name: build cobalt
       working-directory: Cobalt
       run: ./gradlew publishToMavenLocal --no-daemon
