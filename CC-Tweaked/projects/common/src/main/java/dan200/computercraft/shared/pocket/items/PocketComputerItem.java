@@ -267,6 +267,21 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
         return getServerComputer(ServerContext.get(server).registry(), stack);
     }
 
+    @Override
+    public void onCraftedBy(ItemStack stack, Level level, Player player) {
+        var tag = stack.getTag();
+        if (tag == null) return;
+
+        // Normally we treat the computer instance as the source of truth, and copy the computer's state back to the
+        // item. However, if we've just crafted the computer with an upgrade, we should sync the other way, and update
+        // the computer.
+        var server = level.getServer();
+        if (server != null) {
+            var computer = getServerComputer(server, stack);
+            if (computer != null) computer.getBrain().setUpgrade(getUpgradeWithData(stack));
+        }
+    }
+
     // IComputerItem implementation
 
     private static void setComputerID(ItemStack stack, int computerID) {
