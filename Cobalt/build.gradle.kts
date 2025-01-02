@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "me.viluon"
-version = "0.9.5-SNAPSHOT"
+version = "0.9.6-SNAPSHOT"
 
 java {
 	toolchain {
