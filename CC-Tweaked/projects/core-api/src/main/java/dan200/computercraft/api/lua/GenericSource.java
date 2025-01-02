@@ -21,9 +21,9 @@ import dan200.computercraft.api.peripheral.IPeripheral;
  * <p>
  * For example, the main CC: Tweaked mod defines a generic source for inventories, which works on {@code IItemHandler}s:
  *
- * <pre>{@code
+ * <pre class="language language-java">{@code
  * public class InventoryMethods implements GenericSource {
- *     \@LuaFunction( mainThread = true )
+ *     @LuaFunction(mainThread = true)
  *     public int size(IItemHandler inventory) {
  *         return inventory.getSlots();
  *     }

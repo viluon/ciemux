@@ -28,7 +28,7 @@ import java.util.function.Function;
  * {@link #simple(Function)} or {@link #simpleWithCustomItem(BiFunction)} to create a basic upgrade serialiser.
  *
  * <h2>Example (Forge)</h2>
- * <pre>{@code
+ * <pre class="language language-java">{@code
  * static final DeferredRegister<TurtleUpgradeSerialiser<?>> SERIALISERS = DeferredRegister.create( TurtleUpgradeSerialiser.TYPE, "my_mod" );
  *
  * // Register a new upgrade serialiser called "my_upgrade".
@@ -42,9 +42,9 @@ import java.util.function.Function;
  * We can then define a new upgrade using JSON by placing the following in
  * {@literal data/<my_mod>/computercraft/turtle_upgrades/<my_upgrade_id>.json}}.
  *
- * <pre>{@code
+ * <pre class="language language-json">{@code
  * {
- *     "type": my_mod:my_upgrade",
+ *     "type": "my_mod:my_upgrade",
  * }
  * }</pre>
  * <p>

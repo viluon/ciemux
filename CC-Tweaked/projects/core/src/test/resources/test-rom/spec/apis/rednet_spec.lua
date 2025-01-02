@@ -171,6 +171,36 @@ describe("The rednet library", function()
             fake_computer.run_all { computer_1, computer_2 }
         end)
 
+        describe("timeouts", function()
+            it("can time out messages", function()
+                local computer = computer_with_rednet(1, function(rednet)
+                    local id = rednet.receive(1)
+                    expect(id):eq(nil)
+                end, { open = true })
+
+                local computers = { computer }
+                fake_computer.run_all(computers, false)
+                fake_computer.advance_all(computers, 1)
+                fake_computer.run_all(computers)
+            end)
+
+            it("cancels the pending timer", function()
+                local computer = computer_with_rednet(1, function(rednet)
+                    -- Send a message to ourselves with a timer
+                    rednet.send(1, "hello")
+                    local id = rednet.receive(1)
+                    expect(id):eq(1)
+                end, { open = true })
+
+                fake_computer.run_all({ computer })
+
+                -- Our pending timer list only contains the rednet.run timer.
+                expect(computer.pending_timers):same {
+                    [debugx.getupvalue(computer.env.rednet.run, "prune_received_timer")] = 10,
+                }
+            end)
+        end)
+
         it("repeats messages between computers", function()
             local computer_1, modem_1 = computer_with_rednet(1, function(rednet)
                 rednet.send(3, "Hello")

@@ -11,7 +11,7 @@ package dan200.computercraft.api.lua;
  * the given type, rather than requiring an exact type.
  *
  * <h2>Example:</h2>
- * <pre>{@code
+ * <pre class="language language-java">{@code
  * @LuaFunction
  * public final void doSomething(Coerced<String> myString) {
  *   var value = myString.value();

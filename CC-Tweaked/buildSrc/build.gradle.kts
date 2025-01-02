@@ -50,7 +50,6 @@ dependencies {
     implementation(libs.kotlin.plugin)
     implementation(libs.spotless)
 
-    implementation(libs.curseForgeGradle)
     implementation(libs.fabric.loom)
     implementation(libs.forgeGradle)
     implementation(libs.ideaExt)

@@ -86,7 +86,7 @@ public abstract class UpgradeDataProvider<T extends UpgradeBase, R extends Upgra
      * Add all turtle or pocket computer upgrades.
      * <p>
      * <strong>Example usage:</strong>
-     * <pre>{@code
+     * <pre class="language language-java">{@code
      * protected void addUpgrades(Consumer<Upgrade<TurtleUpgradeSerialiser<?>>> addUpgrade) {
      *     simple(new ResourceLocation("mymod", "speaker"), SPEAKER_SERIALISER.get()).add(addUpgrade);
      * }

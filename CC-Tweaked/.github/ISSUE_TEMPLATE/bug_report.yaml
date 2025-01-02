@@ -6,7 +6,8 @@ body:
   id: mc-version
   attributes:
     label: Minecraft Version
-    description: What version of Minecraft are you using?
+    description: |
+        What version of Minecraft are you using? If your version is not listed, please try to reproduce on one of the supported versions.
     options:
       - 1.20.1
       - 1.21.x
@@ -26,8 +27,5 @@ body:
     label: Details
     description: |
       Description of the bug. Please include the following:
-      - Logs: These will be located in the `logs/` directory of your Minecraft
-        instance. Please upload them as a gist or directly into this editor.
-      - Detailed reproduction steps: sometimes I can spot a bug pretty easily,
-        but often it's much more obscure. The more information I have to help
-        reproduce it, the quicker it'll get fixed.
+      - Logs: These will be located in the `logs/` directory of your Minecraft instance. This is always useful, even if it doesn't include errors, so please upload this!
+      - Detailed reproduction steps: sometimes I can spot a bug pretty easily, but often it's much more obscure. The more information I have to help reproduce it, the quicker it'll get fixed.

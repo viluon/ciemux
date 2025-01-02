@@ -28,6 +28,7 @@ class MinecraftMixin {
     @SuppressWarnings("unused")
     private void clearLevel(Screen screen, CallbackInfo ci) {
         ClientHooks.onWorldUnload();
+        ClientHooks.onDisconnect();
     }
 
     @Inject(method = "setLevel", at = @At("HEAD"))

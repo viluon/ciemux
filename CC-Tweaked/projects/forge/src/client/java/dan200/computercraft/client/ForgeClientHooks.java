@@ -38,6 +38,10 @@ public final class ForgeClientHooks {
         if (event.getLevel().isClientSide()) ClientHooks.onWorldUnload();
     }
 
+    @SubscribeEvent
+    public static void onDisconnect(ClientPlayerNetworkEvent.LoggingOut event) {
+        ClientHooks.onDisconnect();
+    }
 
     @SubscribeEvent
     public static void drawHighlight(RenderHighlightEvent.Block event) {

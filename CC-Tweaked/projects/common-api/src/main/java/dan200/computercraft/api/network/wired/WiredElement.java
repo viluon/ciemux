@@ -14,7 +14,7 @@ import dan200.computercraft.api.ComputerCraftAPI;
  * as a proxy for all network objects. Whilst the node may change networks, an element's node should remain constant
  * for its lifespan.
  * <p>
- * Elements are generally tied to a block or tile entity in world. In such as case, one should provide the
+ * Elements are generally tied to a block or block entity in world. In such as case, one should provide the
  * {@link WiredElement} capability for the appropriate sides.
  */
 public interface WiredElement extends WiredSender {

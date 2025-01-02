@@ -8,7 +8,7 @@ import java.util.*
 
 plugins {
     id("cc-tweaked.fabric")
-    id("cc-tweaked.gametest")
+    id("cc-tweaked.mod")
     id("cc-tweaked.mod-publishing")
 }
 
@@ -145,6 +145,8 @@ loom {
         register("data") {
             configName = "Datagen"
             client()
+
+            source(sourceSets.datagen.get())
 
             runDir("run/dataGen")
             property("fabric-api.datagen")
