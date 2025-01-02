@@ -32,15 +32,15 @@ jobs:
 
     - name: build cobalt
       working-directory: Cobalt
-      run: ./gradlew publishToMavenLocal --no-daemon
+      run: ./gradlew publishToMavenLocal --build-cache --no-daemon
 
     - name: build cc-tweaked
       working-directory: CC-Tweaked
-      run: ./gradlew publishToMavenLocal --no-daemon
+      run: ./gradlew publishToMavenLocal --build-cache --no-daemon
 
     - name: build ccemux
       working-directory: CCEmuX
-      run: ./gradlew build --no-daemon
+      run: ./gradlew build --build-cache --no-daemon
 
     - name: upload artifact
       if: ${{ always() }}
