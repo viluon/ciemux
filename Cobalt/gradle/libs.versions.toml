@@ -3,7 +3,7 @@ asm = "9.7.1"
 slf4j = "2.0.16"
 
 checkerFramework-plugin = "0.6.17"
-checkerFramework = "3.48.3"
+checkerFramework = "3.48.4"
 
 kotlin = "2.1.0"
 kotlin-coroutines = "1.9.0"
