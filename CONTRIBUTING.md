@@ -22,8 +22,7 @@ If you have a bug, suggestion, or other feedback, the best thing to do is [file 
 use the issue templates - they provide a useful hint on what information to provide.
 
 ## Translations
-Translations are managed through [CrowdIn], an online interface for managing language strings. Translations may either
-be contributed there, or directly via a pull request.
+Translations are managed through [CrowdIn], an online interface for managing language strings.
 
 ## Setting up a development environment
 In order to develop CC: Tweaked, you'll need to download the source code and then run it.
