@@ -22,8 +22,7 @@ If you have a bug, suggestion, or other feedback, the best thing to do is [file 
 use the issue templates - they provide a useful hint on what information to provide.
 
 ## Translations
-Translations are managed through [CrowdIn], an online interface for managing language strings. Translations may either
-be contributed there, or directly via a pull request.
+Translations are managed through [CrowdIn], an online interface for managing language strings.
 
 ## Setting up a development environment
 In order to develop CC: Tweaked, you'll need to download the source code and then run it.
@@ -49,9 +48,12 @@ If you want to run CC:T in a normal Minecraft instance, run `./gradlew assemble`
 `projects/forge/build/libs` (for Forge) or `projects/fabric/build/libs` (for Fabric).
 
 ## Developing CC: Tweaked
-Before making any major changes to CC: Tweaked, I'd recommend you have a read of the [the architecture
-document][architecture] first. While it's not a comprehensive document, it gives a good hint of where you should start
-looking to make your changes. As always, if you're not sure, [do ask the community][community]!
+Before making any major changes to CC: Tweaked, I'd recommend starting opening an issue or starting a discussion on
+GitHub first. It's often helpful to discuss features before spending time developing them!
+
+Once you're ready to start programming, have a read of the [the architecture document][architecture] first. While it's
+not a comprehensive document, it gives a good hint of where you should start looking to make your changes. As always, if
+you're not sure, [do ask the community][community]!
 
 ### Testing
 When making larger changes, it may be useful to write a test to make sure your code works as expected.
