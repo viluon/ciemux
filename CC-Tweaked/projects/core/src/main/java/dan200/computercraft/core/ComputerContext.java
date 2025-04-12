@@ -4,6 +4,7 @@
 
 package dan200.computercraft.core;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import dan200.computercraft.core.asm.GenericMethod;
 import dan200.computercraft.core.asm.LuaMethodSupplier;
 import dan200.computercraft.core.asm.PeripheralMethodSupplier;
@@ -18,9 +19,8 @@ import dan200.computercraft.core.lua.MachineEnvironment;
 import dan200.computercraft.core.methods.LuaMethod;
 import dan200.computercraft.core.methods.MethodSupplier;
 import dan200.computercraft.core.methods.PeripheralMethod;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -153,7 +153,7 @@ public final class ComputerContext {
         private final GlobalEnvironment environment;
         private @Nullable ComputerScheduler computerScheduler = null;
         private @Nullable MainThreadScheduler mainThreadScheduler;
-        private @Nullable ILuaMachine.Factory luaFactory;
+        private ILuaMachine.@Nullable Factory luaFactory;
         private @Nullable List<GenericMethod> genericMethods;
 
         Builder(GlobalEnvironment environment) {

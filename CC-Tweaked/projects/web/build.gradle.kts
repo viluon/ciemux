@@ -13,11 +13,11 @@ plugins {
 val modVersion: String by extra
 
 node {
-    projectRoot.set(rootProject.projectDir)
+    projectRoot = rootProject.projectDir
 }
 
 illuaminate {
-    version.set(libs.versions.illuaminate)
+    version = libs.versions.illuaminate
 }
 
 sourceSets.register("builder")
@@ -62,8 +62,8 @@ val compileTeaVM by tasks.registering(JavaExec::class) {
             )
         },
     )
-    mainClass.set("cc.tweaked.web.builder.Builder")
-    javaLauncher.set(project.javaToolchains.launcherFor { languageVersion.set(java.toolchain.languageVersion) })
+    mainClass = "cc.tweaked.web.builder.Builder"
+    javaLauncher = project.javaToolchains.launcherFor { languageVersion = java.toolchain.languageVersion }
 }
 
 val rollup by tasks.registering(cc.tweaked.gradle.NpxExecToDir::class) {
@@ -81,7 +81,7 @@ val rollup by tasks.registering(cc.tweaked.gradle.NpxExecToDir::class) {
     inputs.file("rollup.config.js").withPropertyName("Rollup config")
 
     // Output directory. Also defined in illuaminate.sexp and rollup.config.js
-    output.set(layout.buildDirectory.dir("rollup"))
+    output = layout.buildDirectory.dir("rollup")
 
     args = listOf("rollup", "--config", "rollup.config.js") + if (minify) emptyList() else listOf("--configDebug")
 }
@@ -95,14 +95,14 @@ val illuaminateDocs by tasks.registering(cc.tweaked.gradle.IlluaminateExecToDir:
     // Sources
     inputs.files(rootProject.fileTree("doc")).withPropertyName("docs")
     inputs.files(project(":core").fileTree("src/main/resources/data/computercraft/lua")).withPropertyName("lua rom")
-    inputs.files(project(":common").tasks.named("luaJavadoc"))
+    inputs.dir(project(":common").tasks.named<Javadoc>("luaJavadoc").map { it.destinationDir!! }).withPropertyName("luaJavadoc")
     // Assets
     inputs.files(rollup)
 
     // Output directory. Also defined in illuaminate.sexp.
-    output.set(layout.buildDirectory.dir("illuaminate"))
+    output = layout.buildDirectory.dir("illuaminate")
 
-    args = listOf("doc-gen")
+    args("doc-gen")
     workingDir = rootProject.projectDir
 }
 
@@ -119,17 +119,15 @@ val htmlTransform by tasks.registering(cc.tweaked.gradle.NpxExecToDir::class) {
     inputs.files(illuaminateDocs)
 
     // Output directory.
-    output.set(layout.buildDirectory.dir(name))
+    output = layout.buildDirectory.dir(name)
 
-    argumentProviders.add {
-        listOf(
-            "tsx",
-            sources.dir.resolve("index.tsx").absolutePath,
-            illuaminateDocs.get().output.getAbsolutePath(),
-            sources.dir.resolve("export/index.json").absolutePath,
-            output.getAbsolutePath(),
-        )
-    }
+    args(
+        "tsx",
+        sources.dir.resolve("index.tsx").absolutePath,
+        illuaminateDocs.get().output.getAbsolutePath(),
+        sources.dir.resolve("export/index.json").absolutePath,
+        output.getAbsolutePath(),
+    )
 }
 
 val docWebsite by tasks.registering(Copy::class) {

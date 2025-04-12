@@ -11,7 +11,9 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
+import org.gradle.process.ExecOperations
 import java.io.File
+import javax.inject.Inject
 
 class NodePlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -43,9 +45,12 @@ abstract class NpmInstall : DefaultTask() {
     @get:OutputDirectory
     val nodeModules: Provider<Directory> = projectRoot.dir("node_modules")
 
+    @get:Inject
+    protected abstract val execOperations: ExecOperations
+
     @TaskAction
     fun install() {
-        project.exec {
+        execOperations.exec {
             commandLine(ProcessHelpers.getExecutable("npm"), "ci")
             workingDir = projectRoot.get().asFile
         }

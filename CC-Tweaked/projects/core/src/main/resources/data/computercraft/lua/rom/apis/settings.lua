@@ -61,7 +61,7 @@ for _, v in ipairs(valid_types) do valid_types[v] = true end
 --  - `default`: A default value, which is returned by [`settings.get`] if the
 --    setting has not been changed.
 --  - `type`: Require values to be of this type. [Setting][`set`] the value to another type
---    will error.
+--    will error. Must be one of: `"number"`, `"string"`, `"boolean"`, or `"table"`.
 -- @since 1.87.0
 function define(name, options)
     expect(1, name, "string")

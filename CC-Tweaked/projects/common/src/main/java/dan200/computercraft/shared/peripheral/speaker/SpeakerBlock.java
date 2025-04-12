@@ -18,8 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class SpeakerBlock extends HorizontalDirectionalBlock implements EntityBlock {
     private static final BlockEntityTicker<SpeakerBlockEntity> serverTicker = (level, pos, state, drive) -> drive.serverTick();

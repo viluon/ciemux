@@ -6,8 +6,8 @@ package dan200.computercraft.core.filesystem;
 
 import dan200.computercraft.api.filesystem.FileAttributes;
 import dan200.computercraft.api.filesystem.FileOperationException;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -4,6 +4,7 @@
 
 package dan200.computercraft.gametest
 
+import dan200.computercraft.api.ComputerCraftTags
 import dan200.computercraft.api.detail.BasicItemDetailProvider
 import dan200.computercraft.api.detail.VanillaDetailRegistries
 import dan200.computercraft.api.lua.ObjectArguments
@@ -23,27 +24,30 @@ import dan200.computercraft.shared.peripheral.modem.wired.CableModemVariant
 import dan200.computercraft.shared.peripheral.monitor.MonitorBlock
 import dan200.computercraft.shared.peripheral.monitor.MonitorEdgeState
 import dan200.computercraft.shared.turtle.apis.TurtleAPI
+import dan200.computercraft.shared.turtle.core.TurtleCraftCommand
 import dan200.computercraft.shared.util.WaterloggableHelpers
 import dan200.computercraft.test.core.assertArrayEquals
 import dan200.computercraft.test.core.computer.LuaTaskContext
 import dan200.computercraft.test.core.computer.getApi
-import dan200.computercraft.test.shared.ItemStackMatcher.isStack
 import net.minecraft.core.BlockPos
 import net.minecraft.gametest.framework.GameTest
 import net.minecraft.gametest.framework.GameTestHelper
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.item.PrimedTnt
+import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.enchantment.Enchantments
+import net.minecraft.world.level.block.BeehiveBlock
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.ComposterBlock
 import net.minecraft.world.level.block.FenceBlock
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.hamcrest.Matchers.array
+import org.hamcrest.Matchers.instanceOf
+import org.junit.jupiter.api.Assertions.*
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.time.Duration.Companion.milliseconds
@@ -104,6 +108,87 @@ class Turtle_Test {
             for ((i, line) in lines.withIndex()) {
                 assertEquals(line, sign.frontText.getMessage(i, false).string, "Line $i")
             }
+        }
+    }
+
+    /**
+     * Checks that turtles can place boats. These are not a [BlockItem], and so behave slightly differently.
+     *
+     * See [ComputerCraftTags.Items.TURTLE_CAN_PLACE].
+     */
+    @GameTest
+    fun Place_boat(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer {
+            turtle.placeDown(ObjectArguments()).await().assertArrayEquals(true, message = "Placed boat")
+        }
+        thenExecute { helper.assertEntityPresent(EntityType.BOAT) }
+    }
+
+    /**
+     * Checks that turtles can place items into composters.
+     *
+     * See [ComputerCraftTags.Blocks.TURTLE_CAN_USE].
+     */
+    @GameTest
+    fun Place_into_composter(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer {
+            turtle.place(ObjectArguments()).await().assertArrayEquals(true, message = "Placed pumpkin pie")
+            turtle.getItemDetail(context, Optional.empty(), Optional.empty()).await().assertArrayEquals(
+                mapOf("name" to "minecraft:pumpkin_pie", "count" to 1),
+            )
+        }
+        thenExecute {
+            helper.assertBlockHas(BlockPos(2, 2, 2), ComposterBlock.LEVEL, 2)
+        }
+    }
+
+    /**
+     * Checks that turtles cannot place items into non-adjacent blocks.
+     *
+     * See [ComputerCraftTags.Blocks.TURTLE_CAN_USE].
+     */
+    @GameTest
+    fun Place_into_composter_non_adjacent(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer {
+            turtle.place(ObjectArguments()).await()
+                .assertArrayEquals(false, "Cannot place item here", message = "Failed to place item")
+        }
+        thenExecute {
+            helper.assertBlockHas(BlockPos(2, 2, 3), ComposterBlock.LEVEL, 0)
+        }
+    }
+
+    /**
+     * Checks that turtles can place bottles into beehives.
+     *
+     * See [ComputerCraftTags.Blocks.TURTLE_CAN_USE].
+     */
+    @GameTest
+    fun Place_into_beehive(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer {
+            turtle.place(ObjectArguments()).await().assertArrayEquals(true, message = "Placed pumpkin pie")
+            turtle.getItemDetail(context, Optional.of(1), Optional.empty()).await().assertArrayEquals(
+                mapOf("name" to "minecraft:glass_bottle", "count" to 63),
+            )
+            turtle.getItemDetail(context, Optional.of(2), Optional.empty()).await().assertArrayEquals(
+                mapOf("name" to "minecraft:honey_bottle", "count" to 1),
+            )
+        }
+        thenExecute {
+            helper.assertBlockHas(BlockPos(2, 2, 2), BeehiveBlock.HONEY_LEVEL, 0)
+        }
+    }
+
+    /**
+     * Checks that turtles cannot use arbitrary blocks with `place()`.
+     *
+     * See [ComputerCraftTags.Blocks.TURTLE_CAN_USE].
+     */
+    @GameTest
+    fun Place_does_not_use(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer {
+            turtle.place(ObjectArguments()).await()
+                .assertArrayEquals(false, "Cannot place block here", message = "Failed to place item")
         }
     }
 
@@ -315,11 +400,11 @@ class Turtle_Test {
     }
 
     /**
-     * Checks turtles can place into compostors. These are non-typical inventories, so
+     * Checks turtles can place into composters. These are non-typical inventories, so
      * worth testing.
      */
     @GameTest
-    fun Use_compostors(helper: GameTestHelper) = helper.sequence {
+    fun Use_composters(helper: GameTestHelper) = helper.sequence {
         thenOnComputer {
             turtle.dropDown(Optional.empty()).await()
                 .assertArrayEquals(true, message = "Item was dropped")
@@ -354,14 +439,14 @@ class Turtle_Test {
                 object :
                     BasicItemDetailProvider<PrintoutItem>("printout", PrintoutItem::class.java) {
                     override fun provideDetails(data: MutableMap<in String, Any>, stack: ItemStack, item: PrintoutItem) {
-                        data["type"] = item.type.toString().lowercase()
+                        data["pages"] = PrintoutItem.getPageCount(stack)
                     }
                 },
             )
         }
         thenOnComputer {
             val details = getTurtleItemDetail(detailed = true)
-            assertEquals(mapOf("type" to "page"), details["printout"]) {
+            assertEquals(mapOf("pages" to 1), details["printout"]) {
                 "Printout information is returned (whole map is $details)"
             }
         }
@@ -558,6 +643,27 @@ class Turtle_Test {
     }
 
     /**
+     * Test turtles can push entities.
+     */
+    @GameTest
+    fun Move_push_entity(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer { turtle.up().await().assertArrayEquals(true) }
+        thenIdle(9)
+        thenExecute {
+            // The turtle has moved up
+            helper.assertBlockPresent(ModRegistry.Blocks.TURTLE_NORMAL.get(), BlockPos(2, 3, 2))
+
+            // As has the villager
+            val pos = BlockPos(2, 4, 2)
+            helper.assertEntityPresent(EntityType.VILLAGER, pos)
+
+            val villager = helper.getEntity(EntityType.VILLAGER)
+            val expectedY = helper.absolutePos(pos).y - 0.125
+            if (villager.y < expectedY) helper.fail("Expected villager at y>=$expectedY, but at ${villager.y}", pos)
+        }
+    }
+
+    /**
      * Test a turtle can attack an entity and capture its drops.
      */
     @GameTest
@@ -657,6 +763,21 @@ class Turtle_Test {
     }
 
     /**
+     * `turtle.drop` only inserts for the current side.
+     */
+    @GameTest
+    fun Sided_drop(helper: GameTestHelper) = helper.sequence {
+        thenOnComputer {
+            turtle.dropDown(Optional.empty()).await().assertArrayEquals(true)
+            turtle.getItemDetail(context, Optional.empty(), Optional.empty()).await().assertArrayEquals(
+                mapOf("name" to "minecraft:coal", "count" to 8),
+            )
+
+            turtle.dropDown(Optional.empty()).await().assertArrayEquals(false, "No space for items")
+        }
+    }
+
+    /**
      * `turtle.craft` works as expected
      */
     @GameTest
@@ -665,15 +786,13 @@ class Turtle_Test {
             callPeripheral("left", "craft", 1).assertArrayEquals(true)
         }
         thenExecute {
-            val turtle = helper.getBlockEntity(BlockPos(2, 2, 2), ModRegistry.BlockEntities.TURTLE_NORMAL.get())
-            assertThat(
-                "Inventory is as expected.",
-                turtle.contents,
-                contains(
-                    isStack(Items.DIAMOND, 1), isStack(Items.DIAMOND, 1), isStack(Items.DIAMOND, 1), isStack(Items.DIAMOND_PICKAXE, 1),
-                    isStack(ItemStack.EMPTY), isStack(Items.STICK, 1), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
-                    isStack(ItemStack.EMPTY), isStack(Items.STICK, 1), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
-                    isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
+            helper.assertContainerExactly(
+                BlockPos(2, 2, 2),
+                listOf(
+                    ItemStack(Items.DIAMOND), ItemStack(Items.DIAMOND), ItemStack(Items.DIAMOND), ItemStack(Items.DIAMOND_PICKAXE),
+                    ItemStack.EMPTY, ItemStack(Items.STICK), ItemStack.EMPTY, ItemStack.EMPTY,
+                    ItemStack.EMPTY, ItemStack(Items.STICK), ItemStack.EMPTY, ItemStack.EMPTY,
+                    ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                 ),
             )
         }
@@ -686,25 +805,59 @@ class Turtle_Test {
      */
     @GameTest
     fun Craft_remainder(helper: GameTestHelper) = helper.sequence {
-        thenOnComputer {
-            callPeripheral("left", "craft", 1).assertArrayEquals(true)
-        }
         thenExecute {
             val turtle = helper.getBlockEntity(BlockPos(2, 2, 2), ModRegistry.BlockEntities.TURTLE_NORMAL.get())
+            assertTrue(TurtleCraftCommand(1).execute(turtle.access).isSuccess, "Crafting succeeded")
 
             val turtleStack = ItemStack(ModRegistry.Items.TURTLE_NORMAL.get())
             turtleStack.orCreateTag
 
-            assertThat(
-                "Inventory is as expected.",
-                turtle.contents,
-                contains(
-                    isStack(turtleStack), isStack(Items.WET_SPONGE, 1), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
-                    isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
-                    isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
-                    isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY), isStack(ItemStack.EMPTY),
+            helper.assertContainerExactly(
+                BlockPos(2, 2, 2),
+                listOf(
+                    turtleStack, ItemStack(Items.WET_SPONGE), ItemStack.EMPTY, ItemStack.EMPTY,
+                    ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                    ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                    ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
                 ),
             )
+        }
+    }
+
+    /**
+     * Test that turtles attempt crafts in all four corners.
+     *
+     * @see [#1918](https://github.com/cc-tweaked/CC-Tweaked/issues/1918)
+     */
+    @GameTest
+    fun Craft_offset(helper: GameTestHelper) = helper.sequence {
+        for (offset in listOf(0, 1, 4, 5)) {
+            thenExecute {
+                val turtlePos = BlockPos(2, 2, 2)
+                val turtle = helper.getBlockEntity(turtlePos, ModRegistry.BlockEntities.TURTLE_NORMAL.get())
+
+                // Set up turtle inventory
+                turtle.clearContent()
+                turtle.setItem(offset + 0, ItemStack(Items.COBBLESTONE))
+                turtle.setItem(offset + 1, ItemStack(Items.COBBLESTONE))
+                turtle.setItem(offset + 2, ItemStack(Items.COBBLESTONE))
+                turtle.setItem(offset + 5, ItemStack(Items.STICK))
+                turtle.setItem(offset + 9, ItemStack(Items.STICK))
+
+                // Try to craft
+                assertTrue(TurtleCraftCommand(1).execute(turtle.access).isSuccess, "Crafting succeeded")
+
+                // And check item was crafted
+                helper.assertContainerExactly(
+                    turtlePos,
+                    listOf(
+                        ItemStack(Items.STONE_PICKAXE), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                        ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY,
+                    ),
+                )
+            }
         }
     }
 
@@ -735,6 +888,24 @@ class Turtle_Test {
             context.assertItemEntityCountIs(ModRegistry.Items.TURTLE_NORMAL.get(), 1)
             context.assertItemEntityCountIs(Items.BONE_BLOCK, 65)
         }
+    }
+
+    /**
+     * Asserts items can be inserted into a turtle.
+     */
+    @GameTest
+    fun Can_insert_items(helper: GameTestHelper) = helper.sequence {
+        thenWaitUntil {
+            helper.assertContainerExactly(BlockPos(2, 2, 2), listOf(ItemStack(ModRegistry.Items.COMPUTER_NORMAL.get())))
+        }
+    }
+
+    /**
+     * Asserts items can be removed from a turtle.
+     */
+    @GameTest
+    fun Can_extract_items(helper: GameTestHelper) = helper.sequence {
+        thenWaitUntil { helper.assertContainerEmpty(BlockPos(2, 3, 2)) }
     }
 
     /**

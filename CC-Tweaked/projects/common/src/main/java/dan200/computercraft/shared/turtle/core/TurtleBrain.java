@@ -36,11 +36,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -280,7 +281,7 @@ public class TurtleBrain implements TurtleAccessInternal {
         try {
             // We use Block.UPDATE_CLIENTS here to ensure that neighbour updates caused in Block.updateNeighbourShapes
             // are sent to the client. We want to avoid doing a full block update until the turtle state is copied over.
-            if (world.setBlock(pos, newState, 2)) {
+            if (world.setBlock(pos, newState, Block.UPDATE_CLIENTS)) {
                 var block = world.getBlockState(pos).getBlock();
                 if (block == oldBlock.getBlock()) {
                     var newTile = world.getBlockEntity(pos);
@@ -691,7 +692,7 @@ public class TurtleBrain implements TurtleAccessInternal {
                     }
 
                     var aabb = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
-                    var list = world.getEntitiesOfClass(Entity.class, aabb, TurtleBrain::canPush);
+                    var list = world.getEntities((Entity) null, aabb, TurtleBrain::canPush);
                     if (!list.isEmpty()) {
                         double pushStep = 1.0f / ANIM_DURATION;
                         var pushStepX = moveDir.getStepX() * pushStep;

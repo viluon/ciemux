@@ -6,8 +6,8 @@ package dan200.computercraft.core.apis.http;
 
 import dan200.computercraft.core.util.IoUtil;
 import io.netty.channel.ChannelFuture;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;

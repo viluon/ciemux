@@ -5,8 +5,7 @@
 package dan200.computercraft.core.lua;
 
 import dan200.computercraft.core.computer.TimeoutState;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The result of executing an action on a machine.

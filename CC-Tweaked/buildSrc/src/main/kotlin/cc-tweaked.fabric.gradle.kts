@@ -30,7 +30,7 @@ repositories {
 
 loom {
     splitEnvironmentSourceSets()
-    splitModDependencies.set(true)
+    splitModDependencies = true
 }
 
 MinecraftConfigurations.setup(project)

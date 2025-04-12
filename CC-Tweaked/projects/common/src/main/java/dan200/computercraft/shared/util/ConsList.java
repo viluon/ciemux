@@ -4,7 +4,7 @@
 
 package dan200.computercraft.shared.util;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.AbstractList;
 import java.util.Iterator;

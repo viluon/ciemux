@@ -8,18 +8,23 @@ SPDX-PackageSupplier = "Jonathan Coates <git@squiddev.cc>"
 SPDX-PackageDownloadLocation = "https://github.com/cc-tweaked/cc-tweaked"
 
 [[annotations]]
-# Generated/data files are CC0.
 SPDX-FileCopyrightText = "The CC: Tweaked Developers"
 SPDX-License-Identifier = "CC0-1.0"
 path = [
+    # Generated/data files are CC0.
     "gradle/gradle-daemon-jvm.properties",
     "projects/common/src/main/resources/assets/computercraft/sounds.json",
     "projects/common/src/main/resources/assets/computercraft/sounds/empty.ogg",
     "projects/common/src/testMod/resources/data/cctest/computercraft/turtle_upgrades/**",
     "projects/common/src/testMod/resources/data/cctest/structures/**",
-    "projects/**/src/generated/**",
+    "projects/*/src/generated/**",
     "projects/web/src/htmlTransform/export/index.json",
     "projects/web/src/htmlTransform/export/items/minecraft/**",
+    # GitHub build scripts are CC0. While we could add a header to each file,
+    # it's unclear if it will break actions or issue templates in some way.
+    ".github/**",
+    # Example mod is CC0.
+    "projects/*/src/examples/**"
 ]
 
 [[annotations]]
@@ -30,23 +35,15 @@ path = [
     "doc/images/**",
     "package.json",
     "package-lock.json",
-    "projects/common/src/client/resources/computercraft-client.mixins.json",
+    "projects/*/src/*/resources/*.mixins.json",
+    "projects/fabric/src/*/resources/fabric.mod.json",
     "projects/common/src/main/resources/assets/minecraft/shaders/core/computercraft/monitor_tbo.json",
-    "projects/common/src/main/resources/computercraft.mixins.json",
-    "projects/common/src/testMod/resources/computercraft-gametest.mixins.json",
     "projects/common/src/testMod/resources/data/computercraft/loot_tables/treasure_disk.json",
     "projects/common/src/testMod/resources/pack.mcmeta",
     "projects/core/src/main/resources/data/computercraft/lua/rom/modules/command/.ignoreme",
     "projects/core/src/main/resources/data/computercraft/lua/rom/modules/main/.ignoreme",
     "projects/core/src/main/resources/data/computercraft/lua/rom/modules/turtle/.ignoreme",
     "projects/core/src/main/resources/data/computercraft/lua/rom/motd.txt",
-    "projects/fabric/src/client/resources/computercraft-client.fabric.mixins.json",
-    "projects/fabric/src/datagen/resources/fabric.mod.json",
-    "projects/fabric/src/main/resources/computercraft.fabric.mixins.json",
-    "projects/fabric/src/main/resources/fabric.mod.json",
-    "projects/fabric/src/testMod/resources/computercraft-gametest.fabric.mixins.json",
-    "projects/fabric/src/testMod/resources/fabric.mod.json",
-    "projects/forge/src/client/resources/computercraft-client.forge.mixins.json",
     "projects/web/src/frontend/mount/.settings",
     "projects/web/src/frontend/mount/example.nfp",
     "projects/web/src/frontend/mount/example.nft",
@@ -73,7 +70,7 @@ path = [
 ]
 
 [[annotations]]
-# Community-contributed license files
+# Community-contributed language files
 SPDX-FileCopyrightText = "2017 The CC: Tweaked Developers"
 SPDX-License-Identifier = "LicenseRef-CCPL"
 path = [
@@ -87,17 +84,10 @@ path = [
 ]
 
 [[annotations]]
-# Community-contributed license files
+# Community-contributed language files
 SPDX-FileCopyrightText = "2017 The CC: Tweaked Developers"
 SPDX-License-Identifier = "MPL-2.0"
 path = "projects/common/src/main/resources/assets/computercraft/lang/**"
-
-[[annotations]]
-# GitHub build scripts are CC0. While we could add a header to each file,
-# it's unclear if it will break actions or issue templates in some way.
-SPDX-FileCopyrightText = "Jonathan Coates <git@squiddev.cc>"
-SPDX-License-Identifier = "CC0-1.0"
-path = ".github/**"
 
 [[annotations]]
 path = ["gradle/wrapper/**"]

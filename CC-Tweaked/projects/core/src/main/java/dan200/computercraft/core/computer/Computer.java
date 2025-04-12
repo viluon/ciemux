@@ -14,8 +14,8 @@ import dan200.computercraft.core.computer.mainthread.MainThreadScheduler;
 import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.redstone.RedstoneState;
 import dan200.computercraft.core.terminal.Terminal;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <li>Passes main thread tasks to the {@link MainThreadScheduler.Executor}.</li>
  * </ul>
  */
-public class Computer {
+public class Computer implements ComputerEvents.Receiver {
     private static final int START_DELAY = 50;
 
     // Various properties of the computer
@@ -114,7 +114,8 @@ public class Computer {
         executor.queueStop(false, true);
     }
 
-    public void queueEvent(String event, @Nullable Object[] args) {
+    @Override
+    public void queueEvent(String event, @Nullable Object @Nullable [] args) {
         executor.queueEvent(event, args);
     }
 

@@ -12,10 +12,10 @@ import com.electronwill.nightconfig.core.io.WritingMode;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import dan200.computercraft.shared.config.ConfigFile;
 import org.apache.commons.lang3.function.TriFunction;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -14,8 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class TurtleUpgradeModellers {
     private static final Transformation leftTransform = getMatrixFor(-0.4065f);

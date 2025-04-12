@@ -23,7 +23,8 @@ class Speaker_Test {
             callPeripheral("right", "playSound", SoundEvents.NOTE_BLOCK_HARP.key().location().toString())
                 .assertArrayEquals(true)
 
-            tryMultipleTimes(2) { // We could technically call this a tick later, so try twice
+            tryMultipleTimes(2) {
+                // We could technically call this a tick later, so try twice
                 callPeripheral("right", "playSound", SoundEvents.NOTE_BLOCK_HARP.key().location().toString())
                     .assertArrayEquals(false)
             }

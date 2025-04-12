@@ -24,8 +24,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static dan200.computercraft.shared.util.WaterloggableHelpers.WATERLOGGED;
 import static dan200.computercraft.shared.util.WaterloggableHelpers.getFluidStateForPlacement;

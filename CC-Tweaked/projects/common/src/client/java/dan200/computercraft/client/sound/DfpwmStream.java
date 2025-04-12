@@ -10,9 +10,9 @@ import dan200.computercraft.shared.peripheral.speaker.SpeakerPeripheral;
 import dan200.computercraft.shared.peripheral.speaker.SpeakerPosition;
 import net.minecraft.client.sounds.AudioStream;
 import net.minecraft.client.sounds.SoundEngine;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 
-import javax.annotation.Nullable;
 import javax.sound.sampled.AudioFormat;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

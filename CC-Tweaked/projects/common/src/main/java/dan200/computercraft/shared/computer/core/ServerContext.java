@@ -26,10 +26,10 @@ import dan200.computercraft.shared.util.IDAssigner;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Objects;

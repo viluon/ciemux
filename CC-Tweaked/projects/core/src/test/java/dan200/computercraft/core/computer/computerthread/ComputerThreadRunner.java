@@ -4,12 +4,12 @@
 
 package dan200.computercraft.core.computer.computerthread;
 
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import dan200.computercraft.core.computer.TimeoutState;
 import dan200.computercraft.core.metrics.Metric;
 import dan200.computercraft.core.metrics.MetricsObserver;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import javax.annotation.concurrent.GuardedBy;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;

@@ -5,8 +5,8 @@
 package dan200.computercraft.api.lua;
 
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -223,6 +223,9 @@ public interface IArguments {
 
     /**
      * Get an argument as a table.
+     * <p>
+     * The returned table may be converted into a {@link LuaTable} (using {@link ObjectLuaTable}) for easier parsing of
+     * table keys.
      *
      * @param index The argument number.
      * @return The argument's value.

@@ -12,6 +12,7 @@ import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.pocket.PocketUpgradeSerialiser;
 import dan200.computercraft.api.turtle.TurtleUpgradeSerialiser;
+import dan200.computercraft.impl.MediaProviders;
 import dan200.computercraft.shared.CommonHooks;
 import dan200.computercraft.shared.ModRegistry;
 import dan200.computercraft.shared.config.ConfigSpec;
@@ -78,6 +79,8 @@ public final class ComputerCraft {
         ForgeComputerCraftAPI.registerGenericCapability(ForgeCapabilities.FLUID_HANDLER);
 
         ForgeDetailRegistries.FLUID_STACK.addProvider(FluidData::fill);
+
+        MediaProviders.registerDefault();
 
         if (ModList.get().isLoaded(CreateIntegration.ID)) event.enqueueWork(CreateIntegration::setup);
         if (ModList.get().isLoaded(MoreRedIntegration.MOD_ID)) MoreRedIntegration.setup();

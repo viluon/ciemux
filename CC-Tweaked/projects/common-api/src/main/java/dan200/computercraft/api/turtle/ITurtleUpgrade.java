@@ -8,21 +8,69 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.upgrades.UpgradeBase;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Items;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.function.BiFunction;
 
 /**
  * The primary interface for defining an update for Turtles. A turtle update can either be a new tool, or a new
  * peripheral.
  * <p>
  * Turtle upgrades are defined in two stages. First, one creates a {@link ITurtleUpgrade} subclass and corresponding
- * {@link TurtleUpgradeSerialiser} instance, which are then registered in a Forge registry.
+ * {@link TurtleUpgradeSerialiser} instance, which are then registered in a Minecraft registry.
  * <p>
  * You then write a JSON file in your mod's {@literal data/} folder. This is then parsed when the world is loaded, and
- * the upgrade registered internally. See the documentation in {@link TurtleUpgradeSerialiser} for details on this process
- * and where files should be located.
+ * the upgrade automatically registered.
  *
- * @see TurtleUpgradeSerialiser For how to register a turtle upgrade.
+ * <h2>Example</h2>
+ * <h3>Registering the upgrade serialiser</h3>
+ * First, let's create a new class that implements {@link ITurtleUpgrade}. It is recommended to subclass
+ * {@link AbstractTurtleUpgrade}, as that provides a default implementation of most methods.
+ * <p>
+ * {@snippet class=com.example.examplemod.ExampleTurtleUpgrade region=body}
+ * <p>
+ * Now we must construct a new upgrade serialiser. In most cases, you can use one of the helper methods
+ * (e.g. {@link TurtleUpgradeSerialiser#simpleWithCustomItem(BiFunction)}), rather than defining your own implementation.
+ *
+ * {@snippet class=com.example.examplemod.ExampleMod region=turtle_upgrades}
+ *
+ * We now must register this upgrade serialiser. This is done the same way as you'd register blocks, items, or other
+ * Minecraft objects. The approach to do this will depend on mod-loader.
+ *
+ * <h4>Fabric</h4>
+ * {@snippet class=com.example.examplemod.FabricExampleMod region=turtle_upgrades}
+ *
+ * <h4>Forge</h4>
+ * {@snippet class=com.example.examplemod.ForgeExampleMod region=turtle_upgrades}
+ *
+ * <h3>Rendering the upgrade</h3>
+ * Next, we need to register a model for our upgrade. This is done by registering a
+ * {@link dan200.computercraft.api.client.turtle.TurtleUpgradeModeller} for your upgrade serialiser.
+ *
+ * <h4>Fabric</h4>
+ * {@snippet class=com.example.examplemod.FabricExampleModClient region=turtle_modellers}
+ *
+ *
+ * <h4>Forge</h4>
+ * {@snippet class=com.example.examplemod.FabricExampleModClient region=turtle_modellers}
+ *
+ * <h3>Registering the upgrade itself</h3>
+ * Upgrades themselves are loaded from datapacks when a level is loaded. In order to register our new upgrade, we must
+ * create a new JSON file at {@code data/<my_mod>/computercraft/turtle_upgrades/<my_upgrade_id>.json}.
+ *
+ * {@snippet file = data/examplemod/computercraft/turtle_upgrades/example_turtle_upgrade.json}
+ *
+ * The {@code "type"} field points to the ID of the upgrade serialiser we've just registered, while the other fields
+ * are read by the serialiser itself. As our upgrade was defined with {@link TurtleUpgradeSerialiser#simpleWithCustomItem(BiFunction)}, the
+ * {@code "item"} field will construct our upgrade with {@link Items#COMPASS}.
+ * <p>
+ * Rather than manually creating the file, it is recommended to data-generators to generate this file. This can be done
+ * with {@link TurtleUpgradeDataProvider}.
+ *
+ * {@snippet class=com.example.examplemod.data.TurtleDataProvider region=body}
+ *
+ * @see TurtleUpgradeSerialiser Registering a turtle upgrade.
  */
 public interface ITurtleUpgrade extends UpgradeBase {
     /**

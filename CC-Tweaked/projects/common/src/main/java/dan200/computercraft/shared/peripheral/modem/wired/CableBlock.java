@@ -35,8 +35,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.EnumMap;
 
 import static dan200.computercraft.shared.util.WaterloggableHelpers.WATERLOGGED;
@@ -258,11 +258,6 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityB
     @Deprecated
     public final void neighborChanged(BlockState state, Level world, BlockPos pos, Block neighbourBlock, BlockPos neighbourPos, boolean isMoving) {
         if (world.getBlockEntity(pos) instanceof CableBlockEntity modem) modem.neighborChanged(neighbourPos);
-    }
-
-    @ForgeOverride
-    public final void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbour) {
-        if (world.getBlockEntity(pos) instanceof CableBlockEntity modem) modem.neighborChanged(neighbour);
     }
 
     @Override

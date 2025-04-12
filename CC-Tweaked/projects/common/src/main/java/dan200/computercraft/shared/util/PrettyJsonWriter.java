@@ -11,8 +11,8 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.data.DataProvider;
 import net.minecraft.util.GsonHelper;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
@@ -79,8 +79,8 @@ public class PrettyJsonWriter extends JsonWriter {
 
         // Otherwise we either need to push to our list or finish a record pair.
         var head = stack.getLast();
-        if (head instanceof DocList) {
-            ((DocList) head).add(object);
+        if (head instanceof DocList headList) {
+            headList.add(object);
         } else {
             stack.removeLast();
             ((DocList) stack.getLast()).add(new Pair((String) head, object));

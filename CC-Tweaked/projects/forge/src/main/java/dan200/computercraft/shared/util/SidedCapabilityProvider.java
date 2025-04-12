@@ -12,8 +12,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
@@ -31,7 +31,7 @@ public final class SidedCapabilityProvider<T> implements ICapabilityProvider {
     private final Capability<T> cap;
     private final Provider<T> supplier;
     private final BooleanSupplier isRemoved;
-    private @Nullable LazyOptional<T>[] instances;
+    private @Nullable LazyOptional<T> @Nullable [] instances;
 
     private SidedCapabilityProvider(Capability<T> cap, Provider<T> supplier, BooleanSupplier isRemoved) {
         this.cap = Objects.requireNonNull(cap, "Capability cannot be null");

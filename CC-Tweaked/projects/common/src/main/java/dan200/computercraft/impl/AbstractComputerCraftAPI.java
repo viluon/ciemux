@@ -11,7 +11,7 @@ import dan200.computercraft.api.filesystem.Mount;
 import dan200.computercraft.api.filesystem.WritableMount;
 import dan200.computercraft.api.lua.GenericSource;
 import dan200.computercraft.api.lua.ILuaAPIFactory;
-import dan200.computercraft.api.media.MediaProvider;
+import dan200.computercraft.api.media.PrintoutContents;
 import dan200.computercraft.api.network.PacketNetwork;
 import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.network.wired.WiredNode;
@@ -26,6 +26,7 @@ import dan200.computercraft.shared.computer.core.ResourceMount;
 import dan200.computercraft.shared.computer.core.ServerContext;
 import dan200.computercraft.shared.details.BlockDetails;
 import dan200.computercraft.shared.details.ItemDetails;
+import dan200.computercraft.shared.media.items.PrintoutItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -34,11 +35,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.stream.Stream;
 
 public abstract class AbstractComputerCraftAPI implements ComputerCraftAPIService {
     private final DetailRegistry<ItemStack> itemStackDetails = new DetailRegistryImpl<>(ItemDetails::fillBasic);
@@ -91,11 +93,6 @@ public abstract class AbstractComputerCraftAPI implements ComputerCraftAPIServic
     }
 
     @Override
-    public final void registerMediaProvider(MediaProvider provider) {
-        MediaProviders.register(provider);
-    }
-
-    @Override
     public final PacketNetwork getWirelessNetwork(MinecraftServer server) {
         return ServerContext.get(server).wirelessNetwork();
     }
@@ -133,5 +130,22 @@ public abstract class AbstractComputerCraftAPI implements ComputerCraftAPIServic
     @Override
     public final DetailRegistry<BlockReference> getBlockInWorldDetailRegistry() {
         return blockDetails;
+    }
+
+    @Override
+    public @Nullable PrintoutContents getPrintoutContents(ItemStack stack) {
+        return stack.getItem() instanceof PrintoutItem ? new PrintoutContentsImpl(stack) : null;
+    }
+
+    public record PrintoutContentsImpl(ItemStack stack) implements PrintoutContents {
+        @Override
+        public String getTitle() {
+            return PrintoutItem.getTitle(stack);
+        }
+
+        @Override
+        public Stream<String> getTextLines() {
+            return Stream.of(PrintoutItem.getText(stack));
+        }
     }
 }

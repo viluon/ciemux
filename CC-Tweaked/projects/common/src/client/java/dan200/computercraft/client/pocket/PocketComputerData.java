@@ -8,8 +8,7 @@ import dan200.computercraft.shared.computer.core.ComputerState;
 import dan200.computercraft.shared.computer.terminal.NetworkedTerminal;
 import dan200.computercraft.shared.computer.terminal.TerminalState;
 import dan200.computercraft.shared.pocket.core.PocketServerComputer;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Clientside data about a pocket computer.

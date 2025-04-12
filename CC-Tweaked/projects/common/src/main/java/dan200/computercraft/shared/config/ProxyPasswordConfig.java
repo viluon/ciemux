@@ -5,10 +5,10 @@
 package dan200.computercraft.shared.config;
 
 import dan200.computercraft.core.CoreConfig;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

@@ -11,11 +11,13 @@ import dan200.computercraft.api.lua.ILuaFunction;
 import dan200.computercraft.core.CoreConfig;
 import dan200.computercraft.core.Logging;
 import dan200.computercraft.core.computer.TimeoutState;
+import dan200.computercraft.core.lua.errorinfo.ErrorInfoLib;
 import dan200.computercraft.core.methods.LuaMethod;
 import dan200.computercraft.core.methods.MethodSupplier;
 import dan200.computercraft.core.util.LuaUtil;
 import dan200.computercraft.core.util.Nullability;
 import dan200.computercraft.core.util.SanitisedError;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.squiddev.cobalt.*;
@@ -25,7 +27,6 @@ import org.squiddev.cobalt.interrupt.InterruptAction;
 import org.squiddev.cobalt.lib.Bit32Lib;
 import org.squiddev.cobalt.lib.CoreLibraries;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.io.Serial;
 import java.nio.ByteBuffer;
@@ -77,6 +78,7 @@ public class CobaltLuaMachine implements ILuaMachine {
             var globals = state.globals();
             CoreLibraries.debugGlobals(state);
             Bit32Lib.add(state, globals);
+            ErrorInfoLib.add(state);
             globals.rawset("_HOST", ValueFactory.valueOf(environment.hostString()));
             globals.rawset("_CC_DEFAULT_SETTINGS", ValueFactory.valueOf(CoreConfig.defaultComputerSettings));
 
@@ -112,7 +114,7 @@ public class CobaltLuaMachine implements ILuaMachine {
     }
 
     @Override
-    public MachineResult handleEvent(@Nullable String eventName, @Nullable Object[] arguments) {
+    public MachineResult handleEvent(@Nullable String eventName, @Nullable Object @Nullable [] arguments) {
         if (isDisposed) throw new IllegalStateException("Machine has been closed");
 
         if (eventFilter != null && eventName != null && !eventName.equals(eventFilter) && !eventName.equals("terminate")) {
@@ -251,7 +253,7 @@ public class CobaltLuaMachine implements ILuaMachine {
         return Constants.NIL;
     }
 
-    Varargs toValues(@Nullable Object[] objects) throws LuaError {
+    Varargs toValues(@Nullable Object @Nullable [] objects) throws LuaError {
         if (objects == null || objects.length == 0) return Constants.NONE;
         if (objects.length == 1) return toValue(objects[0], null);
 
@@ -264,8 +266,7 @@ public class CobaltLuaMachine implements ILuaMachine {
         return ValueFactory.varargsOf(values);
     }
 
-    @Nullable
-    static Object toObject(LuaValue value, @Nullable IdentityHashMap<LuaValue, Object> objects) {
+    static @Nullable Object toObject(LuaValue value, @Nullable IdentityHashMap<LuaValue, Object> objects) {
         return switch (value.type()) {
             case Constants.TNIL -> null;
             case Constants.TINT, Constants.TNUMBER -> value.toDouble();
@@ -310,7 +311,7 @@ public class CobaltLuaMachine implements ILuaMachine {
         };
     }
 
-    static Object[] toObjects(Varargs values) {
+    static @Nullable Object[] toObjects(Varargs values) {
         var count = values.count();
         var objects = new Object[count];
         for (var i = 0; i < count; i++) objects[i] = toObject(values.arg(i + 1), null);

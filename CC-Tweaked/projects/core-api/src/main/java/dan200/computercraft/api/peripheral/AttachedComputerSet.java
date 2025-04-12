@@ -4,7 +4,8 @@
 
 package dan200.computercraft.api.peripheral;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,21 +28,7 @@ import java.util.function.Consumer;
  *
  * <h2>Example</h2>
  *
- * <pre class="language language-java">{@code
- * public class MyPeripheral implements IPeripheral {
- *     private final AttachedComputerSet computers = new ComputerCollection();
- *
- *     @Override
- *     public void attach(IComputerAccess computer) {
- *         computers.add(computer);
- *     }
- *
- *     @Override
- *     public void detach(IComputerAccess computer) {
- *         computers.remove(computer);
- *     }
- * }
- * }</pre>
+ * {@snippet class=com.example.examplemod.peripheral.ComputerTrackingPeripheral region=body}
  *
  * @see IComputerAccess
  * @see IPeripheral#attach(IComputerAccess)

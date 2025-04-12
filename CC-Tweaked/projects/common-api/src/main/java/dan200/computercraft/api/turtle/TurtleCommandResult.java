@@ -5,8 +5,7 @@
 package dan200.computercraft.api.turtle;
 
 import net.minecraft.core.Direction;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Used to indicate the result of executing a turtle command.
@@ -60,9 +59,9 @@ public final class TurtleCommandResult {
 
     private final boolean success;
     private final @Nullable String errorMessage;
-    private final @Nullable Object[] results;
+    private final @Nullable Object @Nullable [] results;
 
-    private TurtleCommandResult(boolean success, @Nullable String errorMessage, @Nullable Object[] results) {
+    private TurtleCommandResult(boolean success, @Nullable String errorMessage, @Nullable Object @Nullable [] results) {
         this.success = success;
         this.errorMessage = errorMessage;
         this.results = results;
@@ -92,8 +91,7 @@ public final class TurtleCommandResult {
      *
      * @return The command's result, or {@code null} if it was a failure.
      */
-    @Nullable
-    public Object[] getResults() {
+    public @Nullable Object @Nullable [] getResults() {
         return results;
     }
 }

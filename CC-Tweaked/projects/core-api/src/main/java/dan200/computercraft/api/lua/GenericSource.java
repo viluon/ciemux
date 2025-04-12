@@ -18,22 +18,11 @@ import dan200.computercraft.api.peripheral.IPeripheral;
  * by capabilities/the block lookup API take priority. Block entities which use this system are given a peripheral name
  * determined by their id, rather than any peripheral provider, though additional types may be provided by overriding
  * {@link GenericPeripheral#getType()}.
- * <p>
- * For example, the main CC: Tweaked mod defines a generic source for inventories, which works on {@code IItemHandler}s:
  *
- * <pre class="language language-java">{@code
- * public class InventoryMethods implements GenericSource {
- *     @LuaFunction(mainThread = true)
- *     public int size(IItemHandler inventory) {
- *         return inventory.getSlots();
- *     }
- *
- *     // ...
- * }
- * }</pre>
+ * <h2>Example</h2>
+ * {@snippet class=com.example.examplemod.peripheral.FurnacePeripheral region=body}
  * <p>
- * New capabilities or block lookups (those not built into Forge/Fabric) must be explicitly registered using the
- * loader-specific API.
+ * New capabilities (those not built into Forge) must be explicitly registered using the loader-specific API.
  *
  * @see dan200.computercraft.api.ComputerCraftAPI#registerGenericSource(GenericSource)
  */

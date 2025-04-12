@@ -4,6 +4,8 @@
 
 package dan200.computercraft.api.lua;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A continuation which is called when this coroutine is resumed.
  *
@@ -18,5 +20,5 @@ public interface ILuaCallback {
      * @return The result of this continuation. Either the result to return to the callee, or another yield.
      * @throws LuaException On an error.
      */
-    MethodResult resume(Object[] args) throws LuaException;
+    MethodResult resume(@Nullable Object[] args) throws LuaException;
 }

@@ -4,7 +4,8 @@
 
 package dan200.computercraft.core.computer;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 
 /**

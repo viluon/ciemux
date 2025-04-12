@@ -4,13 +4,13 @@
 
 package cc.tweaked.web.builder;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.Remapper;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -168,6 +168,7 @@ public class TransformingClassLoader extends ClassLoader {
         }
     }
 
+    @SuppressWarnings("ArrayRecordComponent")
     private record TransformedClass(String name, byte[] contents) {
     }
 }

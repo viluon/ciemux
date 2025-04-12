@@ -8,8 +8,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.pocket.IPocketAccess;
 import dan200.computercraft.shared.peripheral.speaker.SpeakerPosition;
 import dan200.computercraft.shared.peripheral.speaker.UpgradeSpeakerPeripheral;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class PocketSpeakerPeripheral extends UpgradeSpeakerPeripheral {
     private final IPocketAccess access;

@@ -6,10 +6,10 @@ package cc.tweaked.web.peripheral;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaTable;
+import org.jspecify.annotations.Nullable;
 import org.teavm.jso.webaudio.AudioBuffer;
 import org.teavm.jso.webaudio.AudioContext;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 import static cc.tweaked.web.peripheral.SpeakerPeripheral.SAMPLE_RATE;

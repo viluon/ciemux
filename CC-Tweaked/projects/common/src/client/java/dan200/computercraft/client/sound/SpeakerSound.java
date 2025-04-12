@@ -16,8 +16,8 @@ import net.minecraft.client.sounds.SoundBufferLibrary;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -82,5 +82,11 @@ public class SpeakerSound extends AbstractSoundInstance implements TickableSound
 
     public @Nullable AudioStream getStream() {
         return stream;
+    }
+
+    boolean setVolume(float volume) {
+        if (volume == this.volume) return false;
+        this.volume = volume;
+        return true;
     }
 }

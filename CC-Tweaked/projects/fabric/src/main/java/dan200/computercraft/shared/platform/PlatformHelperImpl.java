@@ -10,6 +10,8 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.ArgumentType;
 import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.media.IMedia;
+import dan200.computercraft.api.media.MediaLookup;
 import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.node.wired.WiredElementLookup;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -59,15 +61,14 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
@@ -78,13 +79,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @AutoService(dan200.computercraft.impl.PlatformHelper.class)
 public class PlatformHelperImpl implements PlatformHelper {
@@ -168,8 +172,8 @@ public class PlatformHelperImpl implements PlatformHelper {
     }
 
     @Override
-    public void openMenu(Player player, MenuProvider owner, ContainerData menu) {
-        player.openMenu(new WrappedMenuProvider(owner, menu));
+    public void openMenu(Player player, Component title, MenuConstructor menu, ContainerData data) {
+        player.openMenu(new WrappedMenuProvider(title, menu, data));
     }
 
     @Override
@@ -205,7 +209,7 @@ public class PlatformHelperImpl implements PlatformHelper {
     }
 
     @Override
-    @SuppressWarnings({ "UnstableApiUsage", "NullAway" }) // FIXME: SIDED is treated as nullable by NullAway
+    @SuppressWarnings("UnstableApiUsage")
     public @Nullable ContainerTransfer getContainer(ServerLevel level, BlockPos pos, Direction side) {
         var storage = ItemStorage.SIDED.find(level, pos, side);
         if (storage != null) return FabricContainerTransfer.of(storage);
@@ -256,7 +260,7 @@ public class PlatformHelperImpl implements PlatformHelper {
 
     @Override
     public int getBurnTime(ItemStack stack) {
-        @Nullable var fuel = FuelRegistry.INSTANCE.get(stack.getItem());
+        var fuel = FuelRegistry.INSTANCE.get(stack.getItem());
         return fuel == null ? 0 : fuel;
     }
 
@@ -309,17 +313,16 @@ public class PlatformHelperImpl implements PlatformHelper {
     }
 
     @Override
-    public InteractionResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit, Predicate<BlockState> canUseBlock) {
+    public UseOnResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit) {
         var result = UseBlockCallback.EVENT.invoker().interact(player, player.level(), InteractionHand.MAIN_HAND, hit);
-        if (result != InteractionResult.PASS) return result;
+        if (result != InteractionResult.PASS) return new UseOnResult.Handled(result);
+        return new UseOnResult.Continue(true, true);
+    }
 
-        var block = player.level().getBlockState(hit.getBlockPos());
-        if (!block.isAir() && canUseBlock.test(block)) {
-            var useResult = block.use(player.level(), player, InteractionHand.MAIN_HAND, hit);
-            if (useResult.consumesAction()) return useResult;
-        }
-
-        return stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
+    @Override
+    @SuppressWarnings("NullAway") // NullAway doesn't like the null here.
+    public @Nullable IMedia getMedia(ItemStack stack) {
+        return MediaLookup.get().find(stack, null);
     }
 
     private record RegistryWrapperImpl<T>(
@@ -413,21 +416,23 @@ public class PlatformHelperImpl implements PlatformHelper {
         }
     }
 
-    private record WrappedMenuProvider(MenuProvider owner, ContainerData menu) implements ExtendedScreenHandlerFactory {
+    private record WrappedMenuProvider(
+        Component title, MenuConstructor menu, ContainerData data
+    ) implements ExtendedScreenHandlerFactory {
         @Nullable
         @Override
         public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-            return owner.createMenu(id, inventory, player);
+            return menu.createMenu(id, inventory, player);
         }
 
         @Override
         public Component getDisplayName() {
-            return owner.getDisplayName();
+            return title;
         }
 
         @Override
         public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {
-            menu.toBytes(buf);
+            data.toBytes(buf);
         }
     }
 

@@ -6,24 +6,24 @@ package dan200.computercraft.shared.pocket.items;
 
 import dan200.computercraft.annotations.ForgeOverride;
 import dan200.computercraft.api.ComputerCraftAPI;
-import dan200.computercraft.api.filesystem.Mount;
-import dan200.computercraft.api.media.IMedia;
 import dan200.computercraft.api.pocket.IPocketUpgrade;
 import dan200.computercraft.api.upgrades.UpgradeData;
 import dan200.computercraft.core.computer.ComputerSide;
 import dan200.computercraft.impl.PocketUpgrades;
+import dan200.computercraft.shared.ModRegistry;
 import dan200.computercraft.shared.common.IColouredItem;
 import dan200.computercraft.shared.computer.core.ComputerFamily;
 import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.computer.core.ServerComputerRegistry;
 import dan200.computercraft.shared.computer.core.ServerContext;
+import dan200.computercraft.shared.computer.inventory.ComputerMenuWithoutInventory;
 import dan200.computercraft.shared.computer.items.IComputerItem;
-import dan200.computercraft.shared.config.Config;
+import dan200.computercraft.shared.lectern.CustomLecternBlock;
 import dan200.computercraft.shared.network.container.ComputerContainerData;
+import dan200.computercraft.shared.platform.PlatformHelper;
 import dan200.computercraft.shared.pocket.core.PocketBrain;
 import dan200.computercraft.shared.pocket.core.PocketHolder;
 import dan200.computercraft.shared.pocket.core.PocketServerComputer;
-import dan200.computercraft.shared.pocket.inventory.PocketComputerMenuProvider;
 import dan200.computercraft.shared.util.IDAssigner;
 import dan200.computercraft.shared.util.InventoryUtil;
 import dan200.computercraft.shared.util.NBTUtil;
@@ -42,14 +42,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PocketComputerItem extends Item implements IComputerItem, IMedia, IColouredItem {
+public class PocketComputerItem extends Item implements IComputerItem, IColouredItem {
     private static final String NBT_UPGRADE = "Upgrade";
     private static final String NBT_UPGRADE_INFO = "UpgradeInfo";
     public static final String NBT_ON = "On";
@@ -79,12 +80,20 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
     /**
      * Tick a pocket computer.
      *
-     * @param stack  The current pocket computer stack.
-     * @param holder The entity holding the pocket item.
-     * @param brain  The pocket computer brain.
+     * @param stack   The current pocket computer stack.
+     * @param holder  The entity holding the pocket item.
+     * @param passive If set, the pocket computer will not be created if it doesn't exist, and will not be kept alive.
      */
-    private void tick(ItemStack stack, PocketHolder holder, PocketBrain brain) {
-        brain.updateHolder(holder);
+    public void tick(ItemStack stack, PocketHolder holder, boolean passive) {
+        PocketBrain brain;
+        if (passive) {
+            var computer = getServerComputer(holder.level().getServer(), stack);
+            if (computer == null) return;
+            brain = computer.getBrain();
+        } else {
+            brain = getOrCreateBrain(holder.level(), holder, stack);
+            brain.computer().keepAlive();
+        }
 
         // Update pocket upgrade
         var upgrade = brain.getUpgrade();
@@ -115,7 +124,11 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
         var label = computer.getLabel();
         if (!Objects.equals(label, getLabel(stack))) {
             changed = true;
-            setLabel(stack, label);
+            if (label != null) {
+                stack.setHoverName(Component.literal(label));
+            } else {
+                stack.resetHoverName();
+            }
         }
 
         var on = computer.isOn();
@@ -137,11 +150,7 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
         if (slot < 0) return;
 
         // If we're in the inventory, create a computer and keep it alive.
-        var holder = new PocketHolder.PlayerHolder(player, slot);
-        var brain = getOrCreateBrain((ServerLevel) world, holder, stack);
-        brain.computer().keepAlive();
-
-        tick(stack, holder, brain);
+        tick(stack, new PocketHolder.PlayerHolder(player, slot), false);
     }
 
     @ForgeOverride
@@ -151,10 +160,14 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
 
         // If we're an item entity, tick an already existing computer (as to update the position), but do not keep the
         // computer alive.
-        var computer = getServerComputer(level.getServer(), stack);
-        if (computer != null) tick(stack, new PocketHolder.ItemEntityHolder(entity), computer.getBrain());
+        tick(stack, new PocketHolder.ItemEntityHolder(entity), true);
 
         return false;
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        return CustomLecternBlock.defaultUseItemOn(context);
     }
 
     @Override
@@ -169,18 +182,37 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
             var stop = false;
             var upgrade = getUpgrade(stack);
             if (upgrade != null) {
-                brain.updateHolder(holder);
                 stop = upgrade.onRightClick(world, brain, computer.getPeripheral(ComputerSide.BACK));
                 // Sync back just in case. We don't need to setChanged, as we'll return the item anyway.
                 updateItem(stack, brain);
             }
 
-            if (!stop) {
-                var isTypingOnly = hand == InteractionHand.OFF_HAND;
-                new ComputerContainerData(computer, stack).open(player, new PocketComputerMenuProvider(computer, stack, this, hand, isTypingOnly));
-            }
+            if (!stop) openImpl(player, stack, holder, hand == InteractionHand.OFF_HAND, computer);
         }
         return new InteractionResultHolder<>(InteractionResult.sidedSuccess(world.isClientSide), stack);
+    }
+
+    /**
+     * Open a container for this pocket computer.
+     *
+     * @param player       The player to show the menu for.
+     * @param stack        The pocket computer stack.
+     * @param holder       The holder of the pocket computer.
+     * @param isTypingOnly Open the off-hand pocket screen (only supporting typing, with no visible terminal).
+     */
+    public void open(Player player, ItemStack stack, PocketHolder holder, boolean isTypingOnly) {
+        var brain = getOrCreateBrain(holder.level(), holder, stack);
+        var computer = brain.computer();
+        computer.turnOn();
+        openImpl(player, stack, holder, isTypingOnly, computer);
+    }
+
+    private static void openImpl(Player player, ItemStack stack, PocketHolder holder, boolean isTypingOnly, ServerComputer computer) {
+        PlatformHelper.get().openMenu(player, stack.getHoverName(), (id, inventory, entity) -> new ComputerMenuWithoutInventory(
+            isTypingOnly ? ModRegistry.Menus.POCKET_COMPUTER_NO_TERM.get() : ModRegistry.Menus.COMPUTER.get(), id, inventory,
+            p -> holder.isValid(computer),
+            computer
+        ), new ComputerContainerData(computer, stack));
     }
 
     @Override
@@ -226,7 +258,11 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
         var registry = ServerContext.get(level.getServer()).registry();
         {
             var computer = getServerComputer(registry, stack);
-            if (computer != null) return computer.getBrain();
+            if (computer != null) {
+                var brain = computer.getBrain();
+                brain.updateHolder(holder);
+                return brain;
+            }
         }
 
         var computerID = getComputerID(stack);
@@ -235,15 +271,17 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
             setComputerID(stack, computerID);
         }
 
-        var brain = new PocketBrain(holder, getComputerID(stack), getLabel(stack), getFamily(), getUpgradeWithData(stack));
+        var brain = new PocketBrain(
+            holder, getUpgradeWithData(stack), getColour(stack),
+            ServerComputer.properties(getComputerID(stack), getFamily()).label(getLabel(stack))
+        );
         var computer = brain.computer();
 
         var tag = stack.getOrCreateTag();
         tag.putInt(NBT_SESSION, registry.getSessionID());
         tag.putUUID(NBT_INSTANCE, computer.register());
 
-        // Only turn on when initially creating the computer, rather than each tick.
-        if (isMarkedOn(stack) && holder instanceof PocketHolder.PlayerHolder) computer.turnOn();
+        if (isMarkedOn(stack)) computer.turnOn();
 
         updateItem(stack, brain);
 
@@ -276,10 +314,14 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
         // item. However, if we've just crafted the computer with an upgrade, we should sync the other way, and update
         // the computer.
         var server = level.getServer();
-        if (server != null) {
-            var computer = getServerComputer(server, stack);
-            if (computer != null) computer.getBrain().setUpgrade(getUpgradeWithData(stack));
-        }
+        if (server == null) return;
+
+        var computer = getServerComputer(server, stack);
+        if (computer == null) return;
+
+        var brain = computer.getBrain();
+        brain.setUpgrade(getUpgradeWithData(stack));
+        brain.setColour(getColour(stack));
     }
 
     // IComputerItem implementation
@@ -303,27 +345,6 @@ public class PocketComputerItem extends Item implements IComputerItem, IMedia, I
             getComputerID(stack), getLabel(stack), getColour(stack),
             getUpgradeWithData(stack)
         ) : ItemStack.EMPTY;
-    }
-
-    // IMedia
-
-    @Override
-    public boolean setLabel(ItemStack stack, @Nullable String label) {
-        if (label != null) {
-            stack.setHoverName(Component.literal(label));
-        } else {
-            stack.resetHoverName();
-        }
-        return true;
-    }
-
-    @Override
-    public @Nullable Mount createDataMount(ItemStack stack, ServerLevel level) {
-        var id = getComputerID(stack);
-        if (id >= 0) {
-            return ComputerCraftAPI.createSaveDirMount(level.getServer(), "computer/" + id, Config.computerSpaceLimit);
-        }
-        return null;
     }
 
     public static @Nullable UUID getInstanceID(ItemStack stack) {

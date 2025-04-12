@@ -10,8 +10,7 @@ import dan200.computercraft.api.turtle.ITurtleUpgrade;
 import dan200.computercraft.api.turtle.TurtleUpgradeSerialiser;
 import dan200.computercraft.impl.Services;
 import org.jetbrains.annotations.ApiStatus;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Backing interface for {@link ComputerCraftAPIClient}

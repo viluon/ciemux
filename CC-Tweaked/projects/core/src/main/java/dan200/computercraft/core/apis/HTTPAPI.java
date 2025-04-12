@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static dan200.computercraft.core.apis.TableHelper.*;
 import static dan200.computercraft.core.util.ArgumentHelpers.assertBetween;
 
 /**
@@ -78,15 +77,14 @@ public class HTTPAPI implements ILuaAPI {
         Optional<Double> timeoutArg;
 
         if (args.get(0) instanceof Map) {
-            var options = args.getTable(0);
-            address = getStringField(options, "url");
-            var postString = optStringField(options, "body", null);
-            postBody = postString == null ? null : LuaValues.encode(postString);
-            headerTable = optTableField(options, "headers", Map.of());
-            binary = optBooleanField(options, "binary", false);
-            requestMethod = optStringField(options, "method", null);
-            redirect = optBooleanField(options, "redirect", true);
-            timeoutArg = optRealField(options, "timeout");
+            var options = new ObjectLuaTable(args.getTable(0));
+            address = options.getString("url");
+            postBody = options.optString("body").map(LuaValues::encode).orElse(null);
+            headerTable = options.optTable("headers").orElse(Map.of());
+            binary = options.optBoolean("binary").orElse(false);
+            requestMethod = options.optString("method").orElse(null);
+            redirect = options.optBoolean("redirect").orElse(true);
+            timeoutArg = options.optFiniteDouble("timeout");
         } else {
             // Get URL and post information
             address = args.getString(0);
@@ -151,10 +149,10 @@ public class HTTPAPI implements ILuaAPI {
         Optional<Double> timeoutArg;
 
         if (args.get(0) instanceof Map) {
-            var options = args.getTable(0);
-            address = getStringField(options, "url");
-            headerTable = optTableField(options, "headers", Map.of());
-            timeoutArg = optRealField(options, "timeout");
+            var options = new ObjectLuaTable(args.getTableUnsafe(0));
+            address = options.getString("url");
+            headerTable = options.optTable("headers").orElse(Map.of());
+            timeoutArg = options.optFiniteDouble("timeout");
         } else {
             address = args.getString(0);
             headerTable = args.optTable(1, Map.of());

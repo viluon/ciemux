@@ -92,7 +92,10 @@ SPDX-License-Identifier: MPL-2.0
         <module name="InvalidJavadocPosition" />
         <module name="JavadocBlockTagLocation" />
         <module name="JavadocMethod"/>
-        <module name="JavadocType"/>
+        <module name="JavadocType">
+            <!-- Seems to complain about @hidden!? -->
+            <property name="allowUnknownTags" value="true" />
+        </module>
         <module name="JavadocStyle">
             <property name="checkHtml" value="false" />
         </module>
@@ -124,7 +127,7 @@ SPDX-License-Identifier: MPL-2.0
         </module>
         <module name="MethodTypeParameterName" />
         <module name="PackageName">
-            <property name="format" value="^(dan200\.computercraft|cc\.tweaked)(\.[a-z][a-z0-9]*)*" />
+            <property name="format" value="^(dan200\.computercraft|cc\.tweaked|com\.example\.examplemod)(\.[a-z][a-z0-9]*)*" />
         </module>
         <module name="ParameterName" />
         <module name="StaticVariableName">
@@ -143,7 +146,10 @@ SPDX-License-Identifier: MPL-2.0
         <module name="NoWhitespaceAfter">
             <property name="tokens" value="AT,INC,DEC,UNARY_MINUS,UNARY_PLUS,BNOT,LNOT,DOT,ARRAY_DECLARATOR,INDEX_OP,METHOD_REF" />
         </module>
-        <module name="NoWhitespaceBefore" />
+        <module name="NoWhitespaceBefore">
+            <!-- Allow whitespace before "..." for @Nullable annotations -->
+            <property name="tokens" value="COMMA,SEMI,POST_INC,POST_DEC,LABELED_STAT" />
+        </module>
         <!-- TODO: Decide on an OperatorWrap style. -->
         <module name="ParenPad" />
         <module name="SeparatorWrap">

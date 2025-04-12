@@ -26,7 +26,7 @@ public class TestMod {
 
         var bus = MinecraftForge.EVENT_BUS;
         bus.addListener(EventPriority.LOW, (ServerStartedEvent e) -> TestHooks.onServerStarted(e.getServer()));
-        bus.addListener((RegisterCommandsEvent e) -> CCTestCommand.register(e.getDispatcher()));
+        bus.addListener((RegisterCommandsEvent e) -> CCTestCommand.register(e.getDispatcher(), e.getBuildContext()));
         bus.addListener((BlockEvent.BreakEvent e) -> {
             if (TestHooks.onBeforeDestroyBlock(e.getLevel(), e.getPos(), e.getState())) e.setCanceled(true);
         });

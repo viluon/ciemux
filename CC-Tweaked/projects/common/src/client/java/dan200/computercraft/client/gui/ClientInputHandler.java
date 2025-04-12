@@ -10,10 +10,10 @@ import dan200.computercraft.shared.computer.menu.ComputerMenu;
 import dan200.computercraft.shared.network.server.ComputerActionServerMessage;
 import dan200.computercraft.shared.network.server.KeyEventServerMessage;
 import dan200.computercraft.shared.network.server.MouseEventServerMessage;
-import dan200.computercraft.shared.network.server.QueueEventServerMessage;
+import dan200.computercraft.shared.network.server.PasteEventComputerMessage;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
-import javax.annotation.Nullable;
+import java.nio.ByteBuffer;
 
 /**
  * An {@link InputHandler} for use on the client.
@@ -25,6 +25,11 @@ public final class ClientInputHandler implements InputHandler {
 
     public ClientInputHandler(AbstractContainerMenu menu) {
         this.menu = menu;
+    }
+
+    @Override
+    public void terminate() {
+        ClientNetworking.sendToServer(new ComputerActionServerMessage(menu, ComputerActionServerMessage.Action.TERMINATE));
     }
 
     @Override
@@ -43,11 +48,6 @@ public final class ClientInputHandler implements InputHandler {
     }
 
     @Override
-    public void queueEvent(String event, @Nullable Object[] arguments) {
-        ClientNetworking.sendToServer(new QueueEventServerMessage(menu, event, arguments));
-    }
-
-    @Override
     public void keyDown(int key, boolean repeat) {
         ClientNetworking.sendToServer(new KeyEventServerMessage(menu, repeat ? KeyEventServerMessage.Action.REPEAT : KeyEventServerMessage.Action.DOWN, key));
     }
@@ -55,6 +55,16 @@ public final class ClientInputHandler implements InputHandler {
     @Override
     public void keyUp(int key) {
         ClientNetworking.sendToServer(new KeyEventServerMessage(menu, KeyEventServerMessage.Action.UP, key));
+    }
+
+    @Override
+    public void charTyped(byte chr) {
+        ClientNetworking.sendToServer(new KeyEventServerMessage(menu, KeyEventServerMessage.Action.CHAR, chr));
+    }
+
+    @Override
+    public void paste(ByteBuffer contents) {
+        ClientNetworking.sendToServer(new PasteEventComputerMessage(menu, contents));
     }
 
     @Override

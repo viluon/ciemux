@@ -5,8 +5,8 @@
 package dan200.computercraft.core.computer;
 
 import dan200.computercraft.api.filesystem.Mount;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 
 /**

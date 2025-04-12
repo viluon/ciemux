@@ -13,8 +13,8 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.util.FakePlayer;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.OptionalInt;
 
 import static dan200.computercraft.shared.platform.FakePlayerConstants.MAX_REACH;

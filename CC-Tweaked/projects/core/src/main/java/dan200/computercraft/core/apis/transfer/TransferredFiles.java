@@ -5,8 +5,8 @@
 package dan200.computercraft.core.apis.transfer;
 
 import dan200.computercraft.api.lua.LuaFunction;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 

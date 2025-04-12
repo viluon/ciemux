@@ -8,6 +8,8 @@ import com.google.auto.service.AutoService;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.ArgumentType;
+import dan200.computercraft.api.media.IMedia;
+import dan200.computercraft.api.media.MediaProvider;
 import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.impl.AbstractComputerCraftAPI;
@@ -25,6 +27,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -35,11 +38,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -52,14 +55,13 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 @AutoService({ PlatformHelper.class, dan200.computercraft.impl.PlatformHelper.class, ComputerCraftAPIService.class })
 public class TestPlatformHelper extends AbstractComputerCraftAPI implements PlatformHelper {
@@ -141,7 +143,7 @@ public class TestPlatformHelper extends AbstractComputerCraftAPI implements Plat
     }
 
     @Override
-    public void openMenu(Player player, MenuProvider owner, ContainerData menu) {
+    public void openMenu(Player player, Component title, MenuConstructor menu, ContainerData data) {
         throw new UnsupportedOperationException("Cannot open menu inside tests");
     }
 
@@ -223,8 +225,13 @@ public class TestPlatformHelper extends AbstractComputerCraftAPI implements Plat
     }
 
     @Override
-    public InteractionResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit, Predicate<BlockState> canUseBlock) {
+    public UseOnResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit) {
         throw new UnsupportedOperationException("Cannot interact with the world inside tests");
+    }
+
+    @Override
+    public @Nullable IMedia getMedia(ItemStack stack) {
+        return null;
     }
 
     @Override
@@ -246,6 +253,11 @@ public class TestPlatformHelper extends AbstractComputerCraftAPI implements Plat
     @Override
     public void onItemCrafted(ServerPlayer player, CraftingContainer container, ItemStack stack) {
         throw new UnsupportedOperationException("Cannot interact with the world inside tests");
+    }
+
+    @Override
+    public void registerMediaProvider(MediaProvider provider) {
+        throw new UnsupportedOperationException("Cannot register media providers inside tests");
     }
 
     @Override

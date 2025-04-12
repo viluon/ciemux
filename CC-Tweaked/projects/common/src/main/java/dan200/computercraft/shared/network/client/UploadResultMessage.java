@@ -12,8 +12,7 @@ import dan200.computercraft.shared.network.NetworkMessages;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class UploadResultMessage implements NetworkMessage<ClientNetworkContext> {
     private final int containerId;

@@ -10,14 +10,9 @@ import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.attributes.TestSuiteType
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
@@ -25,7 +20,6 @@ import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.process.JavaForkOptions
-import org.gradle.testing.jacoco.plugins.JacocoCoverageReport
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
@@ -36,54 +30,40 @@ import java.io.IOException
 import java.net.URI
 import java.util.regex.Pattern
 
-abstract class CCTweakedExtension(
-    private val project: Project,
-    private val fs: FileSystemOperations,
-) {
+abstract class CCTweakedExtension(private val project: Project) {
     /** Get the hash of the latest git commit. */
-    val gitHash: Provider<String> = gitProvider(project, "<no git hash>") {
-        ProcessHelpers.captureOut("git", "-C", project.rootProject.projectDir.absolutePath, "rev-parse", "HEAD").trim()
-    }
+    val gitHash: Provider<String> =
+        gitProvider("<no git commit>", listOf("rev-parse", "HEAD")) { it.trim() }
 
     /** Get the current git branch. */
-    val gitBranch: Provider<String> = gitProvider(project, "<no git branch>") {
-        ProcessHelpers.captureOut("git", "-C", project.rootProject.projectDir.absolutePath, "rev-parse", "--abbrev-ref", "HEAD")
-            .trim()
-    }
+    val gitBranch: Provider<String> =
+        gitProvider("<no git branch>", listOf("rev-parse", "--abbrev-ref", "HEAD")) { it.trim() }
 
     /** Get a list of all contributors to the project. */
-    val gitContributors: Provider<List<String>> = gitProvider(project, listOf()) {
-        ProcessHelpers.captureLines(
-            "git", "-C", project.rootProject.projectDir.absolutePath, "shortlog", "-ns",
-            "--group=author", "--group=trailer:co-authored-by", "HEAD",
-        )
-            .asSequence()
-            .map {
-                val matcher = COMMIT_COUNTS.matcher(it)
-                matcher.find()
-                matcher.group(1)
-            }
-            .filter { !IGNORED_USERS.contains(it) }
-            .toList()
-            .sortedWith(String.CASE_INSENSITIVE_ORDER)
-    }
+    val gitContributors: Provider<List<String>> =
+        gitProvider(listOf(), listOf("shortlog", "-ns", "--group=author", "--group=trailer:co-authored-by", "HEAD")) { input ->
+            input.lineSequence()
+                .filter { it.isNotEmpty() }
+                .map {
+                    val matcher = COMMIT_COUNTS.matcher(it)
+                    matcher.find()
+                    matcher.group(1)
+                }
+                .filter { !IGNORED_USERS.contains(it) }
+                .toList()
+                .sortedWith(String.CASE_INSENSITIVE_ORDER)
+        }
 
     /**
      * References to other sources
      */
     val sourceDirectories: SetProperty<SourceSetReference> = project.objects.setProperty(SourceSetReference::class.java)
 
-    /**
-     * Dependencies excluded from published artifacts.
-     */
-    private val excludedDeps: ListProperty<Dependency> = project.objects.listProperty(Dependency::class.java)
-
     /** All source sets referenced by this project. */
     val sourceSets = sourceDirectories.map { x -> x.map { it.sourceSet } }
 
     init {
         sourceDirectories.finalizeValueOnRead()
-        excludedDeps.finalizeValueOnRead()
         project.afterEvaluate { sourceDirectories.disallowChanges() }
     }
 
@@ -113,7 +93,7 @@ abstract class CCTweakedExtension(
         // Pull in sources from the other project.
         extendSourceSet(otherProject, main)
         extendSourceSet(otherProject, client)
-        for (sourceSet in listOf("datagen", "testMod", "testFixtures")) {
+        for (sourceSet in listOf(MinecraftConfigurations.DATAGEN, MinecraftConfigurations.EXAMPLES, MinecraftConfigurations.TEST_MOD, "testFixtures")) {
             otherJava.sourceSets.findByName(sourceSet)?.let { extendSourceSet(otherProject, it) }
         }
 
@@ -178,23 +158,19 @@ abstract class CCTweakedExtension(
     }
 
     fun <T> jacoco(task: NamedDomainObjectProvider<T>) where T : Task, T : JavaForkOptions {
-        val classDump = project.layout.buildDirectory.dir("jacocoClassDump/${task.name}")
         val reportTaskName = "jacoco${task.name.capitalise()}Report"
 
         val jacoco = project.extensions.getByType(JacocoPluginExtension::class.java)
         task.configure {
             finalizedBy(reportTaskName)
-
-            doFirst("Clean class dump directory") { fs.delete { delete(classDump) } }
-
             jacoco.applyTo(this)
+
             extensions.configure(JacocoTaskExtension::class.java) {
                 includes = listOf("dan200.computercraft.*")
-                classDumpDir = classDump.get().asFile
-
-                // Older versions of modlauncher don't include a protection domain (and thus no code
-                // source). Jacoco skips such classes by default, so we need to explicitly include them.
-                isIncludeNoLocationClasses = true
+                excludes = listOf(
+                    "dan200.computercraft.mixin.*", // Exclude mixins, as they're not executed at runtime.
+                    "dan200.computercraft.shared.Capabilities$*", // Exclude capability tokens, as Forge rewrites them.
+                )
             }
         }
 
@@ -203,15 +179,11 @@ abstract class CCTweakedExtension(
             description = "Generates code coverage report for the ${task.name} task."
 
             executionData(task.get())
-            classDirectories.from(classDump)
 
-            // Don't want to use sourceSets(...) here as we have a custom class directory.
-            for (ref in sourceSets.get()) sourceDirectories.from(ref.allSource.sourceDirectories)
-        }
-
-        project.extensions.configure(ReportingExtension::class.java) {
-            reports.register("${task.name}CodeCoverageReport", JacocoCoverageReport::class.java) {
-                testType.set(TestSuiteType.INTEGRATION_TEST)
+            // Don't want to use sourceSets(...) here as we don't use all class directories.
+            for (ref in this@CCTweakedExtension.sourceDirectories.get()) {
+                sourceDirectories.from(ref.sourceSet.allSource.sourceDirectories)
+                if (ref.classes) classDirectories.from(ref.sourceSet.output)
             }
         }
     }
@@ -251,18 +223,23 @@ abstract class CCTweakedExtension(
         ).resolve().single()
     }
 
-    /**
-     * Exclude a dependency from being published in Maven.
-     */
-    fun exclude(dep: Dependency) {
-        excludedDeps.add(dep)
-    }
+    private fun <T> gitProvider(default: T, command: List<String>, process: (String) -> T): Provider<T> {
+        val baseResult = project.providers.exec {
+            commandLine = listOf("git", "-C", project.rootDir.absolutePath) + command
+        }
 
-    /**
-     * Configure a [MavenDependencySpec].
-     */
-    fun configureExcludes(spec: MavenDependencySpec) {
-        for (dep in excludedDeps.get()) spec.exclude(dep)
+        return project.provider {
+            val res = try {
+                baseResult.standardOutput.asText.get()
+            } catch (e: IOException) {
+                project.logger.error("Cannot read Git repository: ${e.message}", e)
+                return@provider default
+            } catch (e: GradleException) {
+                project.logger.error("Cannot read Git repository: ${e.message}", e)
+                return@provider default
+            }
+            process(res)
+        }
     }
 
     companion object {
@@ -270,20 +247,6 @@ abstract class CCTweakedExtension(
         private val IGNORED_USERS = setOf(
             "GitHub", "Daniel Ratcliffe", "NotSquidDev", "Weblate",
         )
-
-        private fun <T> gitProvider(project: Project, default: T, supplier: () -> T): Provider<T> {
-            return project.provider {
-                try {
-                    supplier()
-                } catch (e: IOException) {
-                    project.logger.error("Cannot read Git repository: ${e.message}")
-                    default
-                } catch (e: GradleException) {
-                    project.logger.error("Cannot read Git repository: ${e.message}")
-                    default
-                }
-            }
-        }
 
         private val isIdeSync: Boolean
             get() = java.lang.Boolean.parseBoolean(System.getProperty("idea.sync.active", "false"))

@@ -4,12 +4,11 @@
 
 package cc.tweaked.web.builder;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-
-import javax.annotation.Nullable;
 
 import static org.objectweb.asm.Opcodes.*;
 

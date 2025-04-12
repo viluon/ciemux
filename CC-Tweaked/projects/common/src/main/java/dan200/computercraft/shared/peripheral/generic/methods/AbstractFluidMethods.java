@@ -41,9 +41,9 @@ public abstract class AbstractFluidMethods<T> implements GenericPeripheral {
      * The returned table is sparse, and so empty tanks will be `nil` - it is recommended to loop over using [`pairs`]
      * rather than [`ipairs`].
      *
-     * @param fluids The current fluid handler.
+     * @param fluids The current fluid storage.
      * @return All tanks.
-     * @cc.treturn { (table|nil)... } All tanks in this fluid storage.
+     * @cc.treturn { (table|nil)... } Basic information about all fluids in this fluid storage.
      */
     @LuaFunction(mainThread = true)
     public abstract Map<Integer, Map<String, ?>> tanks(T fluids);

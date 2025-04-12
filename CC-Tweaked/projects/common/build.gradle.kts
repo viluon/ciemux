@@ -11,12 +11,6 @@ plugins {
     id("cc-tweaked.publishing")
 }
 
-sourceSets {
-    main {
-        resources.srcDir("src/generated/resources")
-    }
-}
-
 minecraft {
     accessWideners(
         "src/main/resources/computercraft.accesswidener",
@@ -43,7 +37,6 @@ dependencies {
     clientApi(clientClasses(project(":common-api")))
 
     compileOnly(libs.bundles.externalMods.common)
-    compileOnly(variantOf(libs.create.forge) { classifier("slim") }) { isTransitive = false }
     clientCompileOnly(variantOf(libs.emi) { classifier("api") })
 
     annotationProcessorEverywhere(libs.autoService)
@@ -67,7 +60,7 @@ dependencies {
 }
 
 illuaminate {
-    version.set(libs.versions.illuaminate)
+    version = libs.versions.illuaminate
 }
 
 val luaJavadoc by tasks.registering(Javadoc::class) {
@@ -88,11 +81,7 @@ val luaJavadoc by tasks.registering(Javadoc::class) {
     options.addStringOption("project-root", rootProject.file(".").absolutePath)
     options.noTimestamp(false)
 
-    javadocTool.set(
-        javaToolchains.javadocToolFor {
-            languageVersion.set(CCTweakedPlugin.JAVA_VERSION)
-        },
-    )
+    javadocTool = javaToolchains.javadocToolFor { languageVersion = CCTweakedPlugin.JAVA_VERSION }
 }
 
 val lintLua by tasks.registering(IlluaminateExec::class) {
@@ -113,20 +102,31 @@ val lintLua by tasks.registering(IlluaminateExec::class) {
     doLast { if (System.getenv("GITHUB_ACTIONS") != null) println("::remove-matcher owner=illuaminate::") }
 }
 
-val runData by tasks.registering(MergeTrees::class) {
-    output = layout.projectDirectory.dir("src/generated/resources")
+fun MergeTrees.configureForDatagen(source: SourceSet, outputFolder: String) {
+    output = layout.projectDirectory.dir(outputFolder)
 
     for (loader in listOf("forge", "fabric")) {
-        mustRunAfter(":$loader:runData")
+        mustRunAfter(":$loader:$name")
         source {
             input {
-                from(project(":$loader").layout.buildDirectory.dir("generatedResources"))
+                from(project(":$loader").layout.buildDirectory.dir(source.getTaskName("generateResources", null)))
                 exclude(".cache")
             }
 
-            output = project(":$loader").layout.projectDirectory.dir("src/generated/resources")
+            output = project(":$loader").layout.projectDirectory.dir(outputFolder)
         }
     }
 }
 
-tasks.withType(GenerateModuleMetadata::class).configureEach { isEnabled = false }
+val runData by tasks.registering(MergeTrees::class) {
+    configureForDatagen(sourceSets.main.get(), "src/generated/resources")
+}
+
+val runExampleData by tasks.registering(MergeTrees::class) {
+    configureForDatagen(sourceSets.examples.get(), "src/examples/generatedResources")
+}
+
+// We can't create accurate module metadata for our additional capabilities, so disable it.
+project.tasks.withType(GenerateModuleMetadata::class.java).configureEach {
+    isEnabled = false
+}

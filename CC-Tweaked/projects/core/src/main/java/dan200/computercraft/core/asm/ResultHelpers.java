@@ -5,15 +5,13 @@
 package dan200.computercraft.core.asm;
 
 import dan200.computercraft.api.lua.MethodResult;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class ResultHelpers {
     private ResultHelpers() {
     }
 
-    @Nullable
-    static Object[] checkNormalResult(MethodResult result) {
+    static @Nullable Object @Nullable [] checkNormalResult(MethodResult result) {
         if (result.getCallback() != null) {
             // Due to how tasks are implemented, we can't currently return a MethodResult. This is an
             // entirely artificial limitation - we can remove it if it ever becomes an issue.

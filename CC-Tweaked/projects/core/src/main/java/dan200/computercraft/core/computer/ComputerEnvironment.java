@@ -7,8 +7,7 @@ package dan200.computercraft.core.computer;
 import dan200.computercraft.api.filesystem.WritableMount;
 import dan200.computercraft.core.filesystem.WritableFileMount;
 import dan200.computercraft.core.metrics.MetricsObserver;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface ComputerEnvironment {
     /**

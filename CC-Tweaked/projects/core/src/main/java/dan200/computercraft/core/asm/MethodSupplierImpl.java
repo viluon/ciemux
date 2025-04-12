@@ -11,10 +11,10 @@ import dan200.computercraft.core.methods.MethodSupplier;
 import dan200.computercraft.core.methods.NamedMethod;
 import dan200.computercraft.core.methods.ObjectSource;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;

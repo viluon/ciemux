@@ -6,6 +6,7 @@ package dan200.computercraft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import dan200.computercraft.shared.ModRegistry;
 import dan200.computercraft.shared.media.items.PrintoutItem;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.EntityType;
@@ -51,7 +52,7 @@ public final class PrintoutItemRenderer extends ItemMapLikeRenderer {
 
     private static void drawPrintout(PoseStack transform, MultiBufferSource render, ItemStack stack, int light) {
         var pages = PrintoutItem.getPageCount(stack);
-        var book = ((PrintoutItem) stack.getItem()).getType() == PrintoutItem.Type.BOOK;
+        var book = stack.is(ModRegistry.Items.PRINTED_BOOK.get());
 
         double width = LINE_MAX_LENGTH * FONT_WIDTH + X_TEXT_MARGIN * 2;
         double height = LINES_PER_PAGE * FONT_HEIGHT + Y_TEXT_MARGIN * 2;

@@ -27,9 +27,9 @@ public final class NetworkMessages {
     private static final List<MessageType<? extends NetworkMessage<ClientNetworkContext>>> clientMessages = new ArrayList<>();
 
     public static final MessageType<ComputerActionServerMessage> COMPUTER_ACTION = registerServerbound(0, "computer_action", ComputerActionServerMessage.class, ComputerActionServerMessage::new);
-    public static final MessageType<QueueEventServerMessage> QUEUE_EVENT = registerServerbound(1, "queue_event", QueueEventServerMessage.class, QueueEventServerMessage::new);
-    public static final MessageType<KeyEventServerMessage> KEY_EVENT = registerServerbound(2, "key_event", KeyEventServerMessage.class, KeyEventServerMessage::new);
-    public static final MessageType<MouseEventServerMessage> MOUSE_EVENT = registerServerbound(3, "mouse_event", MouseEventServerMessage.class, MouseEventServerMessage::new);
+    public static final MessageType<KeyEventServerMessage> KEY_EVENT = registerServerbound(1, "key_event", KeyEventServerMessage.class, KeyEventServerMessage::new);
+    public static final MessageType<MouseEventServerMessage> MOUSE_EVENT = registerServerbound(2, "mouse_event", MouseEventServerMessage.class, MouseEventServerMessage::new);
+    public static final MessageType<PasteEventComputerMessage> PASTE_EVENT = registerServerbound(3, "paste_event", PasteEventComputerMessage.class, PasteEventComputerMessage::new);
     public static final MessageType<UploadFileMessage> UPLOAD_FILE = registerServerbound(4, "upload_file", UploadFileMessage.class, UploadFileMessage::new);
 
     public static final MessageType<ChatTableClientMessage> CHAT_TABLE = registerClientbound(10, "chat_table", ChatTableClientMessage.class, ChatTableClientMessage::new);

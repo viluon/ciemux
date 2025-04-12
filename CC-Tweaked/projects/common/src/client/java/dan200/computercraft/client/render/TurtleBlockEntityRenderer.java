@@ -23,8 +23,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TurtleBlockEntityRenderer implements BlockEntityRenderer<TurtleBlockEntity> {
     private static final ResourceLocation COLOUR_TURTLE_MODEL = new ResourceLocation(ComputerCraftAPI.MOD_ID, "block/turtle_colour");
@@ -127,7 +126,7 @@ public class TurtleBlockEntityRenderer implements BlockEntityRenderer<TurtleBloc
         transform.popPose();
     }
 
-    private void renderModel(PoseStack transform, MultiBufferSource buffers, int lightmapCoord, int overlayLight, ResourceLocation modelLocation, @Nullable int[] tints) {
+    private void renderModel(PoseStack transform, MultiBufferSource buffers, int lightmapCoord, int overlayLight, ResourceLocation modelLocation, int @Nullable [] tints) {
         var modelManager = Minecraft.getInstance().getItemRenderer().getItemModelShaper().getModelManager();
         renderModel(transform, buffers, lightmapCoord, overlayLight, ClientPlatformHelper.get().getModel(modelManager, modelLocation), tints);
     }
@@ -143,7 +142,7 @@ public class TurtleBlockEntityRenderer implements BlockEntityRenderer<TurtleBloc
      * @param tints         Tints for the quads, as an array of RGB values.
      * @see net.minecraft.client.renderer.block.ModelBlockRenderer#renderModel
      */
-    private void renderModel(PoseStack transform, MultiBufferSource renderer, int lightmapCoord, int overlayLight, BakedModel model, @Nullable int[] tints) {
+    private void renderModel(PoseStack transform, MultiBufferSource renderer, int lightmapCoord, int overlayLight, BakedModel model, int @Nullable [] tints) {
         ClientPlatformHelper.get().renderBakedModel(transform, renderer, model, lightmapCoord, overlayLight, tints);
     }
 

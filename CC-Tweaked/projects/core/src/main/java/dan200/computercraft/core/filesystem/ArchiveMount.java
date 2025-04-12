@@ -7,8 +7,8 @@ package dan200.computercraft.core.filesystem;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import dan200.computercraft.core.apis.handles.ArrayByteChannel;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.util.concurrent.TimeUnit;

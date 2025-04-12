@@ -11,11 +11,10 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.core.apis.ComputerAccess;
 import dan200.computercraft.core.apis.IAPIEnvironment;
 import dan200.computercraft.core.computer.ApiLifecycle;
-import dan200.computercraft.shared.util.ComponentMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
@@ -26,11 +25,11 @@ import java.util.Map;
 final class ComputerSystem extends ComputerAccess implements IComputerSystem, ApiLifecycle {
     private final ServerComputer computer;
     private final IAPIEnvironment environment;
-    private final ComponentMap components;
+    private final Map<ComputerComponent<?>, Object> components;
 
     private boolean active;
 
-    ComputerSystem(ServerComputer computer, IAPIEnvironment environment, ComponentMap components) {
+    ComputerSystem(ServerComputer computer, IAPIEnvironment environment, Map<ComputerComponent<?>, Object> components) {
         super(environment);
         this.computer = computer;
         this.environment = environment;
@@ -95,7 +94,8 @@ final class ComputerSystem extends ComputerAccess implements IComputerSystem, Ap
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> @Nullable T getComponent(ComputerComponent<T> component) {
-        return components.get(component);
+        return (T) components.get(component);
     }
 }

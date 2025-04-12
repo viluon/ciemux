@@ -4,29 +4,23 @@
 
 package dan200.computercraft.shared.media.items;
 
-import dan200.computercraft.annotations.ForgeOverride;
-import dan200.computercraft.api.ComputerCraftAPI;
-import dan200.computercraft.api.filesystem.Mount;
-import dan200.computercraft.api.media.IMedia;
 import dan200.computercraft.core.util.Colour;
 import dan200.computercraft.shared.ModRegistry;
 import dan200.computercraft.shared.common.IColouredItem;
-import dan200.computercraft.shared.config.Config;
+import dan200.computercraft.shared.peripheral.diskdrive.DiskDriveBlock;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-public class DiskItem extends Item implements IMedia, IColouredItem {
+public class DiskItem extends Item implements IColouredItem {
     private static final String NBT_ID = "DiskId";
 
     public DiskItem(Properties settings) {
@@ -36,7 +30,7 @@ public class DiskItem extends Item implements IMedia, IColouredItem {
     public static ItemStack createFromIDAndColour(int id, @Nullable String label, int colour) {
         var stack = new ItemStack(ModRegistry.Items.DISK.get());
         setDiskID(stack, id);
-        ModRegistry.Items.DISK.get().setLabel(stack, label);
+        if (label != null) stack.setHoverName(Component.literal(label));
         IColouredItem.setColourBasic(stack, colour);
         return stack;
     }
@@ -52,34 +46,9 @@ public class DiskItem extends Item implements IMedia, IColouredItem {
         }
     }
 
-    @ForgeOverride
-    public boolean doesSneakBypassUse(ItemStack stack, LevelReader world, BlockPos pos, Player player) {
-        return true;
-    }
-
     @Override
-    public @Nullable String getLabel(ItemStack stack) {
-        return stack.hasCustomHoverName() ? stack.getHoverName().getString() : null;
-    }
-
-    @Override
-    public boolean setLabel(ItemStack stack, @Nullable String label) {
-        if (label != null) {
-            stack.setHoverName(Component.literal(label));
-        } else {
-            stack.resetHoverName();
-        }
-        return true;
-    }
-
-    @Override
-    public @Nullable Mount createDataMount(ItemStack stack, ServerLevel level) {
-        var diskID = getDiskID(stack);
-        if (diskID < 0) {
-            diskID = ComputerCraftAPI.createUniqueNumberedSaveDir(level.getServer(), "disk");
-            setDiskID(stack, diskID);
-        }
-        return ComputerCraftAPI.createSaveDirMount(level.getServer(), "disk/" + diskID, Config.floppySpaceLimit);
+    public InteractionResult useOn(UseOnContext context) {
+        return DiskDriveBlock.defaultUseItemOn(context);
     }
 
     public static int getDiskID(ItemStack stack) {
@@ -87,7 +56,7 @@ public class DiskItem extends Item implements IMedia, IColouredItem {
         return nbt != null && nbt.contains(NBT_ID) ? nbt.getInt(NBT_ID) : -1;
     }
 
-    private static void setDiskID(ItemStack stack, int id) {
+    public static void setDiskID(ItemStack stack, int id) {
         if (id >= 0) stack.getOrCreateTag().putInt(NBT_ID, id);
     }
 

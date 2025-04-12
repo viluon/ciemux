@@ -6,8 +6,8 @@ package dan200.computercraft.test.core;
 
 import net.jqwik.api.*;
 import net.jqwik.api.arbitraries.SizableArbitrary;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;

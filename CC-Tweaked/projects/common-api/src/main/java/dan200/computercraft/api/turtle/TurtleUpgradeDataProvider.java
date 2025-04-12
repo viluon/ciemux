@@ -18,8 +18,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 /**
@@ -28,6 +28,9 @@ import java.util.function.Consumer;
  * This should be subclassed and registered to a {@link DataGenerator.PackGenerator}. Override the
  * {@link #addUpgrades(Consumer)} function, construct each upgrade, and pass them off to the provided consumer to
  * generate them.
+ *
+ * <h2>Example</h2>
+ * {@snippet class=com.example.examplemod.data.TurtleDataProvider region=body}
  *
  * @see TurtleUpgradeSerialiser
  */

@@ -4,7 +4,8 @@
 
 package dan200.computercraft.api.peripheral;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.Set;
 

@@ -16,8 +16,8 @@ import dan200.computercraft.shared.platform.PlatformHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.filter.MarkerFilter;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -344,13 +344,13 @@ public final class ConfigSpec {
                 .push("term_sizes");
 
             builder.comment("Terminal size of computers.").push("computer");
-            computerTermWidth = builder.comment("Width of computer terminal").defineInRange("width", Config.computerTermWidth, 1, 255);
-            computerTermHeight = builder.comment("Height of computer terminal").defineInRange("height", Config.computerTermHeight, 1, 255);
+            computerTermWidth = builder.comment("Width of computer terminal").defineInRange("width", Config.DEFAULT_COMPUTER_TERM_WIDTH, 1, 255);
+            computerTermHeight = builder.comment("Height of computer terminal").defineInRange("height", Config.DEFAULT_COMPUTER_TERM_HEIGHT, 1, 255);
             builder.pop();
 
             builder.comment("Terminal size of pocket computers.").push("pocket_computer");
-            pocketTermWidth = builder.comment("Width of pocket computer terminal").defineInRange("width", Config.pocketTermWidth, 1, 255);
-            pocketTermHeight = builder.comment("Height of pocket computer terminal").defineInRange("height", Config.pocketTermHeight, 1, 255);
+            pocketTermWidth = builder.comment("Width of pocket computer terminal").defineInRange("width", Config.DEFAULT_POCKET_TERM_WIDTH, 1, 255);
+            pocketTermHeight = builder.comment("Height of pocket computer terminal").defineInRange("height", Config.DEFAULT_POCKET_TERM_HEIGHT, 1, 255);
             builder.pop();
 
             builder.comment("Maximum size of monitors (in blocks).").push("monitor");
@@ -437,10 +437,6 @@ public final class ConfigSpec {
         Config.turtlesCanPush = turtlesCanPush.get();
 
         // Terminal size
-        Config.computerTermWidth = computerTermWidth.get();
-        Config.computerTermHeight = computerTermHeight.get();
-        Config.pocketTermWidth = pocketTermWidth.get();
-        Config.pocketTermHeight = pocketTermHeight.get();
         Config.monitorWidth = monitorWidth.get();
         Config.monitorHeight = monitorHeight.get();
     }

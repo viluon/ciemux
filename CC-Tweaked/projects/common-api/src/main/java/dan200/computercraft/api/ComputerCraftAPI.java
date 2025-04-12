@@ -26,8 +26,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The static entry point to the ComputerCraft API.
@@ -171,16 +170,9 @@ public final class ComputerCraftAPI {
      * using {@link ILuaAPI#getModuleName()} to expose this library as a module instead of as a global.
      * <p>
      * This may be used with {@link IComputerSystem#getComponent(ComputerComponent)} to only attach APIs to specific
-     * computers. For example, one can add an additional API just to turtles with the following code:
+     * computers. For example, one can add a new API just to turtles with the following code:
      *
-     * <pre class="language language-java">{@code
-     * ComputerCraftAPI.registerAPIFactory(computer -> {
-     *   // Read the turtle component.
-     *   var turtle = computer.getComponent(ComputerComponents.TURTLE);
-     *   // If present then add our API.
-     *   return turtle == null ? null : new MyCustomTurtleApi(turtle);
-     * });
-     * }</pre>
+     * {@snippet class=com.example.examplemod.ExampleAPI region=register}
      *
      * @param factory The factory for your API subclass.
      * @see ILuaAPIFactory

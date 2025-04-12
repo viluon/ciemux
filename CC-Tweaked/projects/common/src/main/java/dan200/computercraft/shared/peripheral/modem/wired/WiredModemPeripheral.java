@@ -24,10 +24,10 @@ import dan200.computercraft.shared.peripheral.modem.ModemState;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -130,7 +130,7 @@ public abstract class WiredModemPeripheral extends ModemPeripheral implements Wi
      * @see PeripheralAPI#getType
      */
     @LuaFunction
-    public final @Nullable Object[] getTypeRemote(IComputerAccess computer, String name) {
+    public final Object @Nullable [] getTypeRemote(IComputerAccess computer, String name) {
         var wrapper = getWrapper(computer, name);
         return wrapper == null ? null : LuaUtil.consArray(wrapper.getType(), wrapper.getAdditionalTypes());
     }
@@ -150,7 +150,7 @@ public abstract class WiredModemPeripheral extends ModemPeripheral implements Wi
      * @see PeripheralAPI#getType
      */
     @LuaFunction
-    public final @Nullable Object[] hasTypeRemote(IComputerAccess computer, String name, String type) {
+    public final Object @Nullable [] hasTypeRemote(IComputerAccess computer, String name, String type) {
         var wrapper = getWrapper(computer, name);
         return wrapper == null ? null : new Object[]{ wrapper.getType().equals(type) || wrapper.getAdditionalTypes().contains(type) };
     }
@@ -168,7 +168,7 @@ public abstract class WiredModemPeripheral extends ModemPeripheral implements Wi
      * @see PeripheralAPI#getMethods
      */
     @LuaFunction
-    public final @Nullable Object[] getMethodsRemote(IComputerAccess computer, String name) {
+    public final Object @Nullable [] getMethodsRemote(IComputerAccess computer, String name) {
         var wrapper = getWrapper(computer, name);
         if (wrapper == null) return null;
 
@@ -215,7 +215,7 @@ public abstract class WiredModemPeripheral extends ModemPeripheral implements Wi
      * @cc.since 1.80pr1.7
      */
     @LuaFunction
-    public final @Nullable Object[] getNameLocal() {
+    public final Object @Nullable [] getNameLocal() {
         var local = localPeripheral.getConnectedName();
         return local == null ? null : new Object[]{ local };
     }

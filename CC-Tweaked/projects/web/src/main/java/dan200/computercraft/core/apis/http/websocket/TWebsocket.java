@@ -13,10 +13,10 @@ import dan200.computercraft.core.apis.http.ResourceGroup;
 import dan200.computercraft.core.apis.http.options.Action;
 import dan200.computercraft.core.apis.http.options.Options;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.jspecify.annotations.Nullable;
 import org.teavm.jso.typedarrays.Int8Array;
 import org.teavm.jso.websocket.WebSocket;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.nio.ByteBuffer;
 

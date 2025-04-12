@@ -5,8 +5,7 @@
 package dan200.computercraft.api.lua;
 
 import dan200.computercraft.api.ComputerCraftAPI;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Construct an {@link ILuaAPI} for a computer.

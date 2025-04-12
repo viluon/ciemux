@@ -8,8 +8,8 @@ import com.google.common.net.InetAddresses;
 import dan200.computercraft.core.apis.http.options.AddressPredicate.DomainPattern;
 import dan200.computercraft.core.apis.http.options.AddressPredicate.HostRange;
 import dan200.computercraft.core.apis.http.options.AddressPredicate.PrivatePattern;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;

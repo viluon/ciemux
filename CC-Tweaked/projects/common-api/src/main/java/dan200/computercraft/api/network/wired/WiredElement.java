@@ -19,8 +19,8 @@ import dan200.computercraft.api.ComputerCraftAPI;
  */
 public interface WiredElement extends WiredSender {
     /**
-     * Called when objects on the network change. This may occur when network nodes are added or removed, or when
-     * peripherals change.
+     * Called when peripherals on the network change. This may occur when network nodes are added or removed, or when
+     * peripherals are attached or detached from a modem.
      *
      * @param change The change which occurred.
      * @see WiredNetworkChange

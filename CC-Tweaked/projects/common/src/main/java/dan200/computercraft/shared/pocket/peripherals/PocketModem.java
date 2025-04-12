@@ -10,8 +10,7 @@ import dan200.computercraft.api.pocket.IPocketAccess;
 import dan200.computercraft.shared.peripheral.modem.wireless.WirelessModemPeripheral;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class PocketModem extends AbstractPocketUpgrade {
     private final boolean advanced;

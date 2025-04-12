@@ -2,50 +2,34 @@
 //
 // SPDX-License-Identifier: MPL-2.0
 
-import cc.tweaked.gradle.clientClasses
-import cc.tweaked.gradle.commonClasses
-
 /**
  * Sets up the configurations for writing game tests.
  *
  * See notes in [cc.tweaked.gradle.MinecraftConfigurations] for the general design behind these cursed ideas.
  */
 
+import cc.tweaked.gradle.MinecraftConfigurations
+import cc.tweaked.gradle.clientClasses
+import cc.tweaked.gradle.commonClasses
+
 plugins {
-    id("cc-tweaked.kotlin-convention")
+    kotlin("jvm")
     id("cc-tweaked.java-convention")
 }
 
 val main = sourceSets["main"]
 val client = sourceSets["client"]
 
-// datagen and testMod inherit from the main and client classpath, just so we have access to Minecraft classes.
-val datagen by sourceSets.creating {
-    compileClasspath += main.compileClasspath + client.compileClasspath
-    runtimeClasspath += main.runtimeClasspath + client.runtimeClasspath
-}
+MinecraftConfigurations.createDerivedConfiguration(project, MinecraftConfigurations.DATAGEN)
+MinecraftConfigurations.createDerivedConfiguration(project, MinecraftConfigurations.EXAMPLES)
+MinecraftConfigurations.createDerivedConfiguration(project, MinecraftConfigurations.TEST_MOD)
 
-val testMod by sourceSets.creating {
-    compileClasspath += main.compileClasspath + client.compileClasspath
-    runtimeClasspath += main.runtimeClasspath + client.runtimeClasspath
-}
+// Set up generated resources
+sourceSets.main { resources.srcDir("src/generated/resources") }
+sourceSets.named("examples") { resources.srcDir("src/examples/generatedResources") }
 
-val extraConfigurations = listOf(datagen, testMod)
-
-configurations {
-    for (config in extraConfigurations) {
-        named(config.compileClasspathConfigurationName) { shouldResolveConsistentlyWith(compileClasspath.get()) }
-        named(config.runtimeClasspathConfigurationName) { shouldResolveConsistentlyWith(runtimeClasspath.get()) }
-    }
-}
-
-// Like the main test configurations, we're safe to depend on source set outputs.
-dependencies {
-    for (config in extraConfigurations) {
-        add(config.implementationConfigurationName, main.output)
-        add(config.implementationConfigurationName, client.output)
-    }
-}
+// Make sure our examples compile.
+tasks.check { dependsOn(tasks.named("compileExamplesJava")) }
 
 // Similar to java-test-fixtures, but tries to avoid putting the obfuscated jar on the classpath.
 

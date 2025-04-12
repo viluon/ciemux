@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 plugins {
-    id("cc-tweaked.kotlin-convention")
+    kotlin("jvm")
     id("cc-tweaked.java-convention")
 }
 

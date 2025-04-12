@@ -17,6 +17,9 @@ public class VanillaDetailRegistries {
      * <p>
      * This instance's {@link DetailRegistry#getBasicDetails(Object)} is thread safe (assuming the stack is immutable)
      * and may be called from the computer thread.
+     * <p>
+     * This does not have special handling for {@linkplain ItemStack#isEmpty() empty item stacks}, and so the returned
+     * details will be an empty stack of air. Callers should generally check for empty stacks before calling this.
      */
     public static final DetailRegistry<ItemStack> ITEM_STACK = ComputerCraftAPIService.get().getItemStackDetailRegistry();
 

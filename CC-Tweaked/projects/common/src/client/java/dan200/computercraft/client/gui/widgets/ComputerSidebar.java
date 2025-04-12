@@ -55,7 +55,7 @@ public final class ComputerSidebar {
         add.accept(new DynamicImageButton(
             x, y, ICON_WIDTH, ICON_HEIGHT,
             GuiSprites.TERMINATE::get,
-            b -> input.queueEvent("terminate"),
+            b -> input.terminate(),
             new HintedMessage(
                 Component.translatable("gui.computercraft.tooltip.terminate"),
                 Component.translatable("gui.computercraft.tooltip.terminate.key")

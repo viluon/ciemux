@@ -8,8 +8,8 @@ import com.google.common.annotations.VisibleForTesting;
 import dan200.computercraft.core.terminal.Terminal;
 import dan200.computercraft.shared.computer.terminal.NetworkedTerminal;
 import dan200.computercraft.shared.util.TickScheduler;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ServerMonitor {

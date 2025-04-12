@@ -6,8 +6,8 @@ package dan200.computercraft.shared.computer.metrics.basic;
 
 import dan200.computercraft.core.metrics.Metric;
 import dan200.computercraft.shared.computer.core.ServerComputer;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 

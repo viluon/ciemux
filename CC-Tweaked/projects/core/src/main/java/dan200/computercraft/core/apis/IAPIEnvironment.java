@@ -14,8 +14,7 @@ import dan200.computercraft.core.metrics.Metric;
 import dan200.computercraft.core.metrics.MetricsObserver;
 import dan200.computercraft.core.metrics.OperationTimer;
 import dan200.computercraft.core.terminal.Terminal;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface IAPIEnvironment {
     String TIMER_EVENT = "timer";

@@ -7,8 +7,8 @@ package dan200.computercraft.core.apis.handles;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.core.filesystem.TrackingCloseable;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Optional;
 
@@ -29,40 +29,36 @@ public class ReadHandle extends AbstractHandle {
     /**
      * {@inheritDoc}
      */
-    @Nullable
     @Override
     @LuaFunction
-    public final Object[] read(Optional<Integer> countArg) throws LuaException {
+    public final Object @Nullable [] read(Optional<Integer> countArg) throws LuaException {
         return super.read(countArg);
     }
 
     /**
      * {@inheritDoc}
      */
-    @Nullable
     @Override
     @LuaFunction
-    public final Object[] readAll() throws LuaException {
+    public final Object @Nullable [] readAll() throws LuaException {
         return super.readAll();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Nullable
     @Override
     @LuaFunction
-    public final Object[] readLine(Optional<Boolean> withTrailingArg) throws LuaException {
+    public final Object @Nullable [] readLine(Optional<Boolean> withTrailingArg) throws LuaException {
         return super.readLine(withTrailingArg);
     }
 
     /**
      * {@inheritDoc}
      */
-    @Nullable
     @Override
     @LuaFunction
-    public final Object[] seek(Optional<String> whence, Optional<Long> offset) throws LuaException {
+    public final Object @Nullable [] seek(Optional<String> whence, Optional<Long> offset) throws LuaException {
         return super.seek(whence, offset);
     }
 }

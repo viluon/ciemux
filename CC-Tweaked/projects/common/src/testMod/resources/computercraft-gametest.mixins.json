@@ -11,6 +11,10 @@
         "GameTestInfoAccessor",
         "GameTestSequenceAccessor",
         "GameTestSequenceMixin",
+        "GameTestServerMixin",
+        "NbtUtilsMixin",
+        "StructureTemplateAccessor",
+        "StructureUtilsMixin",
         "TestCommandAccessor"
     ],
     "client": [

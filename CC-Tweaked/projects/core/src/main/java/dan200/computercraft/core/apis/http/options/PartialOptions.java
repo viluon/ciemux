@@ -6,8 +6,8 @@ package dan200.computercraft.core.apis.http.options;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;

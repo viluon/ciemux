@@ -9,8 +9,7 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.ApiStatus;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An interface passed to {@link ILuaAPIFactory} in order to provide additional information

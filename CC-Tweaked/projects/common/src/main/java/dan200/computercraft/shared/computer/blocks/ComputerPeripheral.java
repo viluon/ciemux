@@ -7,8 +7,7 @@ package dan200.computercraft.shared.computer.blocks;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.core.apis.OSAPI;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A computer or turtle wrapped as a peripheral.

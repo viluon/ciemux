@@ -4,7 +4,8 @@
 
 package dan200.computercraft.api.filesystem;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.Serial;
 import java.util.Objects;

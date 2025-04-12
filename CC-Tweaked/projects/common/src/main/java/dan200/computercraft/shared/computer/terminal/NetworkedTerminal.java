@@ -8,7 +8,6 @@ import dan200.computercraft.core.terminal.Palette;
 import dan200.computercraft.core.terminal.Terminal;
 import dan200.computercraft.core.util.Colour;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 
 public class NetworkedTerminal extends Terminal {
     public NetworkedTerminal(int width, int height, boolean colour) {
@@ -19,59 +18,61 @@ public class NetworkedTerminal extends Terminal {
         super(width, height, colour, changedCallback);
     }
 
-    public synchronized void write(FriendlyByteBuf buffer) {
-        buffer.writeInt(cursorX);
-        buffer.writeInt(cursorY);
-        buffer.writeBoolean(cursorBlink);
-        buffer.writeByte(cursorBackgroundColour << 4 | cursorColour);
+    synchronized TerminalState write() {
+        var contents = new byte[width * height * 2 + Palette.PALETTE_SIZE * 3];
+        var idx = 0;
 
         for (var y = 0; y < height; y++) {
             var text = this.text[y];
             var textColour = this.textColour[y];
             var backColour = backgroundColour[y];
 
-            for (var x = 0; x < width; x++) buffer.writeByte(text.charAt(x) & 0xFF);
+            for (var x = 0; x < width; x++) contents[idx++] = (byte) (text.charAt(x) & 0xFF);
             for (var x = 0; x < width; x++) {
-                buffer.writeByte(getColour(
-                    backColour.charAt(x), Colour.BLACK) << 4 |
-                    getColour(textColour.charAt(x), Colour.WHITE)
-                );
+                contents[idx++] = (byte) (getColour(backColour.charAt(x), Colour.BLACK) << 4 | getColour(textColour.charAt(x), Colour.WHITE));
             }
         }
 
         for (var i = 0; i < Palette.PALETTE_SIZE; i++) {
-            for (var channel : palette.getColour(i)) buffer.writeByte((int) (channel * 0xFF) & 0xFF);
+            for (var channel : palette.getColour(i)) contents[idx++] = (byte) ((int) (channel * 0xFF) & 0xFF);
         }
+
+        assert idx == contents.length;
+        return new TerminalState(colour, width, height, cursorX, cursorY, cursorBlink, cursorColour, cursorBackgroundColour, contents);
     }
 
-    public synchronized void read(FriendlyByteBuf buffer) {
-        cursorX = buffer.readInt();
-        cursorY = buffer.readInt();
-        cursorBlink = buffer.readBoolean();
+    synchronized void read(TerminalState state) {
+        resize(state.width, state.height);
+        cursorX = state.cursorX;
+        cursorY = state.cursorY;
+        cursorBlink = state.cursorBlink;
 
-        var cursorColour = buffer.readByte();
-        cursorBackgroundColour = (cursorColour >> 4) & 0xF;
-        this.cursorColour = cursorColour & 0xF;
+        cursorBackgroundColour = state.cursorBgColour;
+        this.cursorColour = state.cursorFgColour;
 
+        var contents = state.contents;
+        var idx = 0;
         for (var y = 0; y < height; y++) {
             var text = this.text[y];
             var textColour = this.textColour[y];
             var backColour = backgroundColour[y];
 
-            for (var x = 0; x < width; x++) text.setChar(x, (char) (buffer.readByte() & 0xFF));
+            for (var x = 0; x < width; x++) text.setChar(x, (char) (contents[idx++] & 0xFF));
             for (var x = 0; x < width; x++) {
-                var colour = buffer.readByte();
+                var colour = contents[idx++];
                 backColour.setChar(x, BASE_16.charAt((colour >> 4) & 0xF));
                 textColour.setChar(x, BASE_16.charAt(colour & 0xF));
             }
         }
 
         for (var i = 0; i < Palette.PALETTE_SIZE; i++) {
-            var r = (buffer.readByte() & 0xFF) / 255.0;
-            var g = (buffer.readByte() & 0xFF) / 255.0;
-            var b = (buffer.readByte() & 0xFF) / 255.0;
+            var r = (contents[idx++] & 0xFF) / 255.0;
+            var g = (contents[idx++] & 0xFF) / 255.0;
+            var b = (contents[idx++] & 0xFF) / 255.0;
             palette.setColour(i, r, g, b);
         }
+
+        assert idx == contents.length;
         setChanged();
     }
 

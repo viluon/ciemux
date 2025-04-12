@@ -10,8 +10,8 @@ import dan200.computercraft.shared.computer.terminal.TerminalState;
 import dan200.computercraft.shared.network.client.PocketComputerDataMessage;
 import dan200.computercraft.shared.pocket.items.PocketComputerItem;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

@@ -9,9 +9,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.core.apis.RedstoneAPI;
 import dan200.computercraft.core.apis.RedstoneMethods;
 import dan200.computercraft.core.redstone.RedstoneAccess;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The redstone relay is a peripheral that allows reading and outputting redstone signals. While this is not very useful
@@ -46,7 +44,6 @@ public final class RedstoneRelayPeripheral extends RedstoneMethods implements IP
         super(access);
     }
 
-    @Nonnull
     @Override
     public String getType() {
         return "redstone_relay";

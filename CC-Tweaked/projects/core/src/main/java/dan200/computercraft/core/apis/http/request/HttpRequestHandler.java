@@ -14,10 +14,8 @@ import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,8 +28,6 @@ import java.util.Objects;
 import static dan200.computercraft.core.apis.http.request.HttpRequest.getHeaderSize;
 
 public final class HttpRequestHandler extends SimpleChannelInboundHandler<HttpObject> implements Closeable {
-    private static final Logger LOG = LoggerFactory.getLogger(HttpRequestHandler.class);
-
     /**
      * Same as {@link io.netty.handler.codec.MessageAggregator}.
      */

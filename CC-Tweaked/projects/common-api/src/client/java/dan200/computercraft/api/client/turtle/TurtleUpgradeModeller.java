@@ -12,8 +12,8 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,7 +22,14 @@ import java.util.List;
  * <p>
  * Use {@code dan200.computercraft.api.client.FabricComputerCraftAPIClient#registerTurtleUpgradeModeller} to register a
  * modeller on Fabric and {@code dan200.computercraft.api.client.turtle.RegisterTurtleModellersEvent} to register one
- * on Forge
+ * on Forge.
+ *
+ * <h2>Example</h2>
+ * <h3>Fabric</h3>
+ * {@snippet class=com.example.examplemod.FabricExampleModClient region=turtle_modellers}
+ *
+ * <h3>Forge</h3>
+ * {@snippet class=com.example.examplemod.FabricExampleModClient region=turtle_modellers}
  *
  * @param <T> The type of turtle upgrade this modeller applies to.
  * @see RegisterTurtleUpgradeModeller For multi-loader registration support.

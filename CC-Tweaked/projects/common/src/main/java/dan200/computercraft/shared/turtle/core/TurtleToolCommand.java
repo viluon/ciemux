@@ -5,8 +5,8 @@
 package dan200.computercraft.shared.turtle.core;
 
 import dan200.computercraft.api.turtle.*;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Locale;
 
 public class TurtleToolCommand implements TurtleCommand {

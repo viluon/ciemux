@@ -14,8 +14,7 @@ import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.metrics.MetricsObserver;
 import dan200.computercraft.core.terminal.Terminal;
 import dan200.computercraft.test.core.computer.BasicEnvironment;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BasicApiEnvironment implements IAPIEnvironment {
     private final BasicEnvironment environment;

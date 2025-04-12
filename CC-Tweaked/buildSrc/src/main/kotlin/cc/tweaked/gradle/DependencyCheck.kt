@@ -22,19 +22,19 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 abstract class DependencyCheck : DefaultTask() {
     @get:Input
-    abstract val configuration: ListProperty<Configuration>
+    protected abstract val dependencies: ListProperty<DependencyResult>
 
     /**
      * A mapping of module coordinates (`group:module`) to versions, overriding the requested version.
      */
     @get:Input
-    abstract val overrides: MapProperty<String, String>
+    protected abstract val overrides: MapProperty<String, String>
 
     init {
         description = "Check :core's dependencies are consistent with Minecraft's."
         group = LifecycleBasePlugin.VERIFICATION_GROUP
 
-        configuration.finalizeValueOnRead()
+        dependencies.finalizeValueOnRead()
         overrides.finalizeValueOnRead()
     }
 
@@ -45,13 +45,19 @@ abstract class DependencyCheck : DefaultTask() {
         overrides.putAll(project.provider { mutableMapOf(module.get().module.toString() to version) })
     }
 
+    /**
+     * Add a configuration to check.
+     */
+    fun configuration(configuration: Provider<Configuration>) {
+        // We can't store the Configuration in the cache, so store the resolved dependencies instead.
+        dependencies.addAll(configuration.map { it.incoming.resolutionResult.allDependencies })
+    }
+
     @TaskAction
     fun run() {
         var ok = true
-        for (configuration in configuration.get()) {
-            configuration.incoming.resolutionResult.allDependencies {
-                if (!check(this@allDependencies)) ok = false
-            }
+        for (configuration in dependencies.get()) {
+            if (!check(configuration)) ok = false
         }
 
         if (!ok) {

@@ -149,6 +149,7 @@ public final class PrintoutScreen extends AbstractContainerScreen<PrintoutMenu> 
         // Skip rendering labels.
     }
 
+    @SuppressWarnings("ArrayRecordComponent")
     record PrintoutInfo(int pages, boolean book, TextBuffer[] text, TextBuffer[] colour) {
         public static final PrintoutInfo DEFAULT;
 

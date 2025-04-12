@@ -124,7 +124,7 @@ public class ForgeCommonHooks {
     @SubscribeEvent
     public static void onCapability(AttachCapabilitiesEvent<BlockEntity> event) {
         var blockEntity = event.getObject();
-        if (blockEntity instanceof ComputerBlockEntity computer) {
+        if (blockEntity instanceof ComputerBlockEntity computer && !computer.isAdminOnly()) {
             CapabilityProvider.attach(event, PERIPHERAL, CAPABILITY_PERIPHERAL, computer::peripheral);
         } else if (blockEntity instanceof TurtleBlockEntity turtle) {
             CapabilityProvider.attach(event, INVENTORY, ITEM_HANDLER, () -> new InvWrapper(turtle));

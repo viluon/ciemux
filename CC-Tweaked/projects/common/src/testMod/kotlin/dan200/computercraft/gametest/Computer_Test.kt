@@ -96,17 +96,6 @@ class Computer_Test {
     }
 
     /**
-     * Check computers and turtles expose peripherals.
-     */
-    @GameTest
-    fun Computer_peripheral(context: GameTestHelper) = context.sequence {
-        thenExecute {
-            context.assertPeripheral(BlockPos(3, 2, 2), type = "computer")
-            context.assertPeripheral(BlockPos(1, 2, 2), type = "turtle")
-        }
-    }
-
-    /**
      * Check chest peripherals are reattached with a new size.
      */
     @GameTest

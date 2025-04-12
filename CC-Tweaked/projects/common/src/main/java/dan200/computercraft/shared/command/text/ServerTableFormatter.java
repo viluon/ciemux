@@ -7,8 +7,7 @@ package dan200.computercraft.shared.command.text;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ServerTableFormatter implements TableFormatter {
     private final CommandSourceStack source;

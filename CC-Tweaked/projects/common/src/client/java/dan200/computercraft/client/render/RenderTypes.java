@@ -16,11 +16,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
+import org.apache.commons.io.function.IOSupplier;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -68,9 +68,12 @@ public class RenderTypes {
         return Objects.requireNonNull(GameRenderer.getRendertypeTextShader(), "Text shader has not been registered");
     }
 
-    public static void registerShaders(ResourceProvider resources, BiConsumer<ShaderInstance, Consumer<ShaderInstance>> load) throws IOException {
-        load.accept(
-            new MonitorTextureBufferShader(
+    public interface ShaderLoader {
+        void tryLoad(String name, IOSupplier<ShaderInstance> create, Consumer<@Nullable ShaderInstance> accept) throws IOException;
+    }
+
+    public static void registerShaders(ResourceProvider resources, ShaderLoader load) throws IOException {
+        load.tryLoad("monitor shader", () -> new MonitorTextureBufferShader(
                 resources,
                 ComputerCraftAPI.MOD_ID + "/monitor_tbo",
                 MONITOR_TBO.format()

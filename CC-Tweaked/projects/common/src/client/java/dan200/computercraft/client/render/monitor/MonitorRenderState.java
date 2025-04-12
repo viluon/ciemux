@@ -11,12 +11,12 @@ import dan200.computercraft.client.render.vbo.DirectVertexBuffer;
 import dan200.computercraft.shared.peripheral.monitor.ClientMonitor;
 import dan200.computercraft.shared.peripheral.monitor.MonitorRenderer;
 import net.minecraft.core.BlockPos;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 

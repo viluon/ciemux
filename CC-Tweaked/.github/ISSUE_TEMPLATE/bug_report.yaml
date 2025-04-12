@@ -1,6 +1,7 @@
 name: Bug report
 description: Report some misbehaviour in the mod
 labels: [ bug ]
+type: bug
 body:
 - type: dropdown
   id: mc-version
@@ -29,3 +30,5 @@ body:
       Description of the bug. Please include the following:
       - Logs: These will be located in the `logs/` directory of your Minecraft instance. This is always useful, even if it doesn't include errors, so please upload this!
       - Detailed reproduction steps: sometimes I can spot a bug pretty easily, but often it's much more obscure. The more information I have to help reproduce it, the quicker it'll get fixed.
+
+      ![A gif of burning text reading "Upload your logs!!!"](https://tweaked.cc/images/logs.gif)

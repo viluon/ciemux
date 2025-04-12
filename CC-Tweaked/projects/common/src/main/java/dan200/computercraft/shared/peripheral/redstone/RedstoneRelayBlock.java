@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
-import javax.annotation.Nonnull;
 
 /**
  * The block for redstone relays. This mostly just forwards method calls to the {@linkplain RedstoneRelayBlockEntity
@@ -50,13 +49,13 @@ public final class RedstoneRelayBlock extends HorizontalDirectionalBlock impleme
 
     @Override
     @Deprecated
-    public boolean isSignalSource(@Nonnull BlockState state) {
+    public boolean isSignalSource(BlockState state) {
         return true;
     }
 
     @Override
     @Deprecated
-    public int getDirectSignal(@Nonnull BlockState state, BlockGetter level, @Nonnull BlockPos pos, @Nonnull Direction incomingSide) {
+    public int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction incomingSide) {
         return level.getBlockEntity(pos) instanceof RedstoneRelayBlockEntity relay ? relay.getRedstoneOutput(incomingSide.getOpposite()) : 0;
     }
 
@@ -73,7 +72,7 @@ public final class RedstoneRelayBlock extends HorizontalDirectionalBlock impleme
 
     @Override
     @Deprecated
-    public void neighborChanged(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, @Nonnull Block neighbourBlock, @Nonnull BlockPos neighbourPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block neighbourBlock, BlockPos neighbourPos, boolean isMoving) {
         if (world.getBlockEntity(pos) instanceof RedstoneRelayBlockEntity relay) relay.neighborChanged(neighbourPos);
     }
 

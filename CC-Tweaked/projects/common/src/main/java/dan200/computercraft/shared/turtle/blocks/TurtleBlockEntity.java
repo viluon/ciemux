@@ -20,7 +20,6 @@ import dan200.computercraft.shared.config.Config;
 import dan200.computercraft.shared.container.BasicContainer;
 import dan200.computercraft.shared.turtle.core.TurtleBrain;
 import dan200.computercraft.shared.turtle.inventory.TurtleMenu;
-import dan200.computercraft.shared.util.ComponentMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -36,8 +35,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.function.IntSupplier;
 
@@ -74,10 +73,10 @@ public class TurtleBlockEntity extends AbstractComputerBlockEntity implements Ba
 
     @Override
     protected ServerComputer createComputer(int id) {
-        var computer = new ServerComputer(
-            (ServerLevel) getLevel(), getBlockPos(), id, label,
-            getFamily(), Config.turtleTermWidth, Config.turtleTermHeight,
-            ComponentMap.builder().add(ComputerComponents.TURTLE, brain).build()
+        var computer = new ServerComputer((ServerLevel) getLevel(), getBlockPos(), ServerComputer.properties(id, getFamily())
+            .label(getLabel())
+            .terminalSize(Config.TURTLE_TERM_WIDTH, Config.TURTLE_TERM_HEIGHT)
+            .addComponent(ComputerComponents.TURTLE, brain)
         );
         brain.setupComputer(computer);
         return computer;

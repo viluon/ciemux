@@ -4,11 +4,11 @@
 
 package dan200.computercraft.shared.computer.blocks;
 
-import dan200.computercraft.annotations.ForgeOverride;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.shared.common.IBundledRedstoneBlock;
 import dan200.computercraft.shared.computer.items.IComputerItem;
 import dan200.computercraft.shared.network.container.ComputerContainerData;
+import dan200.computercraft.shared.platform.PlatformHelper;
 import dan200.computercraft.shared.platform.RegistryEntry;
 import dan200.computercraft.shared.util.BlockEntityHelpers;
 import net.minecraft.core.BlockPos;
@@ -24,7 +24,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -35,8 +34,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public abstract class AbstractComputerBlock<T extends AbstractComputerBlockEntity> extends HorizontalDirectionalBlock implements IBundledRedstoneBlock, EntityBlock {
@@ -161,7 +160,7 @@ public abstract class AbstractComputerBlock<T extends AbstractComputerBlockEntit
                 var serverComputer = computer.createServerComputer();
                 serverComputer.turnOn();
 
-                new ComputerContainerData(serverComputer, getItem(computer)).open(player, computer);
+                PlatformHelper.get().openMenu(player, computer.getName(), computer, new ComputerContainerData(serverComputer, getItem(computer)));
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -174,12 +173,6 @@ public abstract class AbstractComputerBlock<T extends AbstractComputerBlockEntit
     public final void neighborChanged(BlockState state, Level world, BlockPos pos, Block neighbourBlock, BlockPos neighbourPos, boolean isMoving) {
         var be = world.getBlockEntity(pos);
         if (be instanceof AbstractComputerBlockEntity computer) computer.neighborChanged(neighbourPos);
-    }
-
-    @ForgeOverride
-    public final void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbour) {
-        var be = world.getBlockEntity(pos);
-        if (be instanceof AbstractComputerBlockEntity computer) computer.neighborChanged(neighbour);
     }
 
     @Override

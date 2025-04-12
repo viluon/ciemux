@@ -22,11 +22,10 @@ public class TurtleDetectCommand implements TurtleCommand {
         var direction = this.direction.toWorldDir(turtle);
 
         // Check if thing in front is air or not
-        var world = turtle.getLevel();
-        var oldPosition = turtle.getPosition();
-        var newPosition = oldPosition.relative(direction);
+        var level = turtle.getLevel();
+        var pos = turtle.getPosition().relative(direction);
 
-        return !WorldUtil.isLiquidBlock(world, newPosition) && !world.isEmptyBlock(newPosition)
+        return !WorldUtil.isEmptyBlock(level.getBlockState(pos))
             ? TurtleCommandResult.success()
             : TurtleCommandResult.failure();
     }

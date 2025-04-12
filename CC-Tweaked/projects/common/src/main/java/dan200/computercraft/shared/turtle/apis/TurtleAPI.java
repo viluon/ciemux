@@ -13,7 +13,9 @@ import dan200.computercraft.core.metrics.Metrics;
 import dan200.computercraft.core.metrics.MetricsObserver;
 import dan200.computercraft.shared.peripheral.generic.methods.AbstractInventoryMethods;
 import dan200.computercraft.shared.turtle.core.*;
+import org.jspecify.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -659,6 +661,7 @@ public class TurtleAPI implements ILuaAPI {
      * @cc.treturn [2] string The reason equipping this item failed.
      * @cc.since 1.6
      * @see #equipRight()
+     * @see #getEquippedLeft()
      */
     @LuaFunction
     public final MethodResult equipLeft() {
@@ -678,10 +681,43 @@ public class TurtleAPI implements ILuaAPI {
      * @cc.treturn [2] string The reason equipping this item failed.
      * @cc.since 1.6
      * @see #equipLeft()
+     * @see #getEquippedRight()
      */
     @LuaFunction
     public final MethodResult equipRight() {
         return trackCommand(new TurtleEquipCommand(TurtleSide.RIGHT));
+    }
+
+    /**
+     * Get the upgrade currently equipped on the left of the turtle.
+     * <p>
+     * This returns information about the currently equipped item, in the same form as
+     * {@link #getItemDetail(ILuaContext, Optional, Optional)}.
+     *
+     * @return Information about the currently equipped item, or {@code nil} if no upgrade is equipped.
+     * @see #equipLeft()
+     * @cc.since 1.116.0
+     */
+    @LuaFunction(mainThread = true)
+    public final @Nullable Map<?, ?> getEquippedLeft() {
+        var upgrade = turtle.getUpgradeWithData(TurtleSide.LEFT);
+        return upgrade == null ? null : VanillaDetailRegistries.ITEM_STACK.getDetails(upgrade.getUpgradeItem());
+    }
+
+    /**
+     * Get the upgrade currently equipped on the right of the turtle.
+     * <p>
+     * This returns information about the currently equipped item, in the same form as
+     * {@link #getItemDetail(ILuaContext, Optional, Optional)}.
+     *
+     * @return Information about the currently equipped item, or {@code nil} if no upgrade is equipped.
+     * @see #equipRight()
+     * @cc.since 1.116.0
+     */
+    @LuaFunction(mainThread = true)
+    public final @Nullable Map<?, ?> getEquippedRight() {
+        var upgrade = turtle.getUpgradeWithData(TurtleSide.RIGHT);
+        return upgrade == null ? null : VanillaDetailRegistries.ITEM_STACK.getDetails(upgrade.getUpgradeItem());
     }
 
     /**
@@ -745,7 +781,7 @@ public class TurtleAPI implements ILuaAPI {
      *                 more information about the item at the cost of taking longer to run.
      * @return The command result.
      * @throws LuaException If the slot is out of range.
-     * @cc.treturn nil|table Information about the given slot, or {@code nil} if it is empty.
+     * @cc.treturn nil|table Information about the item in this slot, or {@code nil} if it is empty.
      * @cc.since 1.64
      * @cc.changed 1.90.0 Added detailed parameter.
      * @cc.usage Print the current slot, assuming it contains 13 dirt.

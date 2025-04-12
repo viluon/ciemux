@@ -9,8 +9,7 @@ import dan200.computercraft.api.turtle.ITurtleUpgrade;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Contract;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An upgrade (i.e. a {@link ITurtleUpgrade}) and its current upgrade data.

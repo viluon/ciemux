@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: LicenseRef-CCPL
 package dan200.computercraft.core.redstone;
 
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import dan200.computercraft.core.computer.ComputerSide;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 

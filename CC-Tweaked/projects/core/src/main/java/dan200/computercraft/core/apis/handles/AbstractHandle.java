@@ -10,8 +10,8 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.core.filesystem.TrackingCloseable;
 import dan200.computercraft.core.util.IoUtil;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -77,8 +77,7 @@ public abstract class AbstractHandle {
      * @cc.treturn string The reason seeking failed.
      * @cc.since 1.80pr1.9
      */
-    @Nullable
-    public Object[] seek(Optional<String> whence, Optional<Long> offset) throws LuaException {
+    public Object @Nullable [] seek(Optional<String> whence, Optional<Long> offset) throws LuaException {
         checkOpen();
         long actualOffset = offset.orElse(0L);
         try {
@@ -111,8 +110,7 @@ public abstract class AbstractHandle {
      * @cc.treturn [3] string The bytes read as a string. This is returned when the {@code count} is given.
      * @cc.changed 1.80pr1 Now accepts an integer argument to read multiple bytes, returning a string instead of a number.
      */
-    @Nullable
-    public Object[] read(Optional<Integer> countArg) throws LuaException {
+    public Object @Nullable [] read(Optional<Integer> countArg) throws LuaException {
         checkOpen();
         try {
             if (binary && countArg.isEmpty()) {
@@ -161,7 +159,7 @@ public abstract class AbstractHandle {
                     var bytes = new byte[totalRead];
                     var pos = 0;
                     for (var part : parts) {
-                        int length = part.remaining();
+                        var length = part.remaining();
                         part.get(bytes, pos, length);
                         pos += length;
                     }
@@ -182,8 +180,7 @@ public abstract class AbstractHandle {
      * @cc.treturn string|nil The remaining contents of the file, or {@code nil} in the event of an error.
      * @cc.since 1.80pr1
      */
-    @Nullable
-    public Object[] readAll() throws LuaException {
+    public Object @Nullable [] readAll() throws LuaException {
         checkOpen();
         try {
             var expected = 32;
@@ -214,8 +211,7 @@ public abstract class AbstractHandle {
      * @cc.since 1.80pr1.9
      * @cc.changed 1.81.0 `\r` is now stripped.
      */
-    @Nullable
-    public Object[] readLine(Optional<Boolean> withTrailingArg) throws LuaException {
+    public Object @Nullable [] readLine(Optional<Boolean> withTrailingArg) throws LuaException {
         checkOpen();
         boolean withTrailing = withTrailingArg.orElse(false);
         try {
@@ -269,8 +265,8 @@ public abstract class AbstractHandle {
         checkOpen();
         try {
             var arg = arguments.get(0);
-            if (binary && arg instanceof Number) {
-                var number = ((Number) arg).intValue();
+            if (binary && arg instanceof Number n) {
+                var number = n.intValue();
                 writeSingle((byte) number);
             } else {
                 channel.write(arguments.getBytesCoerced(0));

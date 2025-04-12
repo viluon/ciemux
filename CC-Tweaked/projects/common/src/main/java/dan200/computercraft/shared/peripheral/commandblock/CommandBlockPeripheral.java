@@ -8,8 +8,7 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.computer.apis.CommandAPI;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This peripheral allows you to interact with command blocks.

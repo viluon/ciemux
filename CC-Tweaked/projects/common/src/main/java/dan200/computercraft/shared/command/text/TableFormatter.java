@@ -7,8 +7,7 @@ package dan200.computercraft.shared.command.text;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static dan200.computercraft.shared.command.text.ChatHelpers.coloured;
 

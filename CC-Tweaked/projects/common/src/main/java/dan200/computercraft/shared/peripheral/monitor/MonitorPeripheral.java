@@ -11,8 +11,7 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.core.apis.TermMethods;
 import dan200.computercraft.core.terminal.Terminal;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Monitors are a block which act as a terminal, displaying information on one side. This allows them to be read and
@@ -41,7 +40,6 @@ import javax.annotation.Nullable;
  * monitor.setCursorPos(1, 1)
  * monitor.write("Hello, world!")
  * }</pre>
- *
  * @cc.see monitor_resize Queued when a monitor is resized.
  * @cc.see monitor_touch Queued when an advanced monitor is clicked.
  */
@@ -96,7 +94,7 @@ public class MonitorPeripheral extends TermMethods implements IPeripheral {
 
     @Override
     public boolean equals(@Nullable IPeripheral other) {
-        return other instanceof MonitorPeripheral && monitor == ((MonitorPeripheral) other).monitor;
+        return other instanceof MonitorPeripheral o && monitor == o.monitor;
     }
 
     private ServerMonitor getMonitor() throws LuaException {

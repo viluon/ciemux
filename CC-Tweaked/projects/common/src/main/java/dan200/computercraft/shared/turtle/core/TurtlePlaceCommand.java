@@ -33,8 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TurtlePlaceCommand implements TurtleCommand {
     private final InteractDirection direction;
@@ -202,11 +201,22 @@ public class TurtlePlaceCommand implements TurtleCommand {
      * @return If this item was deployed.
      */
     private static InteractionResult doDeployOnBlock(ItemStack stack, TurtlePlayer turtlePlayer, BlockHitResult hit, boolean adjacent) {
-        var result = PlatformHelper.get().useOn(
-            turtlePlayer.player(), stack, hit,
-            adjacent ? x -> x.is(ComputerCraftTags.Blocks.TURTLE_CAN_USE) : x -> false
-        );
-        if (result != InteractionResult.PASS) return result;
+        var result = PlatformHelper.get().useOn(turtlePlayer.player(), stack, hit);
+        if (result instanceof PlatformHelper.UseOnResult.Handled handled) {
+            if (handled.result() != InteractionResult.PASS) return handled.result();
+        } else {
+            var canUse = (PlatformHelper.UseOnResult.Continue) result;
+
+            var player = turtlePlayer.player();
+            var block = player.level().getBlockState(hit.getBlockPos());
+            if (adjacent && canUse.block() && block.is(ComputerCraftTags.Blocks.TURTLE_CAN_USE)) {
+                var useResult = block.use(player.level(), player, InteractionHand.MAIN_HAND, hit);
+                if (useResult.consumesAction()) return useResult;
+            }
+
+            var useOnResult = stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
+            if (useOnResult != InteractionResult.PASS) return useOnResult;
+        }
 
         var level = turtlePlayer.player().level();
 

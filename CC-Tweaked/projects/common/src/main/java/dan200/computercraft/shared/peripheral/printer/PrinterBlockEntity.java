@@ -5,6 +5,7 @@
 package dan200.computercraft.shared.peripheral.printer;
 
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.shared.ModRegistry;
 import dan200.computercraft.shared.common.AbstractContainerBlockEntity;
 import dan200.computercraft.shared.computer.terminal.NetworkedTerminal;
 import dan200.computercraft.shared.container.BasicWorldlyContainer;
@@ -21,8 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class PrinterBlockEntity extends AbstractContainerBlockEntity implements BasicWorldlyContainer {
     private static final String NBT_PRINTING = "Printing";
@@ -160,14 +160,11 @@ public final class PrinterBlockEntity extends AbstractContainerBlockEntity imple
     }
 
     static boolean isPaper(ItemStack stack) {
-        var item = stack.getItem();
-        return item == Items.PAPER
-            || (item instanceof PrintoutItem printout && printout.getType() == PrintoutItem.Type.PAGE);
+        return stack.is(Items.PAPER) || stack.is(ModRegistry.Items.PRINTED_PAGE.get());
     }
 
     private boolean canInputPage() {
-        var inkStack = inventory.get(0);
-        return !inkStack.isEmpty() && isInk(inkStack) && getPaperLevel() > 0;
+        return getInkLevel() > 0 && getPaperLevel() > 0;
     }
 
     private boolean inputPage() {

@@ -4,17 +4,6 @@
 
 /**
  * ComputerCraft's public API.
- * <p>
- * You probably want to start in the following places:
- * <ul>
- *     <li>{@link dan200.computercraft.api.peripheral} for registering new peripherals.</li>
- *     <li>
- *         {@link dan200.computercraft.api.lua.LuaFunction} and {@link dan200.computercraft.api.lua.IArguments} for
- *          adding methods to your peripheral or Lua objects.
- *     </li>
- *     <li>{@link dan200.computercraft.api.turtle.ITurtleUpgrade} for turtle upgrades.</li>
- *     <li>{@link dan200.computercraft.api.pocket.IPocketUpgrade} for pocket upgrades.</li>
- * </ul>
  */
 @DefaultQualifier(value = NonNull.class, locations = {
     TypeUseLocation.RETURN,

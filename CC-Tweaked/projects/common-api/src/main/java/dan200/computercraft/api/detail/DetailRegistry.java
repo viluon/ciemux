@@ -17,6 +17,7 @@ import java.util.Map;
  * also in this package.
  *
  * @param <T> The type of object that this registry provides details for.
+ * @see dan200.computercraft.api.detail An overview of the detail system.
  */
 @ApiStatus.NonExtendable
 public interface DetailRegistry<T> {

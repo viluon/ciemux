@@ -4,6 +4,7 @@
 
 package dan200.computercraft.core.computer;
 
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import dan200.computercraft.api.filesystem.Mount;
 import dan200.computercraft.api.filesystem.WritableMount;
 import dan200.computercraft.api.lua.ILuaAPI;
@@ -22,11 +23,10 @@ import dan200.computercraft.core.methods.MethodSupplier;
 import dan200.computercraft.core.metrics.MetricsObserver;
 import dan200.computercraft.core.util.Colour;
 import dan200.computercraft.core.util.Nullability;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
@@ -266,7 +266,7 @@ final class ComputerExecutor implements ComputerScheduler.Worker {
      * @param event The event's name
      * @param args  The event's arguments
      */
-    void queueEvent(String event, @Nullable Object[] args) {
+    void queueEvent(String event, @Nullable Object @Nullable [] args) {
         // Events should be skipped if we're not on.
         if (!isOn) return;
 
@@ -552,7 +552,7 @@ final class ComputerExecutor implements ComputerScheduler.Worker {
         terminal.write("ComputerCraft may be installed incorrectly");
     }
 
-    private void resumeMachine(@Nullable String event, @Nullable Object[] args) throws InterruptedException {
+    private void resumeMachine(@Nullable String event, @Nullable Object @Nullable [] args) throws InterruptedException {
         var result = Nullability.assertNonNull(machine).handleEvent(event, args);
         if (result.isError()) {
             displayFailure("Error running computer", result.getMessage());
@@ -573,6 +573,7 @@ final class ComputerExecutor implements ComputerScheduler.Worker {
         ABORT_WITH_ERROR,
     }
 
-    private record Event(String name, @Nullable Object[] args) {
+    @SuppressWarnings("ArrayRecordComponent")
+    private record Event(String name, @Nullable Object @Nullable [] args) {
     }
 }
