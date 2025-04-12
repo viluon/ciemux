@@ -1,0 +1,40 @@
+{
+    DataVersion: 3465,
+    size: [5, 5, 5],
+    data: [
+        {pos: [0, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [2, 1, 1], state: "computercraft:turtle_normal{facing:south,waterlogged:false}", nbt: {ComputerId: 1, Fuel: 0, Items: [{Count: 1b, Slot: 0b, id: "minecraft:polished_andesite"}], Label: "turtle_test.place_does_not_use", On: 1b, Owner: {LowerId: -9198338595628574826L, Name: "Player630", UpperId: -2783603765457764926L}, Slot: 0, id: "computercraft:turtle_normal"}},
+        {pos: [2, 1, 2], state: "minecraft:lever{face:wall,facing:north,powered:false}"},
+        {pos: [2, 1, 3], state: "minecraft:polished_andesite"}
+    ],
+    entities: [],
+    palette: [
+        "minecraft:polished_andesite",
+        "minecraft:lever{face:wall,facing:north,powered:false}",
+        "computercraft:turtle_normal{facing:south,waterlogged:false}"
+    ]
+}

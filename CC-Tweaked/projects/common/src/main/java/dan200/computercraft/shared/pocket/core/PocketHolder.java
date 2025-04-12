@@ -5,7 +5,9 @@
 package dan200.computercraft.shared.pocket.core;
 
 import dan200.computercraft.shared.computer.core.ServerComputer;
+import dan200.computercraft.shared.lectern.CustomLecternBlockEntity;
 import dan200.computercraft.shared.pocket.items.PocketComputerItem;
+import dan200.computercraft.shared.util.BlockEntityHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * An object that holds a pocket computer item.
  */
-public sealed interface PocketHolder permits PocketHolder.EntityHolder {
+public sealed interface PocketHolder {
     /**
      * The level this holder is in.
      *
@@ -52,9 +54,18 @@ public sealed interface PocketHolder permits PocketHolder.EntityHolder {
     void setChanged();
 
     /**
+     * Whether the terminal is visible to all players in range, and so should be broadcast to everyone.
+     *
+     * @return Whether to send the terminal.
+     */
+    default boolean isTerminalAlwaysVisible() {
+        return false;
+    }
+
+    /**
      * An {@link Entity} holding a pocket computer.
      */
-    sealed interface EntityHolder extends PocketHolder permits PocketHolder.PlayerHolder, PocketHolder.ItemEntityHolder {
+    sealed interface EntityHolder extends PocketHolder {
         /**
          * Get the entity holding this pocket computer.
          *
@@ -110,6 +121,43 @@ public sealed interface PocketHolder permits PocketHolder.EntityHolder {
         @Override
         public void setChanged() {
             entity.setItem(entity.getItem().copy());
+        }
+    }
+
+    /**
+     * A pocket computer in a {@link CustomLecternBlockEntity}.
+     *
+     * @param lectern The lectern holding this item.
+     */
+    record LecternHolder(CustomLecternBlockEntity lectern) implements PocketHolder {
+        @Override
+        public ServerLevel level() {
+            return (ServerLevel) lectern.getLevel();
+        }
+
+        @Override
+        public Vec3 pos() {
+            return Vec3.atCenterOf(lectern.getBlockPos());
+        }
+
+        @Override
+        public BlockPos blockPos() {
+            return lectern.getBlockPos();
+        }
+
+        @Override
+        public boolean isValid(ServerComputer computer) {
+            return !lectern().isRemoved() && PocketComputerItem.isServerComputer(computer, lectern.getItem());
+        }
+
+        @Override
+        public void setChanged() {
+            BlockEntityHelpers.updateBlock(lectern());
+        }
+
+        @Override
+        public boolean isTerminalAlwaysVisible() {
+            return true;
         }
     }
 }

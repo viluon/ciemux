@@ -26,7 +26,7 @@ public class TestMod implements ModInitializer, ClientModInitializer {
         var phase = new ResourceLocation(ComputerCraftAPI.MOD_ID, "test_mod");
         ServerLifecycleEvents.SERVER_STARTED.addPhaseOrdering(Event.DEFAULT_PHASE, phase);
         ServerLifecycleEvents.SERVER_STARTED.register(phase, TestHooks::onServerStarted);
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CCTestCommand.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, buildContext, environment) -> CCTestCommand.register(dispatcher, buildContext));
         PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !TestHooks.onBeforeDestroyBlock(level, pos, state));
 
         TestHooks.loadTests(GameTestRegistry::register);

@@ -27,11 +27,11 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL31;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 

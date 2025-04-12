@@ -14,8 +14,8 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.core.computer.GuardedLuaContext;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 

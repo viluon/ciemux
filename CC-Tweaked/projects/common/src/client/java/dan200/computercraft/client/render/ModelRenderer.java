@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -39,7 +39,7 @@ public final class ModelRenderer {
      * @param overlayLight  The current overlay light.
      * @param tints         Block colour tints to apply to the model.
      */
-    public static void renderQuads(PoseStack transform, VertexConsumer buffer, List<BakedQuad> quads, int lightmapCoord, int overlayLight, @Nullable int[] tints) {
+    public static void renderQuads(PoseStack transform, VertexConsumer buffer, List<BakedQuad> quads, int lightmapCoord, int overlayLight, int @Nullable [] tints) {
         var matrix = transform.last();
         var inverted = matrix.pose().determinant() < 0;
 

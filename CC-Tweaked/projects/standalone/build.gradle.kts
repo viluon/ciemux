@@ -44,7 +44,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("cc.tweaked.standalone.Main")
+    mainClass = "cc.tweaked.standalone.Main"
 }
 
 tasks.named("run", JavaExec::class.java) {

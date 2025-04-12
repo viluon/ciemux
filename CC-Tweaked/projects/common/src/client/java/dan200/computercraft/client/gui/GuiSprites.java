@@ -11,8 +11,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.TextureAtlasHolder;
 import net.minecraft.resources.ResourceLocation;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -32,10 +32,13 @@ public final class GuiSprites extends TextureAtlasHolder {
     public static final ComputerTextures COMPUTER_COMMAND = computer("command", false, true);
     public static final ComputerTextures COMPUTER_COLOUR = computer("colour", true, false);
 
+    public static final ResourceLocation TURTLE_NORMAL_SELECTED_SLOT = new ResourceLocation(ComputerCraftAPI.MOD_ID, "gui/sprites/turtle_normal_selected_slot");
+    public static final ResourceLocation TURTLE_ADVANCED_SELECTED_SLOT = new ResourceLocation(ComputerCraftAPI.MOD_ID, "gui/sprites/turtle_advanced_selected_slot");
+
     private static ButtonTextures button(String name) {
         return new ButtonTextures(
-            new ResourceLocation(ComputerCraftAPI.MOD_ID, "gui/buttons/" + name),
-            new ResourceLocation(ComputerCraftAPI.MOD_ID, "gui/buttons/" + name + "_hover")
+            new ResourceLocation(ComputerCraftAPI.MOD_ID, "gui/sprites/buttons/" + name),
+            new ResourceLocation(ComputerCraftAPI.MOD_ID, "gui/sprites/buttons/" + name + "_hover")
         );
     }
 

@@ -7,10 +7,6 @@ plugins {
     id("cc-tweaked.publishing")
 }
 
-java {
-    withJavadocJar()
-}
-
 cct.inlineProject(":common-api")
 
 dependencies {
@@ -19,12 +15,4 @@ dependencies {
 
 tasks.javadoc {
     include("dan200/computercraft/api/**/*.java")
-}
-
-publishing {
-    publications {
-        named("maven", MavenPublication::class) {
-            fg.component(this)
-        }
-    }
 }

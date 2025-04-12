@@ -46,8 +46,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static dan200.computercraft.shared.util.WaterloggableHelpers.WATERLOGGED;
 import static dan200.computercraft.shared.util.WaterloggableHelpers.getFluidStateForPlacement;

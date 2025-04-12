@@ -26,8 +26,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @AutoService(dan200.computercraft.impl.client.ClientPlatformHelper.class)
 public class ClientPlatformHelperImpl implements ClientPlatformHelper {
@@ -52,7 +51,7 @@ public class ClientPlatformHelperImpl implements ClientPlatformHelper {
     }
 
     @Override
-    public void renderBakedModel(PoseStack transform, MultiBufferSource buffers, BakedModel model, int lightmapCoord, int overlayLight, @Nullable int[] tints) {
+    public void renderBakedModel(PoseStack transform, MultiBufferSource buffers, BakedModel model, int lightmapCoord, int overlayLight, int @Nullable [] tints) {
         // Unfortunately we can't call Fabric's emitItemQuads here, as there's no way to obtain a RenderContext via the
         // API. Instead, we special case our FoiledModel, and just render everything else normally.
         var buffer = ItemRenderer.getFoilBuffer(buffers, Sheets.translucentCullBlockSheet(), true, model instanceof FoiledModel);

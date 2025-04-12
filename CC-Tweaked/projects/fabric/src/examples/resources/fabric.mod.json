@@ -1,0 +1,16 @@
+{
+    "schemaVersion": 1,
+    "id": "examplemod",
+    "version": "1.0.0",
+    "entrypoints": {
+        "main": [
+            "com.example.examplemod.FabricExampleMod"
+        ],
+        "fabric-datagen": [
+            "com.example.examplemod.FabricExampleModDataGenerator"
+        ]
+    },
+    "depends": {
+        "computercraft": "*"
+    }
+}

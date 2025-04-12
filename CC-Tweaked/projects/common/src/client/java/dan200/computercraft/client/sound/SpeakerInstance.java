@@ -10,8 +10,7 @@ import dan200.computercraft.shared.peripheral.speaker.EncodedAudio;
 import dan200.computercraft.shared.peripheral.speaker.SpeakerPosition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An instance of a speaker, which is either playing a {@link DfpwmStream} stream or a normal sound.
@@ -25,7 +24,7 @@ public class SpeakerInstance {
     SpeakerInstance() {
     }
 
-    private void pushAudio(EncodedAudio buffer) {
+    private void pushAudio(EncodedAudio buffer, float volume) {
         var sound = this.sound;
 
         var stream = currentStream;
@@ -33,18 +32,30 @@ public class SpeakerInstance {
         var exhausted = stream.isEmpty();
         stream.push(buffer);
 
-        // If we've got nothing left in the buffer, enqueue an additional one just in case.
-        if (exhausted && sound != null && sound.stream == stream && stream.channel != null && stream.executor != null) {
+        if (sound == null) return;
+
+        var volumeChanged = sound.setVolume(volume);
+
+        if ((exhausted || volumeChanged) && sound.stream == stream && stream.channel != null && stream.executor != null) {
             var actualStream = sound.stream;
             stream.executor.execute(() -> {
                 var channel = Nullability.assertNonNull(actualStream.channel);
-                if (!channel.stopped()) channel.pumpBuffers(1);
+                if (channel.stopped()) return;
+
+                // If we've got nothing left in the buffer, enqueue an additional one just in case.
+                if (exhausted) channel.pumpBuffers(1);
+
+                // Update the attenuation if the volume has changed: SoundEngine.tickNonPaused updates the volume
+                // itself, but leaves the attenuation unchanged. We mirror the logic of SoundEngine.play here.
+                if (volumeChanged) {
+                    channel.linearAttenuation(Math.max(volume, 1) * sound.getSound().getAttenuationDistance());
+                }
             });
         }
     }
 
     public void playAudio(SpeakerPosition position, float volume, EncodedAudio buffer) {
-        pushAudio(buffer);
+        pushAudio(buffer, volume);
 
         var soundManager = Minecraft.getInstance().getSoundManager();
 

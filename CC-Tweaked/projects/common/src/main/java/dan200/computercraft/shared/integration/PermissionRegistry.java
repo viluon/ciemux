@@ -4,13 +4,13 @@
 
 package dan200.computercraft.shared.integration;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import dan200.computercraft.shared.command.CommandComputerCraft;
 import dan200.computercraft.shared.command.UserLevel;
 import dan200.computercraft.shared.platform.RegistrationHelper;
 import net.minecraft.commands.CommandSourceStack;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;

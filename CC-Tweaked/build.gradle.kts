@@ -24,21 +24,19 @@ val mcVersion: String by extra
 
 githubRelease {
     token(findProperty("githubApiKey") as String? ?: "")
-    owner.set("cc-tweaked")
-    repo.set("CC-Tweaked")
-    targetCommitish.set(cct.gitBranch)
+    owner = "cc-tweaked"
+    repo = "CC-Tweaked"
+    targetCommitish = cct.gitBranch
 
-    tagName.set("v$mcVersion-$modVersion")
-    releaseName.set("[$mcVersion] $modVersion")
-    body.set(
-        provider {
-            "## " + project(":core").file("src/main/resources/data/computercraft/lua/rom/help/whatsnew.md")
-                .readLines()
-                .takeWhile { it != "Type \"help changelog\" to see the full version history." }
-                .joinToString("\n").trim()
-        },
-    )
-    prerelease.set(isUnstable)
+    tagName = "v$mcVersion-$modVersion"
+    releaseName = "[$mcVersion] $modVersion"
+    body = provider {
+        "## " + project(":core").file("src/main/resources/data/computercraft/lua/rom/help/whatsnew.md")
+            .readLines()
+            .takeWhile { it != "Type \"help changelog\" to see the full version history." }
+            .joinToString("\n").trim()
+    }
+    prerelease = isUnstable
 }
 
 tasks.publish { dependsOn(tasks.githubRelease) }
@@ -118,7 +116,7 @@ idea.project.settings.compiler.javac {
 }
 
 versionCatalogUpdate {
-    sortByKey.set(false)
+    sortByKey = false
     pin { versions.addAll("fastutil", "guava", "netty", "slf4j") }
-    keep { keepUnusedLibraries.set(true) }
+    keep { keepUnusedLibraries = true }
 }

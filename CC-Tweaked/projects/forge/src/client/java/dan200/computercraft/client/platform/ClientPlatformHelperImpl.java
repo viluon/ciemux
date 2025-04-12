@@ -24,8 +24,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.data.ModelData;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 @AutoService(dan200.computercraft.impl.client.ClientPlatformHelper.class)
@@ -49,7 +49,7 @@ public class ClientPlatformHelperImpl implements ClientPlatformHelper {
     }
 
     @Override
-    public void renderBakedModel(PoseStack transform, MultiBufferSource buffers, BakedModel model, int lightmapCoord, int overlayLight, @Nullable int[] tints) {
+    public void renderBakedModel(PoseStack transform, MultiBufferSource buffers, BakedModel model, int lightmapCoord, int overlayLight, int @Nullable [] tints) {
         for (var renderType : model.getRenderTypes(ItemStack.EMPTY, true)) {
             var buffer = buffers.getBuffer(renderType);
             for (var face : directions) {

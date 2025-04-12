@@ -4,12 +4,9 @@
 
 package dan200.computercraft.shared.computer.terminal;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Contract;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A snapshot of a terminal's state.
@@ -20,53 +17,72 @@ import javax.annotation.Nullable;
  */
 public class TerminalState {
     private final boolean colour;
-    private final int width;
-    private final int height;
-    private final ByteBuf buffer;
+    final int width;
+    final int height;
+    final int cursorX;
+    final int cursorY;
+    final boolean cursorBlink;
+    final int cursorBgColour;
+    final int cursorFgColour;
+    final byte[] contents;
 
-    public TerminalState(NetworkedTerminal terminal) {
-        colour = terminal.isColour();
-        width = terminal.getWidth();
-        height = terminal.getHeight();
-
-        var buf = buffer = Unpooled.buffer();
-        terminal.write(new FriendlyByteBuf(buf));
+    TerminalState(
+        boolean colour, int width, int height, int cursorX, int cursorY, boolean cursorBlink, int cursorFgColour, int cursorBgColour, byte[] contents
+    ) {
+        this.colour = colour;
+        this.width = width;
+        this.height = height;
+        this.cursorX = cursorX;
+        this.cursorY = cursorY;
+        this.cursorBlink = cursorBlink;
+        this.cursorFgColour = cursorFgColour;
+        this.cursorBgColour = cursorBgColour;
+        this.contents = contents;
     }
 
     @Contract("null -> null; !null -> !null")
     public static @Nullable TerminalState create(@Nullable NetworkedTerminal terminal) {
-        return terminal == null ? null : new TerminalState(terminal);
+        return terminal == null ? null : terminal.write();
     }
 
     public TerminalState(FriendlyByteBuf buf) {
         colour = buf.readBoolean();
         width = buf.readVarInt();
         height = buf.readVarInt();
+        cursorX = buf.readVarInt();
+        cursorY = buf.readVarInt();
+        cursorBlink = buf.readBoolean();
 
-        var length = buf.readVarInt();
-        buffer = buf.readBytes(length);
+        var cursorColour = buf.readByte();
+        this.cursorBgColour = (cursorColour >> 4) & 0xF;
+        this.cursorFgColour = cursorColour & 0xF;
+
+        contents = buf.readByteArray();
     }
 
     public void write(FriendlyByteBuf buf) {
         buf.writeBoolean(colour);
         buf.writeVarInt(width);
         buf.writeVarInt(height);
-        buf.writeVarInt(buffer.readableBytes());
-        buf.writeBytes(buffer, buffer.readerIndex(), buffer.readableBytes());
+        buf.writeVarInt(cursorX);
+        buf.writeVarInt(cursorY);
+        buf.writeBoolean(cursorBlink);
+        buf.writeByte(cursorBgColour << 4 | cursorFgColour);
+
+        buf.writeByteArray(contents);
     }
 
     public int size() {
-        return buffer.readableBytes();
+        return contents.length;
     }
 
     public void apply(NetworkedTerminal terminal) {
-        terminal.resize(width, height);
-        terminal.read(new FriendlyByteBuf(buffer));
+        terminal.read(this);
     }
 
     public NetworkedTerminal create() {
         var terminal = new NetworkedTerminal(width, height, colour);
-        terminal.read(new FriendlyByteBuf(buffer));
+        terminal.read(this);
         return terminal;
     }
 }

@@ -7,6 +7,7 @@ package dan200.computercraft.shared.platform;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.ArgumentType;
+import dan200.computercraft.api.media.IMedia;
 import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.config.ConfigFile;
@@ -20,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceKey;
@@ -29,16 +31,21 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.*;
+import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -47,13 +54,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * This extends {@linkplain dan200.computercraft.impl.PlatformHelper the API's loader abstraction layer}, adding
@@ -159,10 +165,11 @@ public interface PlatformHelper extends dan200.computercraft.impl.PlatformHelper
      * Open a container using a specific {@link ContainerData}.
      *
      * @param player The player to open the menu for.
-     * @param owner  The underlying menu provider.
-     * @param menu   The menu data.
+     * @param title  The title for this menu.
+     * @param menu   The underlying menu constructor.
+     * @param data   The menu data.
      */
-    void openMenu(Player player, MenuProvider owner, ContainerData menu);
+    void openMenu(Player player, Component title, MenuConstructor menu, ContainerData data);
 
     /**
      * Create a new {@link MessageType}.
@@ -375,20 +382,40 @@ public interface PlatformHelper extends dan200.computercraft.impl.PlatformHelper
     boolean interactWithEntity(ServerPlayer player, Entity entity, Vec3 hitPos);
 
     /**
-     * Place an item against a block.
-     * <p>
-     * Implementations should largely mirror {@link ServerPlayerGameMode#useItemOn(ServerPlayer, Level, ItemStack, InteractionHand, BlockHitResult)}
-     * (including any loader-specific modifications), except the call to {@link BlockState#use(Level, Player, InteractionHand, BlockHitResult)}
-     * should only be evaluated when {@code canUseBlock} evaluates to true.
-     *
-     * @param player      The player which is placing this item.
-     * @param stack       The item to place.
-     * @param hit         The collision with the block we're placing against.
-     * @param canUseBlock Test whether the block should be interacted with first.
-     * @return Whether any interaction occurred.
-     * @see ServerPlayerGameMode#useItemOn(ServerPlayer, Level, ItemStack, InteractionHand, BlockHitResult)
+     * The result of attempting to use an item on a block.
      */
-    InteractionResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit, Predicate<BlockState> canUseBlock);
+    sealed interface UseOnResult {
+        /**
+         * This interaction was intercepted by an event, and handled.
+         *
+         * @param result The result of using an item on a block.
+         */
+        record Handled(InteractionResult result) implements UseOnResult {
+        }
+
+        /**
+         * This result was not handled, and should be handled by the caller.
+         *
+         * @param block Whether the block may be used ({@link BlockState#use(Level, Player, InteractionHand, BlockHitResult)}).
+         * @param item  Whether the item may be used on the block ({@link ItemStack#useOn(UseOnContext)}).
+         * @see ServerPlayerGameMode#useItemOn(ServerPlayer, Level, ItemStack, InteractionHand, BlockHitResult)
+         */
+        record Continue(boolean block, boolean item) implements UseOnResult {
+        }
+    }
+
+    /**
+     * Run mod-loader specific code before placing an item against a block.
+     * <p>
+     * This should dispatch any mod-loader specific events that are fired when clicking a block. It does necessarily
+     * handle the actual clicking of the block — see {@link UseOnResult.Handled} and {@link UseOnResult.Continue}.
+     *
+     * @param player The player which is placing this item.
+     * @param stack  The item to place.
+     * @param hit    The collision with the block we're placing against.
+     * @return Whether any interaction occurred.
+     */
+    UseOnResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit);
 
     /**
      * Whether {@link net.minecraft.network.chat.ClickEvent.Action#RUN_COMMAND} can be used to run client commands.
@@ -398,4 +425,13 @@ public interface PlatformHelper extends dan200.computercraft.impl.PlatformHelper
     default boolean canClickRunClientCommand() {
         return true;
     }
+
+    /**
+     * Find a {@link IMedia} instance for an item stack.
+     *
+     * @param stack The stack to look up the media for.
+     * @return The media instance, or {@code null} if not found.
+     */
+    @Nullable
+    IMedia getMedia(ItemStack stack);
 }

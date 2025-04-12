@@ -7,8 +7,8 @@ package dan200.computercraft.gametest.api;
 import dan200.computercraft.gametest.core.TestAPI;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestSequence;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;

@@ -5,8 +5,7 @@
 package dan200.computercraft.core.util;
 
 import dan200.computercraft.api.peripheral.IPeripheral;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utilities for working with {@linkplain IPeripheral peripherals}.

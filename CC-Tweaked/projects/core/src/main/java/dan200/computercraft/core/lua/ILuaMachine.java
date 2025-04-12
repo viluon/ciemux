@@ -4,7 +4,8 @@
 
 package dan200.computercraft.core.lua;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -28,7 +29,7 @@ public interface ILuaMachine {
      * @return The result of loading this machine. Will either be OK, or the error message that occurred when
      * executing.
      */
-    MachineResult handleEvent(@Nullable String eventName, @Nullable Object[] arguments);
+    MachineResult handleEvent(@Nullable String eventName, @Nullable Object @Nullable [] arguments);
 
     /**
      * Print some information about the internal execution state.

@@ -13,9 +13,9 @@ import dan200.computercraft.api.lua.MethodResult;
 import dan200.computercraft.api.peripheral.PeripheralType;
 import dan200.computercraft.core.methods.LuaMethod;
 import dan200.computercraft.core.methods.NamedMethod;
+import org.jspecify.annotations.Nullable;
 import org.teavm.metaprogramming.*;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;

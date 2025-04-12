@@ -15,8 +15,8 @@ import dan200.computercraft.core.apis.handles.WriteHandle;
 import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.filesystem.FileSystemException;
 import dan200.computercraft.core.metrics.Metrics;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -410,9 +410,8 @@ public class FSAPI implements ILuaAPI {
      * print("/rom/: " .. fs.getDrive("rom"))
      * }</pre>
      */
-    @Nullable
     @LuaFunction
-    public final Object[] getDrive(String path) throws LuaException {
+    public final Object @Nullable [] getDrive(String path) throws LuaException {
         try {
             return getFileSystem().exists(path) ? new Object[]{ getFileSystem().getMountLabel(path) } : null;
         } catch (FileSystemException e) {

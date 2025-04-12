@@ -17,8 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ComputerBlock<T extends ComputerBlockEntity> extends AbstractComputerBlock<T> {
     public static final EnumProperty<ComputerState> STATE = EnumProperty.create("state", ComputerState.class);

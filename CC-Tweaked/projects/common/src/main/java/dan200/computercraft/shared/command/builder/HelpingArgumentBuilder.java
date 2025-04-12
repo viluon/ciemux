@@ -14,8 +14,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -66,8 +66,8 @@ public final class HelpingArgumentBuilder extends LiteralArgumentBuilder<Command
     public LiteralArgumentBuilder<CommandSourceStack> then(final ArgumentBuilder<CommandSourceStack, ?> argument) {
         if (getRedirect() != null) throw new IllegalStateException("Cannot add children to a redirected node");
 
-        if (argument instanceof HelpingArgumentBuilder) {
-            children.add((HelpingArgumentBuilder) argument);
+        if (argument instanceof HelpingArgumentBuilder child) {
+            children.add(child);
         } else if (argument instanceof LiteralArgumentBuilder) {
             super.then(argument);
         } else {

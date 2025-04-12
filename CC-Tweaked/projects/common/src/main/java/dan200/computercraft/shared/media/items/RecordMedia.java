@@ -8,8 +8,7 @@ import dan200.computercraft.api.media.IMedia;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An implementation of {@link IMedia} for {@link RecordItem}.

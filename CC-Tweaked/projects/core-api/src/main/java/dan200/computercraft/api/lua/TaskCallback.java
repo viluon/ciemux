@@ -5,13 +5,12 @@
 package dan200.computercraft.api.lua;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class TaskCallback implements ILuaCallback, LuaTask {
     private final LuaTask task;
 
-    private volatile @Nullable Object[] result;
+    private volatile @Nullable Object @Nullable [] result;
     private volatile @MonotonicNonNull LuaException failure;
 
     private final long taskId;
@@ -22,9 +21,8 @@ final class TaskCallback implements ILuaCallback, LuaTask {
         taskId = context.issueMainThreadTask(this);
     }
 
-    @Nullable
     @Override
-    public Object[] execute() throws LuaException {
+    public @Nullable Object @Nullable [] execute() throws LuaException {
         // Store the result/exception: we read these back when receiving the task_complete event.
         try {
             result = task.execute();
@@ -38,7 +36,7 @@ final class TaskCallback implements ILuaCallback, LuaTask {
     }
 
     @Override
-    public MethodResult resume(Object[] response) throws LuaException {
+    public MethodResult resume(@Nullable Object[] response) throws LuaException {
         if (response.length < 3 || !(response[1] instanceof Number eventTask) || !(response[2] instanceof Boolean isOk)) {
             return pull;
         }

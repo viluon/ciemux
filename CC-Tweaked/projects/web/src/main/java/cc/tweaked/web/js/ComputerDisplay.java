@@ -4,9 +4,8 @@
 
 package cc.tweaked.web.js;
 
+import org.jspecify.annotations.Nullable;
 import org.teavm.jso.JSObject;
-
-import javax.annotation.Nullable;
 
 /**
  * The Javascript-side terminal which displays this computer.

@@ -37,10 +37,11 @@ public class KeyEventServerMessage extends ComputerServerMessage {
     @Override
     protected void handle(ServerNetworkContext context, ComputerMenu container) {
         var input = container.getInput();
-        if (type == Action.UP) {
-            input.keyUp(key);
-        } else {
-            input.keyDown(key, type == Action.REPEAT);
+        switch (type) {
+            case UP -> input.keyUp(key);
+            case DOWN -> input.keyDown(key, false);
+            case REPEAT -> input.keyDown(key, true);
+            case CHAR -> input.charTyped((byte) key);
         }
     }
 
@@ -50,6 +51,6 @@ public class KeyEventServerMessage extends ComputerServerMessage {
     }
 
     public enum Action {
-        DOWN, REPEAT, UP
+        DOWN, REPEAT, UP, CHAR
     }
 }

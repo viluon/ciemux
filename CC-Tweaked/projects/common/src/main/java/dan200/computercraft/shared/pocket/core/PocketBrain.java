@@ -10,7 +10,7 @@ import dan200.computercraft.api.pocket.IPocketUpgrade;
 import dan200.computercraft.api.upgrades.UpgradeData;
 import dan200.computercraft.core.computer.ComputerSide;
 import dan200.computercraft.shared.common.IColouredItem;
-import dan200.computercraft.shared.computer.core.ComputerFamily;
+import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.network.client.PocketComputerDataMessage;
 import dan200.computercraft.shared.network.server.ServerNetworking;
 import dan200.computercraft.shared.pocket.items.PocketComputerItem;
@@ -20,8 +20,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -44,11 +44,12 @@ public final class PocketBrain implements IPocketAccess {
     private int colour = -1;
     private int lightColour = -1;
 
-    public PocketBrain(PocketHolder holder, int computerID, @Nullable String label, ComputerFamily family, @Nullable UpgradeData<IPocketUpgrade> upgrade) {
-        this.computer = new PocketServerComputer(this, holder, computerID, label, family);
+    public PocketBrain(PocketHolder holder, @Nullable UpgradeData<IPocketUpgrade> upgrade, int colour, ServerComputer.Properties properties) {
+        this.computer = new PocketServerComputer(this, holder, properties);
         this.holder = holder;
         this.position = holder.pos();
         this.upgrade = UpgradeData.copyOf(upgrade);
+        this.colour = colour;
         invalidatePeripheral();
     }
 

@@ -4,7 +4,7 @@
 
 package dan200.computercraft.api.lua;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A task which can be executed via {@link ILuaContext#issueMainThreadTask(LuaTask)} This will be run on the main
@@ -24,5 +24,5 @@ public interface LuaTask {
      *                      arguments are supplied to your method.
      */
     @Nullable
-    Object[] execute() throws LuaException;
+    Object @Nullable [] execute() throws LuaException;
 }

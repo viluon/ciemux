@@ -5,6 +5,7 @@
 package dan200.computercraft.gametest.api
 
 import dan200.computercraft.api.peripheral.IPeripheral
+import dan200.computercraft.gametest.Recipe_Test.DummyMenu
 import dan200.computercraft.gametest.core.ManagedComputers
 import dan200.computercraft.mixin.gametest.GameTestHelperAccessor
 import dan200.computercraft.mixin.gametest.GameTestInfoAccessor
@@ -22,9 +23,11 @@ import net.minecraft.world.Container
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.inventory.TransientCraftingContainer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.context.UseOnContext
+import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.BarrelBlockEntity
 import net.minecraft.world.level.block.entity.BlockEntity
@@ -125,6 +128,14 @@ fun GameTestHelper.sequence(run: GameTestSequence.() -> Unit) {
     val sequence = startSequence()
     run(sequence)
     sequence.thenSucceed()
+}
+
+/**
+ * Run a function immediately, and then succeed.
+ */
+fun GameTestHelper.immediate(run: () -> Unit) {
+    run()
+    succeed()
 }
 
 /**
@@ -232,15 +243,17 @@ private fun GameTestHelper.getPeripheralAt(pos: BlockPos, direction: Direction):
 
 fun GameTestHelper.assertPeripheral(pos: BlockPos, direction: Direction = Direction.UP, type: String) {
     val peripheral = getPeripheralAt(pos, direction)
+    val block = getBlockState(pos).block.name.string
     when {
-        peripheral == null -> fail("No peripheral at position", pos)
-        peripheral.type != type -> fail("Peripheral is of type ${peripheral.type}, expected $type", pos)
+        peripheral == null -> fail("No peripheral for '$block'", pos)
+        peripheral.type != type -> fail("Peripheral for '$block' is of type ${peripheral.type}, expected $type", pos)
     }
 }
 
 fun GameTestHelper.assertNoPeripheral(pos: BlockPos, direction: Direction = Direction.UP) {
     val peripheral = getPeripheralAt(pos, direction)
-    if (peripheral != null) fail("Expected no peripheral, got a ${peripheral.type}", pos)
+    val block = getBlockState(pos).block.name
+    if (peripheral != null) fail("Expected no peripheral for '$block', got a ${peripheral.type}", pos)
 }
 
 fun GameTestHelper.assertExactlyItems(vararg expected: ItemStack, message: String? = null) {
@@ -331,6 +344,32 @@ fun GameTestHelper.placeItemAt(stack: ItemStack, pos: BlockPos, direction: Direc
     val absolutePos = absolutePos(pos.relative(direction))
     val hit = BlockHitResult(Vec3.atCenterOf(absolutePos), direction, absolutePos, false)
     stack.useOn(UseOnContext(player, InteractionHand.MAIN_HAND, hit))
+}
+
+/**
+ * Assert a recipe is not craftable.
+ */
+fun GameTestHelper.assertNotCraftable(vararg items: ItemStack) {
+    val container = TransientCraftingContainer(DummyMenu, 3, 3)
+    for ((i, item) in items.withIndex()) container.setItem(i, item)
+
+    val recipe = level.server.recipeManager.getRecipeFor(RecipeType.CRAFTING, container, level)
+
+    if (recipe.isPresent) fail("Expected no recipe to match $items")
+}
+
+/**
+ * Attempt to craft an item.
+ */
+fun GameTestHelper.craftItem(vararg items: ItemStack): ItemStack {
+    val container = TransientCraftingContainer(DummyMenu, 3, 3)
+    for ((i, item) in items.withIndex()) container.setItem(i, item)
+
+    val recipe = level.server.recipeManager
+        .getRecipeFor(RecipeType.CRAFTING, container, level)
+        .orElseThrow { GameTestAssertException("No recipe matches $items") }
+
+    return recipe.assemble(container, level.registryAccess())
 }
 
 /**

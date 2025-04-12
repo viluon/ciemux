@@ -5,8 +5,8 @@
 package dan200.computercraft.impl;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serial;
 
 /**

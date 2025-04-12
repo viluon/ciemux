@@ -14,6 +14,7 @@ import java.util.Map;
  *
  * @param <T> The type of object that this provider can provide details for.
  * @see DetailRegistry
+ * @see dan200.computercraft.api.detail An overview of the detail system.
  */
 @FunctionalInterface
 public interface DetailProvider<T> {

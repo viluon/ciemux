@@ -11,15 +11,15 @@ import dan200.computercraft.shared.network.server.ServerNetworking;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TableBuilder {
     private final String id;
     private int columns = -1;
-    private final @Nullable Component[] headers;
+    private final Component @Nullable [] headers;
     private final ArrayList<Component[]> rows = new ArrayList<>();
     private int additional;
 
@@ -72,8 +72,7 @@ public class TableBuilder {
         return columns;
     }
 
-    @Nullable
-    public Component[] getHeaders() {
+    public Component @Nullable [] getHeaders() {
         return headers;
     }
 

@@ -1,7 +1,7 @@
 {
     "parent": "computercraft:block/turtle_base",
     "textures": {
-        "texture": "computercraft:block/turtle_colour",
+        "particle": "computercraft:block/turtle_colour_body_front",
         "body_back": "computercraft:block/turtle_colour_body_back",
         "body_backpack": "computercraft:block/turtle_colour_body_backpack",
         "body_bottom": "computercraft:block/turtle_colour_body_bottom",

@@ -10,8 +10,7 @@ import dan200.computercraft.shared.network.NetworkMessage;
 import dan200.computercraft.shared.network.NetworkMessages;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MonitorClientMessage implements NetworkMessage<ClientNetworkContext> {
     private final BlockPos pos;

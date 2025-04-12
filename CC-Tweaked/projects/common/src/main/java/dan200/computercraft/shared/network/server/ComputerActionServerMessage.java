@@ -33,6 +33,7 @@ public class ComputerActionServerMessage extends ComputerServerMessage {
     @Override
     protected void handle(ServerNetworkContext context, ComputerMenu container) {
         switch (action) {
+            case TERMINATE -> container.getInput().terminate();
             case TURN_ON -> container.getInput().turnOn();
             case REBOOT -> container.getInput().reboot();
             case SHUTDOWN -> container.getInput().shutdown();
@@ -45,6 +46,7 @@ public class ComputerActionServerMessage extends ComputerServerMessage {
     }
 
     public enum Action {
+        TERMINATE,
         TURN_ON,
         SHUTDOWN,
         REBOOT

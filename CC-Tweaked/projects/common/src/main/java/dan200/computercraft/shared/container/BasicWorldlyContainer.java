@@ -7,8 +7,7 @@ package dan200.computercraft.shared.container;
 import net.minecraft.core.Direction;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.ItemStack;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A basic implementation of {@link WorldlyContainer} which operates on a {@linkplain #getContents() list of stacks}.

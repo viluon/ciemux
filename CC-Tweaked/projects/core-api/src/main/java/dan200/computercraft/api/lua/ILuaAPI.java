@@ -4,7 +4,7 @@
 
 package dan200.computercraft.api.lua;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a Lua object which is stored as a global variable on computer startup. This must either provide

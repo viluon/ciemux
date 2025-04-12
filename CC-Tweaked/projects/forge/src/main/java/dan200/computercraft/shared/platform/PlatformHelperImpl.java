@@ -10,8 +10,10 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.ArgumentType;
 import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.media.IMedia;
 import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.impl.MediaProviders;
 import dan200.computercraft.impl.Peripherals;
 import dan200.computercraft.shared.Capabilities;
 import dan200.computercraft.shared.config.ConfigFile;
@@ -28,6 +30,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceKey;
@@ -41,6 +44,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -75,10 +79,13 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.registries.RegistryObject;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @AutoService(dan200.computercraft.impl.PlatformHelper.class)
 public class PlatformHelperImpl implements PlatformHelper {
@@ -154,8 +161,8 @@ public class PlatformHelperImpl implements PlatformHelper {
     }
 
     @Override
-    public void openMenu(Player player, MenuProvider owner, ContainerData menu) {
-        NetworkHooks.openScreen((ServerPlayer) player, owner, menu::toBytes);
+    public void openMenu(Player player, Component title, MenuConstructor menu, ContainerData data) {
+        NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider(menu, title), data::toBytes);
     }
 
     @Override
@@ -324,30 +331,28 @@ public class PlatformHelperImpl implements PlatformHelper {
     }
 
     @Override
-    public InteractionResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit, Predicate<BlockState> canUseBlock) {
-        var level = player.level();
+    public UseOnResult useOn(ServerPlayer player, ItemStack stack, BlockHitResult hit) {
         var pos = hit.getBlockPos();
         var event = ForgeHooks.onRightClickBlock(player, InteractionHand.MAIN_HAND, pos, hit);
-        if (event.isCanceled()) return event.getCancellationResult();
+        if (event.isCanceled()) return new UseOnResult.Handled(event.getCancellationResult());
 
         var context = new UseOnContext(player, InteractionHand.MAIN_HAND, hit);
         if (event.getUseItem() != Event.Result.DENY) {
             var result = stack.onItemUseFirst(context);
-            if (result != InteractionResult.PASS) return result;
+            if (result != InteractionResult.PASS) return new UseOnResult.Handled(event.getCancellationResult());
         }
 
-        var block = level.getBlockState(hit.getBlockPos());
-        if (event.getUseBlock() != Event.Result.DENY && !block.isAir() && canUseBlock.test(block)) {
-            var useResult = block.use(level, player, InteractionHand.MAIN_HAND, hit);
-            if (useResult.consumesAction()) return useResult;
-        }
-
-        return event.getUseItem() == Event.Result.DENY ? InteractionResult.PASS : stack.useOn(context);
+        return new UseOnResult.Continue(event.getUseBlock() != Event.Result.DENY, event.getUseItem() != Event.Result.DENY);
     }
 
     @Override
     public boolean canClickRunClientCommand() {
         return false;
+    }
+
+    @Override
+    public @Nullable IMedia getMedia(ItemStack stack) {
+        return MediaProviders.get(stack);
     }
 
     private record RegistryWrapperImpl<T>(

@@ -5,9 +5,9 @@
 package dan200.computercraft.shared.config;
 
 import com.google.common.base.Splitter;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;

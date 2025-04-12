@@ -1,0 +1,39 @@
+{
+    DataVersion: 3465,
+    size: [5, 5, 5],
+    data: [
+        {pos: [0, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [2, 1, 2], state: "minecraft:furnace{facing:north,lit:false}", nbt: {BurnTime: 0s, CookTime: 0s, CookTimeTotal: 200s, Items: [{Count: 8b, Slot: 0b, id: "minecraft:coal"}], RecipesUsed: {}, id: "minecraft:furnace"}},
+        {pos: [2, 2, 2], state: "computercraft:turtle_normal{facing:north,waterlogged:false}", nbt: {ComputerId: 1, Fuel: 0, Items: [{Count: 64b, Slot: 0b, id: "minecraft:coal"}], Label: "turtle_test.sided_drop", On: 1b, Owner: {LowerId: -5939166093450296082L, Name: "Player58", UpperId: 5394875410161482031L}, Slot: 0, id: "computercraft:turtle_normal"}}
+    ],
+    entities: [],
+    palette: [
+        "minecraft:polished_andesite",
+        "minecraft:furnace{facing:north,lit:false}",
+        "computercraft:turtle_normal{facing:north,waterlogged:false}"
+    ]
+}

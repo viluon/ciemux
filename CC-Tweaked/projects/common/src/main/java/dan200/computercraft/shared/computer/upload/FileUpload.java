@@ -4,10 +4,10 @@
 
 package dan200.computercraft.shared.computer.upload;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -52,8 +52,7 @@ public class FileUpload {
         return digest != null && Arrays.equals(checksum, digest);
     }
 
-    @Nullable
-    public static byte[] getDigest(ByteBuffer bytes) {
+    public static byte @Nullable [] getDigest(ByteBuffer bytes) {
         try {
             var digest = MessageDigest.getInstance("SHA-256");
             digest.update(bytes.duplicate());

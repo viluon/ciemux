@@ -21,13 +21,13 @@ import dan200.computercraft.core.computer.ComputerSide;
 import dan200.computercraft.core.filesystem.MemoryMount;
 import dan200.computercraft.core.metrics.MetricsObserver;
 import dan200.computercraft.core.terminal.Terminal;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.typedarrays.ArrayBuffer;
 
-import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;

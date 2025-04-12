@@ -16,8 +16,8 @@ import dan200.computercraft.core.methods.MethodSupplier;
 import dan200.computercraft.core.methods.PeripheralMethod;
 import dan200.computercraft.core.metrics.Metrics;
 import dan200.computercraft.core.util.LuaUtil;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -268,9 +268,8 @@ public class PeripheralAPI implements ILuaAPI, IAPIEnvironment.IPeripheralChange
         return false;
     }
 
-    @Nullable
     @LuaFunction
-    public final Object[] getType(String sideName) {
+    public final Object @Nullable [] getType(String sideName) {
         var side = ComputerSide.valueOfInsensitive(sideName);
         if (side == null) return null;
 
@@ -280,9 +279,8 @@ public class PeripheralAPI implements ILuaAPI, IAPIEnvironment.IPeripheralChange
         }
     }
 
-    @Nullable
     @LuaFunction
-    public final Object[] hasType(String sideName, String type) {
+    public final Object @Nullable [] hasType(String sideName, String type) {
         var side = ComputerSide.valueOfInsensitive(sideName);
         if (side == null) return null;
 
@@ -295,9 +293,8 @@ public class PeripheralAPI implements ILuaAPI, IAPIEnvironment.IPeripheralChange
         return null;
     }
 
-    @Nullable
     @LuaFunction
-    public final Object[] getMethods(String sideName) {
+    public final Object @Nullable [] getMethods(String sideName) {
         var side = ComputerSide.valueOfInsensitive(sideName);
         if (side == null) return null;
 

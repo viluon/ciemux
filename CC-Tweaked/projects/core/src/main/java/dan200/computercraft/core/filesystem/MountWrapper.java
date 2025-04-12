@@ -7,8 +7,8 @@ package dan200.computercraft.core.filesystem;
 import dan200.computercraft.api.filesystem.FileOperationException;
 import dan200.computercraft.api.filesystem.Mount;
 import dan200.computercraft.api.filesystem.WritableMount;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.OpenOption;

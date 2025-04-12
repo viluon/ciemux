@@ -8,10 +8,6 @@ plugins {
     id("cc-tweaked")
 }
 
-java {
-    withJavadocJar()
-}
-
 // Due to the slightly circular nature of our API, add the main API jars to the javadoc classpath.
 val docApi by configurations.registering {
     isTransitive = false
@@ -27,3 +23,5 @@ tasks.javadoc {
     // Depend on the common API when publishing javadoc
     classpath += docApi.get()
 }
+
+cct.linters(minecraft = false, loader = null)

@@ -5,8 +5,8 @@
 package dan200.computercraft.core.apis;
 
 import dan200.computercraft.api.lua.LuaException;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -112,7 +112,7 @@ final class LuaDateTime {
 
     private static int getField(Map<?, ?> table, String field, int def) throws LuaException {
         var value = table.get(field);
-        if (value instanceof Number) return ((Number) value).intValue();
+        if (value instanceof Number n) return n.intValue();
         if (def < 0) throw new LuaException("field \"" + field + "\" missing in date table");
         return def;
     }

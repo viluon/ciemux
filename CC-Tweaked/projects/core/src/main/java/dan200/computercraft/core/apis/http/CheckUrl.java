@@ -5,8 +5,8 @@
 package dan200.computercraft.core.apis.http;
 
 import dan200.computercraft.core.apis.IAPIEnvironment;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.concurrent.Future;
 

@@ -5,6 +5,7 @@
 package cc.tweaked.web.js;
 
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSByRef;
 import org.teavm.jso.JSObject;
@@ -15,7 +16,6 @@ import org.teavm.jso.core.JSString;
 import org.teavm.jso.typedarrays.ArrayBuffer;
 import org.teavm.jso.typedarrays.Int8Array;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
 /**
@@ -29,7 +29,7 @@ public class JavascriptConv {
      * @return The converted value.
      */
     @Contract("null -> null; !null -> !null")
-    public static @Nullable Object[] toJava(@Nullable JSObject[] value) {
+    public static @Nullable Object @Nullable [] toJava(@Nullable JSObject @Nullable [] value) {
         if (value == null) return null;
         var out = new Object[value.length];
         for (var i = 0; i < value.length; i++) out[i] = toJava(value[i]);

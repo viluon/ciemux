@@ -7,8 +7,8 @@ package cc.tweaked.web;
 import cc.tweaked.web.js.Callbacks;
 import dan200.computercraft.api.filesystem.Mount;
 import dan200.computercraft.core.computer.GlobalEnvironment;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
@@ -21,7 +21,7 @@ final class EmulatorEnvironment implements GlobalEnvironment {
 
     private final String version = Callbacks.getModVersion();
     private @Nullable ResourceMount romMount;
-    private @Nullable byte[] bios;
+    private byte @Nullable [] bios;
 
     private EmulatorEnvironment() {
     }

@@ -23,7 +23,7 @@ public class TerminalStateTest {
         var terminal = randomTerminal();
 
         var buffer = new FriendlyByteBuf(Unpooled.directBuffer());
-        new TerminalState(terminal).write(buffer);
+        TerminalState.create(terminal).write(buffer);
 
         checkEqual(terminal, read(buffer));
         assertEquals(0, buffer.readableBytes());
@@ -37,6 +37,10 @@ public class TerminalStateTest {
             for (var x = 0; x < buffer.length(); x++) buffer.setChar(x, (char) (random.nextInt(26) + 65));
         }
 
+        terminal.setTextColour(random.nextInt(16));
+        terminal.setBackgroundColour(random.nextInt(16));
+        terminal.setCursorPos(random.nextInt(terminal.getWidth()), random.nextInt(terminal.getHeight()));
+
         return terminal;
     }
 
@@ -46,6 +50,10 @@ public class TerminalStateTest {
         assertEquals(expected.isColour(), actual.isColour(), "isColour must match");
         assertEquals(expected.getHeight(), actual.getHeight(), "Heights must match");
         assertEquals(expected.getWidth(), actual.getWidth(), "Widths must match");
+        assertEquals(expected.getTextColour(), actual.getTextColour(), "Text colours must match");
+        assertEquals(expected.getBackgroundColour(), actual.getBackgroundColour(), "Background colours must match");
+        assertEquals(expected.getCursorX(), actual.getCursorX(), "Cursor x must match");
+        assertEquals(expected.getCursorY(), actual.getCursorY(), "Cursor y must match");
 
         for (var y = 0; y < expected.getHeight(); y++) {
             assertEquals(expected.getLine(y).toString(), actual.getLine(y).toString());

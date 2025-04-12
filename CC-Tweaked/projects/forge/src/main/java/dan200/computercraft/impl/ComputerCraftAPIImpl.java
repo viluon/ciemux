@@ -7,6 +7,7 @@ package dan200.computercraft.impl;
 import com.google.auto.service.AutoService;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.detail.DetailRegistry;
+import dan200.computercraft.api.media.MediaProvider;
 import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
 import dan200.computercraft.impl.detail.DetailRegistryImpl;
@@ -18,8 +19,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModList;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static dan200.computercraft.shared.Capabilities.CAPABILITY_WIRED_ELEMENT;
 
@@ -56,5 +56,10 @@ public final class ComputerCraftAPIImpl extends AbstractComputerCraftAPI impleme
     @Override
     public DetailRegistry<FluidStack> getFluidStackDetailRegistry() {
         return fluidStackDetails;
+    }
+
+    @Override
+    public void registerMediaProvider(MediaProvider provider) {
+        MediaProviders.register(provider);
     }
 }

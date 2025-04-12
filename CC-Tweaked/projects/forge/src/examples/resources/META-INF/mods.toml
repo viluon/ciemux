@@ -1,0 +1,14 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="CC0-1.0"
+
+[[mods]]
+modId="examplemod"
+version="1.0.0"
+
+[[dependencies.examplemod]]
+modId="computercraft"
+mandatory=true
+versionRange="[1.0,)"
+ordering="AFTER"
+side="BOTH"

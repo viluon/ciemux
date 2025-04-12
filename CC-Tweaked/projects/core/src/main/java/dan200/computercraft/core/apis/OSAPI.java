@@ -11,8 +11,8 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.core.util.StringUtil;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -110,14 +110,14 @@ public class OSAPI implements ILuaAPI {
         return time;
     }
 
-    private static int getDayForCalendar(Calendar c) {
-        var g = c instanceof GregorianCalendar ? (GregorianCalendar) c : new GregorianCalendar();
-        var year = c.get(Calendar.YEAR);
+    private static int getDayForCalendar(Calendar calendar) {
+        var g = calendar instanceof GregorianCalendar c ? c : new GregorianCalendar();
+        var year = calendar.get(Calendar.YEAR);
         var day = 0;
         for (var y = 1970; y < year; y++) {
             day += g.isLeapYear(y) ? 366 : 365;
         }
-        day += c.get(Calendar.DAY_OF_YEAR);
+        day += calendar.get(Calendar.DAY_OF_YEAR);
         return day;
     }
 
@@ -133,7 +133,7 @@ public class OSAPI implements ILuaAPI {
      * @param args The parameters of the event.
      * @cc.tparam string name The name of the event to queue.
      * @cc.param ... The parameters of the event. These can be any primitive type (boolean, number, string) as well as
-    *                tables. Other types (like functions), as well as metatables, will not be preserved.
+     *               tables. Other types (like functions), as well as metatables, will not be preserved.
      * @cc.see os.pullEvent To pull the event queued
      */
     @LuaFunction
@@ -245,9 +245,8 @@ public class OSAPI implements ILuaAPI {
      * @cc.treturn string|nil The label of the computer.
      * @cc.since 1.3
      */
-    @Nullable
     @LuaFunction({ "getComputerLabel", "computerLabel" })
-    public final Object[] getComputerLabel() {
+    public final Object @Nullable [] getComputerLabel() {
         var label = apiEnvironment.getLabel();
         return label == null ? null : new Object[]{ label };
     }

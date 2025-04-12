@@ -54,9 +54,9 @@ public class TurtleScreen extends AbstractComputerScreen<TurtleMenu> {
         if (slot >= 0) {
             var slotX = slot % 4;
             var slotY = slot / 4;
-            graphics.blit(texture,
-                leftPos + TURTLE_START_X - 2 + slotX * 18, topPos + PLAYER_START_Y - 2 + slotY * 18, 0,
-                0, 217, 24, 24, FULL_TEX_SIZE, FULL_TEX_SIZE
+            graphics.blit(
+                leftPos + TURTLE_START_X - 2 + slotX * 18, topPos + PLAYER_START_Y - 2 + slotY * 18, 0, 22, 22,
+                GuiSprites.get(advanced ? GuiSprites.TURTLE_ADVANCED_SELECTED_SLOT : GuiSprites.TURTLE_NORMAL_SELECTED_SLOT)
             );
         }
 

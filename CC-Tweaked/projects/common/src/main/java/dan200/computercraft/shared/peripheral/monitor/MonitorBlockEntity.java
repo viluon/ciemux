@@ -18,14 +18,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public class MonitorBlockEntity extends BlockEntity {
@@ -237,7 +238,7 @@ public class MonitorBlockEntity extends BlockEntity {
         getLevel().setBlock(getBlockPos(), getBlockState()
             .setValue(MonitorBlock.STATE, MonitorEdgeState.fromConnections(
                 yIndex < height - 1, yIndex > 0,
-                xIndex > 0, xIndex < width - 1)), 2);
+                xIndex > 0, xIndex < width - 1)), Block.UPDATE_CLIENTS);
     }
 
     // region Sizing and placement stuff

@@ -9,8 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class CapabilityUtil {
     private CapabilityUtil() {
@@ -22,7 +21,7 @@ public final class CapabilityUtil {
         return null;
     }
 
-    public static <T> void invalidate(@Nullable LazyOptional<T>[] caps) {
+    public static <T> void invalidate(@Nullable LazyOptional<T> @Nullable [] caps) {
         if (caps == null) return;
 
         for (var i = 0; i < caps.length; i++) {

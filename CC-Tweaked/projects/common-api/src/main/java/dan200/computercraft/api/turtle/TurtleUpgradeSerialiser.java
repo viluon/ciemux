@@ -27,32 +27,6 @@ import java.util.function.Function;
  * If your turtle upgrade doesn't have any associated configurable parameters (like most upgrades), you can use
  * {@link #simple(Function)} or {@link #simpleWithCustomItem(BiFunction)} to create a basic upgrade serialiser.
  *
- * <h2>Example (Forge)</h2>
- * <pre class="language language-java">{@code
- * static final DeferredRegister<TurtleUpgradeSerialiser<?>> SERIALISERS = DeferredRegister.create( TurtleUpgradeSerialiser.TYPE, "my_mod" );
- *
- * // Register a new upgrade serialiser called "my_upgrade".
- * public static final RegistryObject<TurtleUpgradeSerialiser<MyUpgrade>> MY_UPGRADE =
- *     SERIALISERS.register( "my_upgrade", () -> TurtleUpgradeSerialiser.simple( MyUpgrade::new ) );
- *
- * // Then in your constructor
- * SERIALISERS.register( bus );
- * }</pre>
- * <p>
- * We can then define a new upgrade using JSON by placing the following in
- * {@literal data/<my_mod>/computercraft/turtle_upgrades/<my_upgrade_id>.json}}.
- *
- * <pre class="language language-json">{@code
- * {
- *     "type": "my_mod:my_upgrade",
- * }
- * }</pre>
- * <p>
- * Finally, we need to register a model for our upgrade. The way to do this varies on mod loader, see
- * {@link dan200.computercraft.api.client.turtle.TurtleUpgradeModeller} for more information.
- * <p>
- * {@link TurtleUpgradeDataProvider} provides a data provider to aid with generating these JSON files.
- *
  * @param <T> The type of turtle upgrade this is responsible for serialising.
  * @see ITurtleUpgrade
  * @see TurtleUpgradeDataProvider

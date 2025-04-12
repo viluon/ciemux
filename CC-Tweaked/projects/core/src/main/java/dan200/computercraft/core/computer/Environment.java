@@ -14,8 +14,8 @@ import dan200.computercraft.core.terminal.Terminal;
 import dan200.computercraft.core.util.PeripheralHelpers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 
 /**

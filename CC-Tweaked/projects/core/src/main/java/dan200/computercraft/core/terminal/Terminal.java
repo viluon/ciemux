@@ -5,8 +5,8 @@
 package dan200.computercraft.core.terminal;
 
 import dan200.computercraft.core.util.Colour;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
 public class Terminal {

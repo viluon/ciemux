@@ -46,8 +46,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.BiConsumer;
@@ -63,6 +65,8 @@ import java.util.function.Supplier;
  * @see ModRegistry The common registry for actual game objects.
  */
 public final class ClientRegistry {
+    private static final Logger LOG = LoggerFactory.getLogger(ClientRegistry.class);
+
     private ClientRegistry() {
     }
 
@@ -182,7 +186,18 @@ public final class ClientRegistry {
     }
 
     public static void registerShaders(ResourceProvider resources, BiConsumer<ShaderInstance, Consumer<ShaderInstance>> load) throws IOException {
-        RenderTypes.registerShaders(resources, load);
+        RenderTypes.registerShaders(resources, (name, create, onLoaded) -> {
+            ShaderInstance shader;
+            try {
+                shader = create.get();
+            } catch (Exception e) {
+                LOG.error("Failed to load {}", name, e);
+                onLoaded.accept(null);
+                return;
+            }
+
+            load.accept(shader, onLoaded);
+        });
     }
 
     private record UnclampedPropertyFunction(

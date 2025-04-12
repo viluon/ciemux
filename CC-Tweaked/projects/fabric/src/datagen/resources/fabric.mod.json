@@ -9,5 +9,8 @@
     },
     "depends": {
         "computercraft": "*"
-    }
+    },
+    "mixins": [
+        "computercraft-datagen.fabric.mixins.json"
+    ]
 }

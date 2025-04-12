@@ -4,7 +4,7 @@
 
 package cc.tweaked.gradle
 
-import net.minecraftforge.gradle.common.util.RunConfig
+import net.neoforged.moddevgradle.internal.RunGameTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.invocation.Gradle
@@ -65,11 +65,19 @@ abstract class ClientJavaExec : JavaExec() {
         setTestProperties()
     }
 
+    fun copyFromForge(path: String) = copyFromForge(project.tasks.getByName(path, RunGameTask::class))
+
     /**
-     * Set this task to run a given [RunConfig].
+     * Set this task to run a given [RunGameTask].
      */
-    fun setRunConfig(config: RunConfig) {
-        (this as JavaExec).setRunConfig(config)
+    fun copyFromForge(task: RunGameTask) {
+        copyFrom(task)
+
+        // Eagerly evaluate the behaviour of RunGameTask.exec
+        environment.putAll(task.environmentProperty.get())
+        classpath(task.classpathProvider)
+        workingDir = task.gameDirectory.get().asFile
+
         setTestProperties() // setRunConfig may clobber some properties, ensure everything is set.
     }
 

@@ -31,10 +31,10 @@ fun addRemappedConfiguration(name: String) {
     }
     val capitalName = name.replaceFirstChar { it.titlecase(Locale.ROOT) }
     loom.addRemapConfiguration("mod$capitalName") {
-        onCompileClasspath.set(false)
-        onRuntimeClasspath.set(true)
-        sourceSet.set(ourSourceSet)
-        targetConfigurationName.set(name)
+        onCompileClasspath = false
+        onRuntimeClasspath = true
+        sourceSet = ourSourceSet
+        targetConfigurationName = name
     }
     configurations.create(name) {
         isCanBeConsumed = false
@@ -61,6 +61,16 @@ configurations {
     include { extendsFrom(includeRuntimeOnly.get(), includeImplementation.get()) }
     runtimeOnly { extendsFrom(includeRuntimeOnly.get()) }
     implementation { extendsFrom(includeImplementation.get()) }
+
+    // Declare a configuration for projects which are on the compile and runtime classpath, but not treated as
+    // dependencies. This is used for our local projects.
+    val localImplementation by registering {
+        isCanBeResolved = false
+        isCanBeConsumed = false
+        isVisible = false
+    }
+    compileClasspath { extendsFrom(localImplementation.get()) }
+    runtimeClasspath { extendsFrom(localImplementation.get()) }
 }
 
 dependencies {
@@ -90,9 +100,9 @@ dependencies {
     "includeImplementation"(libs.nightConfig.toml)
 
     // Pull in our other projects. See comments in MinecraftConfigurations on this nastiness.
-    api(commonClasses(project(":fabric-api"))) { cct.exclude(this) }
-    clientApi(clientClasses(project(":fabric-api"))) { cct.exclude(this) }
-    implementation(project(":core")) { cct.exclude(this) }
+    "localImplementation"(project(":core"))
+    "localImplementation"(commonClasses(project(":fabric-api")))
+    clientImplementation(clientClasses(project(":fabric-api")))
 
     annotationProcessorEverywhere(libs.autoService)
 
@@ -106,11 +116,9 @@ dependencies {
     testFixturesImplementation(testFixtures(project(":core")))
 }
 
-sourceSets.main { resources.srcDir("src/generated/resources") }
-
 loom {
-    accessWidenerPath.set(project(":common").file("src/main/resources/computercraft.accesswidener"))
-    mixin.defaultRefmapName.set("computercraft.refmap.json")
+    accessWidenerPath = project(":common").file("src/main/resources/computercraft.accesswidener")
+    mixin.defaultRefmapName = "computercraft.refmap.json"
 
     mods {
         register("computercraft") {
@@ -125,6 +133,10 @@ loom {
         register("cctest") {
             sourceSet(sourceSets.testMod.get())
             sourceSet(project(":common").sourceSets.testMod.get())
+        }
+
+        register("examplemod") {
+            sourceSet(sourceSets.examples.get())
         }
     }
 
@@ -142,19 +154,24 @@ loom {
             runDir("run/server")
         }
 
-        register("data") {
-            configName = "Datagen"
+        fun RunConfigSettings.configureForData(sourceSet: SourceSet) {
             client()
-
-            source(sourceSets.datagen.get())
-
-            runDir("run/dataGen")
+            runDir("run/run${name.capitalise()}")
             property("fabric-api.datagen")
-            property("fabric-api.datagen.output-dir", layout.buildDirectory.dir("generatedResources").getAbsolutePath())
+            property(
+                "fabric-api.datagen.output-dir",
+                layout.buildDirectory.dir(sourceSet.getTaskName("generateResources", null)).getAbsolutePath(),
+            )
             property("fabric-api.datagen.strict-validation")
         }
 
-        fun configureForGameTest(config: RunConfigSettings) = config.run {
+        register("data") {
+            configName = "Datagen"
+            configureForData(sourceSets.main.get())
+            source(sourceSets.datagen.get())
+        }
+
+        fun RunConfigSettings.configureForGameTest() {
             source(sourceSets.testMod.get())
 
             val testSources = project(":common").file("src/testMod/resources/data/cctest").absolutePath
@@ -169,7 +186,7 @@ loom {
         val testClient by registering {
             configName = "Test Client"
             client()
-            configureForGameTest(this)
+            configureForGameTest()
 
             runDir("run/testClient")
             property("cctest.tags", "client,common")
@@ -178,25 +195,36 @@ loom {
         register("gametest") {
             configName = "Game Test"
             server()
-            configureForGameTest(this)
+            configureForGameTest()
 
             property("fabric-api.gametest")
             property(
                 "fabric-api.gametest.report-file",
-                layout.buildDirectory.dir("test-results/runGametest.xml")
-                    .getAbsolutePath(),
+                layout.buildDirectory.dir("test-results/runGametest.xml").getAbsolutePath(),
             )
             runDir("run/gametest")
+        }
+
+        register("exampleClient") {
+            client()
+            configName = "Example Mod Client"
+            source(sourceSets.examples.get())
+        }
+
+        register("exampleData") {
+            configName = "Example Mod Datagen"
+            configureForData(sourceSets.examples.get())
+            source(sourceSets.examples.get())
         }
     }
 }
 
 tasks.processResources {
-    inputs.property("version", modVersion)
+    inputs.property("modVersion", modVersion)
 
-    filesMatching("fabric.mod.json") {
-        expand(mapOf("version" to modVersion))
-    }
+    var props = mapOf("version" to modVersion)
+
+    filesMatching("fabric.mod.json") { expand(props) }
 }
 
 tasks.jar {
@@ -267,18 +295,7 @@ tasks.register("checkClient") {
 }
 
 modPublishing {
-    output.set(tasks.remapJar)
-}
-
-tasks.withType(GenerateModuleMetadata::class).configureEach { isEnabled = false }
-publishing {
-    publications {
-        named("maven", MavenPublication::class) {
-            mavenDependencies {
-                cct.configureExcludes(this)
-            }
-        }
-    }
+    output = tasks.remapJar
 }
 
 modrinth {

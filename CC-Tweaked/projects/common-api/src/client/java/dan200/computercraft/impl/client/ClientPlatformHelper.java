@@ -11,8 +11,7 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @ApiStatus.Internal
 public interface ClientPlatformHelper {

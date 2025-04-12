@@ -17,8 +17,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 

@@ -14,10 +14,10 @@ import dan200.computercraft.shared.computer.metrics.basic.AggregatedMetric;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.server.MinecraftServer;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.management.*;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;

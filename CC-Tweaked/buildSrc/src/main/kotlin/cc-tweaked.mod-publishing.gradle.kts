@@ -24,16 +24,16 @@ val modVersion: String by extra
 val mcVersion: String by extra
 
 modrinth {
-    token.set(findProperty("modrinthApiKey") as String? ?: "")
-    projectId.set("gu7yAYhd")
-    versionNumber.set(modVersion)
-    versionName.set(modVersion)
-    versionType.set(if (isUnstable) "alpha" else "release")
+    token = findProperty("modrinthApiKey") as String? ?: ""
+    projectId = "gu7yAYhd"
+    versionNumber = modVersion
+    versionName = modVersion
+    versionType = if (isUnstable) "alpha" else "release"
     uploadFile.setProvider(modPublishing.output)
     gameVersions.add(mcVersion)
-    changelog.set("Release notes can be found on the [GitHub repository](https://github.com/cc-tweaked/CC-Tweaked/releases/tag/v$mcVersion-$modVersion).")
+    changelog = "Release notes can be found on the [GitHub repository](https://github.com/cc-tweaked/CC-Tweaked/releases/tag/v$mcVersion-$modVersion)."
 
-    syncBodyFrom.set(provider { rootProject.file("doc/mod-page.md").readText() })
+    syncBodyFrom = provider { rootProject.file("doc/mod-page.md").readText() }
 }
 
 tasks.publish { dependsOn(tasks.modrinth) }

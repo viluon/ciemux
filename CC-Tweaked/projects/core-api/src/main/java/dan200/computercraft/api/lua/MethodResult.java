@@ -5,8 +5,8 @@
 package dan200.computercraft.api.lua;
 
 import dan200.computercraft.api.peripheral.IComputerAccess;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -19,17 +19,17 @@ import java.util.*;
 public final class MethodResult {
     private static final MethodResult empty = new MethodResult(null, null);
 
-    private final @Nullable Object[] result;
+    private final @Nullable Object @Nullable [] result;
     private final @Nullable ILuaCallback callback;
     private final int adjust;
 
-    private MethodResult(@Nullable Object[] arguments, @Nullable ILuaCallback callback) {
+    private MethodResult(@Nullable Object @Nullable [] arguments, @Nullable ILuaCallback callback) {
         result = arguments;
         this.callback = callback;
         adjust = 0;
     }
 
-    private MethodResult(@Nullable Object[] arguments, @Nullable ILuaCallback callback, int adjust) {
+    private MethodResult(@Nullable Object @Nullable [] arguments, @Nullable ILuaCallback callback, int adjust) {
         result = arguments;
         this.callback = callback;
         this.adjust = adjust;
@@ -73,7 +73,7 @@ public final class MethodResult {
      * @param values The values to return. See {@link #of(Object)} for acceptable values.
      * @return A method result which returns immediately with the given values.
      */
-    public static MethodResult of(@Nullable Object... values) {
+    public static MethodResult of(@Nullable Object @Nullable ... values) {
         return values == null || values.length == 0 ? empty : new MethodResult(values, null);
     }
 
@@ -121,13 +121,12 @@ public final class MethodResult {
      * @see #pullEvent(String, ILuaCallback)
      */
     @SuppressWarnings("NamedLikeContextualKeyword")
-    public static MethodResult yield(@Nullable Object[] arguments, ILuaCallback callback) {
+    public static MethodResult yield(@Nullable Object @Nullable [] arguments, ILuaCallback callback) {
         Objects.requireNonNull(callback, "callback cannot be null");
         return new MethodResult(arguments, callback);
     }
 
-    @Nullable
-    public Object[] getResult() {
+    public @Nullable Object @Nullable [] getResult() {
         return result;
     }
 

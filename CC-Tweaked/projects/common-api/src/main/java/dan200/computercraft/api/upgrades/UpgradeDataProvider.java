@@ -19,8 +19,8 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -32,6 +32,8 @@ import java.util.function.Function;
  *
  * @param <T> The base class of upgrades.
  * @param <R> The upgrade serialiser to register for.
+ * @see dan200.computercraft.api.turtle.TurtleUpgradeDataProvider
+ * @see dan200.computercraft.api.pocket.PocketUpgradeDataProvider
  */
 public abstract class UpgradeDataProvider<T extends UpgradeBase, R extends UpgradeSerialiser<? extends T>> implements DataProvider {
     private final PackOutput output;
@@ -84,13 +86,9 @@ public abstract class UpgradeDataProvider<T extends UpgradeBase, R extends Upgra
 
     /**
      * Add all turtle or pocket computer upgrades.
-     * <p>
-     * <strong>Example usage:</strong>
-     * <pre class="language language-java">{@code
-     * protected void addUpgrades(Consumer<Upgrade<TurtleUpgradeSerialiser<?>>> addUpgrade) {
-     *     simple(new ResourceLocation("mymod", "speaker"), SPEAKER_SERIALISER.get()).add(addUpgrade);
-     * }
-     * }</pre>
+     *
+     * <h4>Example</h4>
+     * {@snippet class=com.example.examplemod.data.TurtleDataProvider region=body}
      *
      * @param addUpgrade A callback used to register an upgrade.
      */

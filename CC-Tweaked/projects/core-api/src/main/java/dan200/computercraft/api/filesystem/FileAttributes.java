@@ -4,7 +4,8 @@
 
 package dan200.computercraft.api.filesystem;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 

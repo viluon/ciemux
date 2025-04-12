@@ -24,7 +24,6 @@ class MinecraftConfigurations private constructor(private val project: Project) 
     private val java = project.extensions.getByType(JavaPluginExtension::class.java)
     private val sourceSets = java.sourceSets
     private val configurations = project.configurations
-    private val objects = project.objects
 
     private val main = sourceSets[SourceSet.MAIN_SOURCE_SET_NAME]
     private val test = sourceSets[SourceSet.TEST_SOURCE_SET_NAME]
@@ -37,13 +36,7 @@ class MinecraftConfigurations private constructor(private val project: Project) 
         val client = sourceSets.maybeCreate("client")
 
         // Ensure the client classpaths behave the same as the main ones.
-        configurations.named(client.compileClasspathConfigurationName) {
-            shouldResolveConsistentlyWith(configurations[main.compileClasspathConfigurationName])
-        }
-
-        configurations.named(client.runtimeClasspathConfigurationName) {
-            shouldResolveConsistentlyWith(configurations[main.runtimeClasspathConfigurationName])
-        }
+        consistentWithMain(client)
 
         // Set up an API configuration for clients (to ensure it's consistent with the main source set).
         val clientApi = configurations.maybeCreate(client.apiConfigurationName).apply {
@@ -85,6 +78,16 @@ class MinecraftConfigurations private constructor(private val project: Project) 
         setupBasic()
     }
 
+    private fun consistentWithMain(sourceSet: SourceSet) {
+        configurations.named(sourceSet.compileClasspathConfigurationName) {
+            shouldResolveConsistentlyWith(configurations[main.compileClasspathConfigurationName])
+        }
+
+        configurations.named(sourceSet.runtimeClasspathConfigurationName) {
+            shouldResolveConsistentlyWith(configurations[main.runtimeClasspathConfigurationName])
+        }
+    }
+
     private fun setupBasic() {
         val client = sourceSets["client"]
 
@@ -96,19 +99,40 @@ class MinecraftConfigurations private constructor(private val project: Project) 
         val checkDependencyConsistency =
             project.tasks.register("checkDependencyConsistency", DependencyCheck::class.java) {
                 // We need to check both the main and client classpath *configurations*, as the actual configuration
-                configuration.add(configurations.named(main.runtimeClasspathConfigurationName))
-                configuration.add(configurations.named(client.runtimeClasspathConfigurationName))
+                configuration(configurations.named(main.runtimeClasspathConfigurationName))
+                configuration(configurations.named(client.runtimeClasspathConfigurationName))
             }
         project.tasks.named("check") { dependsOn(checkDependencyConsistency) }
     }
 
+    /**
+     * Create a new configuration that pulls in the main and client classes from the mod.
+     */
+    private fun createDerivedConfiguration(name: String) {
+        val client = sourceSets["client"]
+        val sourceSet = sourceSets.create(name)
+        sourceSet.compileClasspath += main.compileClasspath + client.compileClasspath
+        sourceSet.runtimeClasspath += main.runtimeClasspath + client.runtimeClasspath
+        consistentWithMain(sourceSet)
+        project.dependencies.add(sourceSet.implementationConfigurationName, main.output)
+        project.dependencies.add(sourceSet.implementationConfigurationName, client.output)
+    }
+
     companion object {
+        const val DATAGEN = "datagen"
+        const val EXAMPLES = "examples"
+        const val TEST_MOD = "testMod"
+
         fun setupBasic(project: Project) {
             MinecraftConfigurations(project).setupBasic()
         }
 
         fun setup(project: Project) {
             MinecraftConfigurations(project).setup()
+        }
+
+        fun createDerivedConfiguration(project: Project, name: String) {
+            MinecraftConfigurations(project).createDerivedConfiguration(name)
         }
     }
 }

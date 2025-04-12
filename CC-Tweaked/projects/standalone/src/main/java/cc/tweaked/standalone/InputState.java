@@ -8,6 +8,7 @@ import dan200.computercraft.core.apis.handles.ArrayByteChannel;
 import dan200.computercraft.core.apis.transfer.TransferredFile;
 import dan200.computercraft.core.apis.transfer.TransferredFiles;
 import dan200.computercraft.core.computer.Computer;
+import dan200.computercraft.core.computer.ComputerEvents;
 import dan200.computercraft.core.util.StringUtil;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWDropCallback;
@@ -49,10 +50,8 @@ public class InputState {
     }
 
     public void onCharEvent(int codepoint) {
-        if (codepoint >= 32 && codepoint <= 126 || codepoint >= 160 && codepoint <= 255) {
-            // Queue the char event for any printable chars in byte range
-            computer.queueEvent("char", new Object[]{ Character.toString(codepoint) });
-        }
+        var terminalChar = StringUtil.unicodeToTerminal(codepoint);
+        if (StringUtil.isTypableChar(terminalChar)) ComputerEvents.charTyped(computer, (byte) terminalChar);
     }
 
     public void onKeyEvent(long window, int key, int action, int modifiers) {
@@ -68,8 +67,8 @@ public class InputState {
         if (key == GLFW.GLFW_KEY_V && modifiers == GLFW.GLFW_MOD_CONTROL) {
             var string = GLFW.glfwGetClipboardString(window);
             if (string != null) {
-                var clipboard = StringUtil.normaliseClipboardString(string);
-                if (!clipboard.isEmpty()) computer.queueEvent("paste", new Object[]{ clipboard });
+                var clipboard = StringUtil.getClipboardString(string);
+                if (clipboard.remaining() > 0) ComputerEvents.paste(computer, clipboard);
             }
             return;
         }
@@ -92,7 +91,7 @@ public class InputState {
             // Queue the "key" event and add to the down set
             var repeat = keysDown.get(key);
             keysDown.set(key);
-            computer.queueEvent("key", new Object[]{ key, repeat });
+            ComputerEvents.keyDown(computer, key, repeat);
         }
     }
 
@@ -100,7 +99,7 @@ public class InputState {
         // Queue the "key_up" event and remove from the down set
         if (key >= 0 && keysDown.get(key)) {
             keysDown.set(key, false);
-            computer.queueEvent("key_up", new Object[]{ key });
+            ComputerEvents.keyUp(computer, key);
         }
 
         switch (key) {
@@ -115,12 +114,12 @@ public class InputState {
     public void onMouseClick(int button, int action) {
         switch (action) {
             case GLFW.GLFW_PRESS -> {
-                computer.queueEvent("mouse_click", new Object[]{ button + 1, lastMouseX + 1, lastMouseY + 1 });
+                ComputerEvents.mouseClick(computer, button + 1, lastMouseX + 1, lastMouseY + 1);
                 lastMouseButton = button;
             }
             case GLFW.GLFW_RELEASE -> {
                 if (button == lastMouseButton) {
-                    computer.queueEvent("mouse_click", new Object[]{ button + 1, lastMouseX + 1, lastMouseY + 1 });
+                    ComputerEvents.mouseUp(computer, button + 1, lastMouseX + 1, lastMouseY + 1);
                     lastMouseButton = -1;
                 }
             }
@@ -133,13 +132,13 @@ public class InputState {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
         if (lastMouseButton != -1) {
-            computer.queueEvent("mouse_drag", new Object[]{ lastMouseButton + 1, mouseX + 1, mouseY + 1 });
+            ComputerEvents.mouseDrag(computer, lastMouseButton + 1, mouseX + 1, mouseY + 1);
         }
     }
 
     public void onMouseScroll(double yOffset) {
         if (yOffset != 0) {
-            computer.queueEvent("mouse_scroll", new Object[]{ yOffset < 0 ? 1 : -1, lastMouseX + 1, lastMouseY + 1 });
+            ComputerEvents.mouseScroll(computer, yOffset < 0 ? 1 : -1, lastMouseX + 1, lastMouseY + 1);
         }
     }
 

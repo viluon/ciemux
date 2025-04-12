@@ -5,8 +5,7 @@
 package dan200.computercraft.core.computer;
 
 import dan200.computercraft.api.lua.ILuaAPI;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A wrapper for {@link ILuaAPI}s which provides an optional shutdown hook to clean up resources.
@@ -27,9 +26,5 @@ record ApiWrapper(ILuaAPI api, @Nullable ApiLifecycle lifecycle) {
     public void shutdown() {
         api.shutdown();
         if (lifecycle != null) lifecycle.shutdown();
-    }
-
-    public ILuaAPI api() {
-        return api;
     }
 }

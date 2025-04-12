@@ -4,7 +4,7 @@
 
 package dan200.computercraft.shared.peripheral.monitor;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class MonitorState {
     public static final MonitorState UNLOADED = new MonitorState(State.UNLOADED, null);

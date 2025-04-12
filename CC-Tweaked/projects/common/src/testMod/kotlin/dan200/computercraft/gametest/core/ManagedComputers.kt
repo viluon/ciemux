@@ -36,6 +36,10 @@ object ManagedComputers : ILuaMachine.Factory {
     private val LOGGER = LoggerFactory.getLogger(ManagedComputers::class.java)
     private val computers: MutableMap<String, Queue<suspend LuaTaskContext.() -> Unit>> = mutableMapOf()
 
+    internal fun reset() {
+        computers.clear()
+    }
+
     internal fun enqueue(test: GameTestInfo, label: String, task: suspend LuaTaskContext.() -> Unit): Monitor {
         val monitor = Monitor(test, label)
         computers.computeIfAbsent(label) { ConcurrentLinkedDeque() }.add {

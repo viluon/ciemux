@@ -5,19 +5,17 @@
 package dan200.computercraft.shared.pocket.core;
 
 import dan200.computercraft.api.component.ComputerComponents;
-import dan200.computercraft.shared.computer.core.ComputerFamily;
 import dan200.computercraft.shared.computer.core.ComputerState;
 import dan200.computercraft.shared.computer.core.ServerComputer;
-import dan200.computercraft.shared.config.Config;
+import dan200.computercraft.shared.config.ConfigSpec;
 import dan200.computercraft.shared.network.client.PocketComputerDataMessage;
 import dan200.computercraft.shared.network.client.PocketComputerDeletedClientMessage;
 import dan200.computercraft.shared.network.server.ServerNetworking;
 import dan200.computercraft.shared.pocket.items.PocketComputerItem;
-import dan200.computercraft.shared.util.ComponentMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -41,10 +39,10 @@ public final class PocketServerComputer extends ServerComputer {
 
     private Set<ServerPlayer> tracking = Set.of();
 
-    PocketServerComputer(PocketBrain brain, PocketHolder holder, int computerID, @Nullable String label, ComputerFamily family) {
-        super(
-            holder.level(), holder.blockPos(), computerID, label, family, Config.pocketTermWidth, Config.pocketTermHeight,
-            ComponentMap.builder().add(ComputerComponents.POCKET, brain).build()
+    PocketServerComputer(PocketBrain brain, PocketHolder holder, ServerComputer.Properties properties) {
+        super(holder.level(), holder.blockPos(), properties
+            .terminalSize(ConfigSpec.pocketTermWidth.get(), ConfigSpec.pocketTermHeight.get())
+            .addComponent(ComputerComponents.POCKET, brain)
         );
         this.brain = brain;
     }
@@ -74,7 +72,7 @@ public final class PocketServerComputer extends ServerComputer {
             // Broadcast the state to new players.
             var added = newTracking.stream().filter(x -> !tracking.contains(x)).toList();
             if (!added.isEmpty()) {
-                ServerNetworking.sendToPlayers(new PocketComputerDataMessage(this, false), added);
+                ServerNetworking.sendToPlayers(new PocketComputerDataMessage(this, brain.holder().isTerminalAlwaysVisible()), added);
             }
         }
 
@@ -85,9 +83,15 @@ public final class PocketServerComputer extends ServerComputer {
     protected void onTerminalChanged() {
         super.onTerminalChanged();
 
-        if (brain.holder() instanceof PocketHolder.PlayerHolder holder && holder.isValid(this)) {
-            // Broadcast the terminal to the current player.
-            ServerNetworking.sendToPlayer(new PocketComputerDataMessage(this, true), holder.entity());
+        var holder = brain.holder() instanceof PocketHolder.PlayerHolder h && h.isValid(this) ? h.entity() : null;
+        if (brain.holder().isTerminalAlwaysVisible() && !tracking.isEmpty()) {
+            // If the terminal is always visible, send it to all players *and* the holder.
+            var packet = new PocketComputerDataMessage(this, true);
+            ServerNetworking.sendToPlayers(packet, tracking);
+            if (holder != null && !tracking.contains(holder)) ServerNetworking.sendToPlayer(packet, holder);
+        } else if (holder != null) {
+            // Otherwise just send it to the holder.
+            ServerNetworking.sendToPlayer(new PocketComputerDataMessage(this, true), holder);
         }
     }
 

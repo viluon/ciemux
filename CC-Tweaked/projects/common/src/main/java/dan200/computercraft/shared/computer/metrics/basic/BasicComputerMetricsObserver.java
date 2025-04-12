@@ -5,12 +5,12 @@
 package dan200.computercraft.shared.computer.metrics.basic;
 
 import com.google.common.collect.MapMaker;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import dan200.computercraft.core.metrics.Metric;
 import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.computer.metrics.ComputerMetricsObserver;
 import dan200.computercraft.shared.computer.metrics.GlobalMetrics;
 
-import javax.annotation.concurrent.GuardedBy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

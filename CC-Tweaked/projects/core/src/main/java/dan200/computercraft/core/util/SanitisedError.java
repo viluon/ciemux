@@ -13,7 +13,7 @@ import java.util.Set;
  * This is intended for logging errors where the message content is supplied from untrusted sources. This isn't a
  * perfect escaping mechanism, but ensures basic "unsafe" strings (i.e. ANSI escape sequences, long lines) are escaped.
  *
- * <h2>Example:</h2>
+ * <h2>Example</h2>
  * <pre>{@code
  * LOG.error("Some error occurred: {}", new TruncatedError(error));
  * }</pre>

@@ -7,8 +7,8 @@ package dan200.computercraft.shared.peripheral.monitor;
 import dan200.computercraft.core.terminal.Terminal;
 import dan200.computercraft.shared.computer.terminal.NetworkedTerminal;
 import dan200.computercraft.shared.computer.terminal.TerminalState;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public final class ClientMonitor {

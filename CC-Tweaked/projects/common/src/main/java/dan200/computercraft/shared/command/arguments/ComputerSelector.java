@@ -22,8 +22,8 @@ import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -43,11 +43,11 @@ public record ComputerSelector(
     @Nullable String label,
     @Nullable ComputerFamily family,
     @Nullable AABB bounds,
-    @Nullable MinMaxBounds.Doubles range
+    MinMaxBounds.@Nullable Doubles range
 ) {
     private static final ComputerSelector all = new ComputerSelector("@c[]", OptionalInt.empty(), null, OptionalInt.empty(), null, null, null, null);
 
-    private static UuidArgument uuidArgument = UuidArgument.uuid();
+    private static final UuidArgument uuidArgument = UuidArgument.uuid();
 
     /**
      * A {@link ComputerSelector} which matches all computers.
@@ -279,7 +279,7 @@ public record ComputerSelector(
         private @Nullable String label;
         private @Nullable ComputerFamily family;
         private @Nullable AABB bounds;
-        private @Nullable MinMaxBounds.Doubles range;
+        private MinMaxBounds.@Nullable Doubles range;
     }
 
     private static final Map<String, Option> options;

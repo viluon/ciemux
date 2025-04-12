@@ -4,12 +4,11 @@
 
 package cc.tweaked.web.js;
 
+import org.jspecify.annotations.Nullable;
 import org.teavm.jso.JSObject;
 import org.teavm.jso.JSProperty;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.typedarrays.ArrayBuffer;
-
-import javax.annotation.Nullable;
 
 /**
  * A Javascript-facing interface for controlling computers.

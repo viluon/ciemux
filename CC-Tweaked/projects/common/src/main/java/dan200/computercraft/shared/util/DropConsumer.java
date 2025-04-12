@@ -11,8 +11,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -70,9 +70,9 @@ public final class DropConsumer {
 
     public static boolean onEntitySpawn(Entity entity) {
         // Capture any nearby item spawns
-        if (dropWorld == entity.level() && entity instanceof ItemEntity
+        if (dropWorld == entity.level() && entity instanceof ItemEntity item
             && assertNonNull(dropBounds).contains(entity.position())) {
-            handleDrops(((ItemEntity) entity).getItem());
+            handleDrops(item.getItem());
             return true;
         }
 

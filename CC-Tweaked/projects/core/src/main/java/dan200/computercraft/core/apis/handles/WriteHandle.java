@@ -9,8 +9,8 @@ import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.core.filesystem.TrackingCloseable;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Optional;
@@ -64,10 +64,9 @@ public class WriteHandle extends AbstractHandle {
         /**
          * {@inheritDoc}
          */
-        @Nullable
         @Override
         @LuaFunction
-        public final Object[] seek(Optional<String> whence, Optional<Long> offset) throws LuaException {
+        public final Object @Nullable [] seek(Optional<String> whence, Optional<Long> offset) throws LuaException {
             return super.seek(whence, offset);
         }
     }

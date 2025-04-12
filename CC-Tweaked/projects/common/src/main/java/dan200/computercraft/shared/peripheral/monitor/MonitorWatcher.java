@@ -11,8 +11,8 @@ import dan200.computercraft.shared.network.server.ServerNetworking;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -57,11 +57,10 @@ public final class MonitorWatcher {
             if (monitor == null) continue;
 
             var pos = tile.getBlockPos();
-            var world = tile.getLevel();
-            if (!(world instanceof ServerLevel)) continue;
+            if (!(tile.getLevel() instanceof ServerLevel level)) continue;
 
-            var chunk = world.getChunkAt(pos);
-            if (((ServerLevel) world).getChunkSource().chunkMap.getPlayers(chunk.getPos(), false).isEmpty()) {
+            var chunk = level.getChunkAt(pos);
+            if (level.getChunkSource().chunkMap.getPlayers(chunk.getPos(), false).isEmpty()) {
                 continue;
             }
 

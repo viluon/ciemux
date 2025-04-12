@@ -7,6 +7,8 @@ package dan200.computercraft.shared.computer.menu;
 import dan200.computercraft.core.apis.handles.ByteBufferChannel;
 import dan200.computercraft.core.apis.transfer.TransferredFile;
 import dan200.computercraft.core.apis.transfer.TransferredFiles;
+import dan200.computercraft.core.computer.ComputerEvents;
+import dan200.computercraft.core.util.StringUtil;
 import dan200.computercraft.shared.computer.upload.FileSlice;
 import dan200.computercraft.shared.computer.upload.FileUpload;
 import dan200.computercraft.shared.computer.upload.UploadResult;
@@ -17,10 +19,11 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,20 +52,32 @@ public class ServerInputState<T extends AbstractContainerMenu & ComputerMenu> im
     }
 
     @Override
-    public void queueEvent(String event, @Nullable Object[] arguments) {
-        owner.getComputer().queueEvent(event, arguments);
-    }
-
-    @Override
     public void keyDown(int key, boolean repeat) {
         keysDown.add(key);
-        owner.getComputer().keyDown(key, repeat);
+        ComputerEvents.keyDown(owner.getComputer(), key, repeat);
     }
 
     @Override
     public void keyUp(int key) {
         keysDown.remove(key);
-        owner.getComputer().keyUp(key);
+        ComputerEvents.keyUp(owner.getComputer(), key);
+    }
+
+    @Override
+    public void charTyped(byte chr) {
+        if (StringUtil.isTypableChar(chr)) ComputerEvents.charTyped(owner.getComputer(), chr);
+    }
+
+    @Override
+    public void paste(ByteBuffer contents) {
+        if (contents.remaining() > 0 && isValidClipboard(contents)) ComputerEvents.paste(owner.getComputer(), contents);
+    }
+
+    private static boolean isValidClipboard(ByteBuffer buffer) {
+        for (int i = buffer.position(), max = buffer.limit(); i < max; i++) {
+            if (!StringUtil.isTypableChar(buffer.get(i))) return false;
+        }
+        return true;
     }
 
     @Override
@@ -71,7 +86,7 @@ public class ServerInputState<T extends AbstractContainerMenu & ComputerMenu> im
         lastMouseY = y;
         lastMouseDown = button;
 
-        owner.getComputer().mouseClick(button, x, y);
+        ComputerEvents.mouseClick(owner.getComputer(), button, x, y);
     }
 
     @Override
@@ -80,7 +95,7 @@ public class ServerInputState<T extends AbstractContainerMenu & ComputerMenu> im
         lastMouseY = y;
         lastMouseDown = -1;
 
-        owner.getComputer().mouseUp(button, x, y);
+        ComputerEvents.mouseUp(owner.getComputer(), button, x, y);
     }
 
     @Override
@@ -89,7 +104,7 @@ public class ServerInputState<T extends AbstractContainerMenu & ComputerMenu> im
         lastMouseY = y;
         lastMouseDown = button;
 
-        owner.getComputer().mouseDrag(button, x, y);
+        ComputerEvents.mouseDrag(owner.getComputer(), button, x, y);
     }
 
     @Override
@@ -97,7 +112,12 @@ public class ServerInputState<T extends AbstractContainerMenu & ComputerMenu> im
         lastMouseX = x;
         lastMouseY = y;
 
-        owner.getComputer().mouseScroll(direction, x, y);
+        ComputerEvents.mouseScroll(owner.getComputer(), direction, x, y);
+    }
+
+    @Override
+    public void terminate() {
+        owner.getComputer().queueEvent("terminate");
     }
 
     @Override
@@ -169,9 +189,9 @@ public class ServerInputState<T extends AbstractContainerMenu & ComputerMenu> im
     public void close() {
         var computer = owner.getComputer();
         var keys = keysDown.iterator();
-        while (keys.hasNext()) computer.keyUp(keys.nextInt());
+        while (keys.hasNext()) ComputerEvents.keyUp(computer, keys.nextInt());
 
-        if (lastMouseDown != -1) computer.mouseUp(lastMouseDown, lastMouseX, lastMouseY);
+        if (lastMouseDown != -1) ComputerEvents.mouseUp(computer, lastMouseDown, lastMouseX, lastMouseY);
 
         keysDown.clear();
         lastMouseDown = -1;

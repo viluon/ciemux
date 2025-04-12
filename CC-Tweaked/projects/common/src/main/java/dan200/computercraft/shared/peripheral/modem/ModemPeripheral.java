@@ -13,8 +13,8 @@ import dan200.computercraft.api.network.PacketReceiver;
 import dan200.computercraft.api.network.PacketSender;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 

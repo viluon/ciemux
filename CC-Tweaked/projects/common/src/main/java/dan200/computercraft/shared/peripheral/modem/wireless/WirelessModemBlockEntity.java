@@ -15,8 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class WirelessModemBlockEntity extends BlockEntity {
     private static class Peripheral extends WirelessModemPeripheral {
@@ -39,7 +38,7 @@ public class WirelessModemBlockEntity extends BlockEntity {
 
         @Override
         public boolean equals(@Nullable IPeripheral other) {
-            return this == other || (other instanceof Peripheral && entity == ((Peripheral) other).entity);
+            return this == other || (other instanceof Peripheral o && entity == o.entity);
         }
 
         @Override

@@ -13,8 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class SpeakerBlockEntity extends BlockEntity {
     private final SpeakerPeripheral peripheral;
@@ -54,7 +53,7 @@ public class SpeakerBlockEntity extends BlockEntity {
 
         @Override
         public boolean equals(@Nullable IPeripheral other) {
-            return this == other || (other instanceof Peripheral && speaker == ((Peripheral) other).speaker);
+            return this == other || (other instanceof Peripheral o && speaker == o.speaker);
         }
     }
 }

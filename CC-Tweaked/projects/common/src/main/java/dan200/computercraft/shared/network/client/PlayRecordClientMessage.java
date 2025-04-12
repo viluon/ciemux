@@ -11,8 +11,7 @@ import dan200.computercraft.shared.peripheral.diskdrive.DiskDriveBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.sounds.SoundEvent;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Starts or stops a record on the client, depending on if {@link #soundEvent} is {@code null}.

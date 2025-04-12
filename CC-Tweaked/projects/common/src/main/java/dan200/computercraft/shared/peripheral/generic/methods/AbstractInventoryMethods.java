@@ -11,8 +11,8 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.GenericPeripheral;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.PeripheralType;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,8 +56,8 @@ public abstract class AbstractInventoryMethods<T> implements GenericPeripheral {
      * rather than [`ipairs`].
      *
      * @param inventory The current inventory.
-     * @return All items in this inventory.
-     * @cc.treturn { (table|nil)... } All items in this inventory.
+     * @return Basic information about all items in this inventory.
+     * @cc.treturn { (table|nil)... } Basic information about all items in this inventory.
      * @cc.usage Find an adjacent chest and print all items in it.
      *
      * <pre>{@code
@@ -89,9 +89,8 @@ public abstract class AbstractInventoryMethods<T> implements GenericPeripheral {
      *
      * @param inventory The current inventory.
      * @param slot      The slot to get information about.
-     * @return Information about the item in this slot, or {@code nil} if not present.
+     * @return Information about the item in this slot, or {@code nil} if it is empty.
      * @throws LuaException If the slot is out of range.
-     * @cc.treturn table Information about the item in this slot, or {@code nil} if not present.
      * @cc.usage Print some information about the first in a chest.
      *
      * <pre>{@code
@@ -109,7 +108,7 @@ public abstract class AbstractInventoryMethods<T> implements GenericPeripheral {
      */
     @Nullable
     @LuaFunction(mainThread = true)
-    public abstract Map<String, ?> getItemDetail(T inventory, int slot) throws LuaException;
+    public abstract Map<?, ?> getItemDetail(T inventory, int slot) throws LuaException;
 
     /**
      * Get the maximum number of items which can be stored in this slot.

@@ -11,12 +11,12 @@ import com.google.common.primitives.Primitives;
 import com.google.common.reflect.TypeToken;
 import dan200.computercraft.api.lua.*;
 import dan200.computercraft.core.methods.LuaMethod;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.teavm.metaprogramming.ReflectClass;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
@@ -124,8 +124,7 @@ public final class StaticGenerator<T> {
         }
     }
 
-    @Nullable
-    private byte[] generate(String className, Class<?> target, Method targetMethod, boolean unsafe) {
+    private byte @Nullable [] generate(String className, Class<?> target, Method targetMethod, boolean unsafe) {
         var internalName = className.replace(".", "/");
 
         // Construct a public final class which extends Object and implements MethodInstance.Delegate
@@ -207,8 +206,7 @@ public final class StaticGenerator<T> {
         return cw.toByteArray();
     }
 
-    @Nullable
-    private Boolean loadArg(MethodVisitor mw, Class<?> target, Method method, boolean unsafe, java.lang.reflect.Type genericArg, int argIndex) {
+    private @Nullable Boolean loadArg(MethodVisitor mw, Class<?> target, Method method, boolean unsafe, java.lang.reflect.Type genericArg, int argIndex) {
         if (genericArg == target) {
             mw.visitVarInsn(ALOAD, 1);
             mw.visitTypeInsn(CHECKCAST, Type.getInternalName(target));

@@ -19,10 +19,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LecternBlock;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class PrintoutItem extends Item {
@@ -35,17 +33,8 @@ public class PrintoutItem extends Item {
     public static final int LINE_MAX_LENGTH = 25;
     public static final int MAX_PAGES = 16;
 
-    public enum Type {
-        PAGE,
-        PAGES,
-        BOOK
-    }
-
-    private final Type type;
-
-    public PrintoutItem(Properties settings, Type type) {
+    public PrintoutItem(Properties settings) {
         super(settings);
-        this.type = type;
     }
 
     @Override
@@ -56,18 +45,7 @@ public class PrintoutItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        var level = context.getLevel();
-        var blockPos = context.getClickedPos();
-        var blockState = level.getBlockState(blockPos);
-        if (blockState.is(Blocks.LECTERN) && !blockState.getValue(LecternBlock.HAS_BOOK)) {
-            // If we have an empty lectern, place our book into it.
-            if (!level.isClientSide) {
-                CustomLecternBlock.replaceLectern(level, blockPos, blockState, context.getItemInHand());
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
-        } else {
-            return InteractionResult.PASS;
-        }
+        return CustomLecternBlock.defaultUseItemOn(context);
     }
 
     @Override
@@ -81,7 +59,7 @@ public class PrintoutItem extends Item {
         return new InteractionResultHolder<>(InteractionResult.sidedSuccess(world.isClientSide), stack);
     }
 
-    private ItemStack createFromTitleAndText(@Nullable String title, @Nullable String[] text, @Nullable String[] colours) {
+    private ItemStack createFromTitleAndText(@Nullable String title, String @Nullable [] text, String @Nullable [] colours) {
         var stack = new ItemStack(this);
 
         // Build NBT
@@ -104,20 +82,16 @@ public class PrintoutItem extends Item {
         return stack;
     }
 
-    public static ItemStack createSingleFromTitleAndText(@Nullable String title, @Nullable String[] text, @Nullable String[] colours) {
+    public static ItemStack createSingleFromTitleAndText(@Nullable String title, String @Nullable [] text, String @Nullable [] colours) {
         return ModRegistry.Items.PRINTED_PAGE.get().createFromTitleAndText(title, text, colours);
     }
 
-    public static ItemStack createMultipleFromTitleAndText(@Nullable String title, @Nullable String[] text, @Nullable String[] colours) {
+    public static ItemStack createMultipleFromTitleAndText(@Nullable String title, String @Nullable [] text, String @Nullable [] colours) {
         return ModRegistry.Items.PRINTED_PAGES.get().createFromTitleAndText(title, text, colours);
     }
 
-    public static ItemStack createBookFromTitleAndText(@Nullable String title, @Nullable String[] text, @Nullable String[] colours) {
+    public static ItemStack createBookFromTitleAndText(@Nullable String title, String @Nullable [] text, String @Nullable [] colours) {
         return ModRegistry.Items.PRINTED_BOOK.get().createFromTitleAndText(title, text, colours);
-    }
-
-    public Type getType() {
-        return type;
     }
 
     public static String getTitle(ItemStack stack) {

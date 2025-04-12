@@ -9,8 +9,8 @@ import dan200.computercraft.api.filesystem.FileOperationException;
 import dan200.computercraft.api.filesystem.Mount;
 import dan200.computercraft.api.filesystem.WritableMount;
 import dan200.computercraft.core.util.Nullability;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -220,8 +220,7 @@ public final class MemoryMount extends AbstractInMemoryMount<MemoryMount.FileEnt
     protected static final class FileEntry extends AbstractInMemoryMount.FileEntry<FileEntry> {
         FileTime created = EPOCH;
         FileTime modified = EPOCH;
-        @Nullable
-        byte[] contents;
+        byte @Nullable [] contents;
 
         int length;
 

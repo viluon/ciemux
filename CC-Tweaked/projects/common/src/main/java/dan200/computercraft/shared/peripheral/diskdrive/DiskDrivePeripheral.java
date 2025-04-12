@@ -10,8 +10,8 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.core.util.StringUtil;
 import dan200.computercraft.shared.media.items.DiskItem;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
@@ -60,9 +60,8 @@ public class DiskDrivePeripheral implements IPeripheral {
      * @return The label of the disk, or {@code nil} if either no disk is inserted or the disk doesn't have a label.
      * @cc.treturn string|nil The label of the disk, or {@code nil} if either no disk is inserted or the disk doesn't have a label.
      */
-    @Nullable
     @LuaFunction
-    public final Object[] getDiskLabel() {
+    public final @Nullable Object @Nullable [] getDiskLabel() {
         var media = diskDrive.getMedia();
         return media.media() == null ? null : new Object[]{ media.media().getLabel(media.stack()) };
     }
@@ -166,9 +165,8 @@ public class DiskDrivePeripheral implements IPeripheral {
      * @cc.treturn number|nil The ID of the disk in the drive, or {@code nil} if no disk with an ID is inserted.
      * @cc.since 1.4
      */
-    @Nullable
     @LuaFunction
-    public final Object[] getDiskID() {
+    public final @Nullable Object @Nullable [] getDiskID() {
         var disk = diskDrive.getMedia().stack();
         return disk.getItem() instanceof DiskItem ? new Object[]{ DiskItem.getDiskID(disk) } : null;
     }

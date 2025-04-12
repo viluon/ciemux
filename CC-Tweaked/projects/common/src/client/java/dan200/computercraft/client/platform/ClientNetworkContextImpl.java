@@ -26,8 +26,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**

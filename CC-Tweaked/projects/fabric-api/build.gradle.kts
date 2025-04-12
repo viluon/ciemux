@@ -7,10 +7,6 @@ plugins {
     id("cc-tweaked.publishing")
 }
 
-java {
-    withJavadocJar()
-}
-
 cct.inlineProject(":common-api")
 
 dependencies {

@@ -6,6 +6,7 @@ package dan200.computercraft.core.computer.computerthread;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.Keep;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import dan200.computercraft.core.ComputerContext;
 import dan200.computercraft.core.Logging;
 import dan200.computercraft.core.computer.TimeoutState;
@@ -13,11 +14,10 @@ import dan200.computercraft.core.metrics.Metrics;
 import dan200.computercraft.core.metrics.MetricsObserver;
 import dan200.computercraft.core.metrics.ThreadAllocations;
 import dan200.computercraft.core.util.ThreadUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.TreeSet;
@@ -242,7 +242,7 @@ public final class ComputerThread implements ComputerScheduler {
         // Encourage any currently running runners to terminate.
         threadLock.lock();
         try {
-            for (@Nullable var worker : workers) {
+            for (var worker : workers) {
                 if (worker == null) continue;
 
                 var executor = worker.currentExecutor.get();
@@ -349,7 +349,7 @@ public final class ComputerThread implements ComputerScheduler {
         // Update all the currently executing tasks
         var now = System.nanoTime();
         var tasks = 1 + computerQueue.size();
-        for (@Nullable var runner : workersReadOnly()) {
+        for (var runner : workersReadOnly()) {
             if (runner == null) continue;
             var executor = runner.currentExecutor.get();
             if (executor == null) continue;
@@ -431,6 +431,16 @@ public final class ComputerThread implements ComputerScheduler {
      */
     private boolean isBusy() {
         return computerQueueSize() > idleWorkers.get();
+    }
+
+    /**
+     * Determine if no work is queued, and all workers are idle.
+     *
+     * @return If the threads are fully idle.
+     */
+    @VisibleForTesting
+    boolean isFullyIdle() {
+        return computerQueueSize() == 0 && idleWorkers.get() >= workerCount();
     }
 
     private void workerFinished(WorkerThread worker) {

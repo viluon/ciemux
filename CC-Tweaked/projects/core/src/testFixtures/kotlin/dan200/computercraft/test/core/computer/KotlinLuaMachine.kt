@@ -21,7 +21,7 @@ abstract class KotlinLuaMachine(environment: MachineEnvironment) : ILuaMachine, 
         for (api in environment.apis) addApi(api)
     }
 
-    override fun handleEvent(eventName: String?, arguments: Array<out Any>?): MachineResult {
+    override fun handleEvent(eventName: String?, arguments: Array<out Any?>?): MachineResult {
         if (hasEventListeners) {
             queueEvent(eventName, arguments)
         } else {

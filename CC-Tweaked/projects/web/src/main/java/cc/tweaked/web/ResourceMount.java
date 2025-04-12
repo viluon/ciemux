@@ -7,8 +7,8 @@ package cc.tweaked.web;
 import cc.tweaked.web.js.Callbacks;
 import dan200.computercraft.core.apis.handles.ArrayByteChannel;
 import dan200.computercraft.core.filesystem.AbstractInMemoryMount;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.channels.SeekableByteChannel;
 
 /**
@@ -43,7 +43,7 @@ final class ResourceMount extends AbstractInMemoryMount<ResourceMount.FileEntry>
 
     protected static final class FileEntry extends AbstractInMemoryMount.FileEntry<FileEntry> {
         private final String path;
-        private @Nullable byte[] contents;
+        private byte @Nullable [] contents;
 
         FileEntry(String path) {
             this.path = path;

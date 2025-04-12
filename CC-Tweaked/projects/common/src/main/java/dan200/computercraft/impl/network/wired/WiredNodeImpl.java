@@ -11,8 +11,8 @@ import dan200.computercraft.api.network.wired.WiredNetwork;
 import dan200.computercraft.api.network.wired.WiredNode;
 import dan200.computercraft.api.network.wired.WiredSender;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;

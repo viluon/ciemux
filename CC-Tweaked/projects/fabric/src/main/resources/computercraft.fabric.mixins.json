@@ -13,8 +13,6 @@
         "ExplosionDamageCalculatorMixin",
         "ItemEntityMixin",
         "ItemMixin",
-        "ServerLevelMixin",
-        "TagEntryAccessor",
-        "TagsProviderMixin"
+        "ServerLevelMixin"
     ]
 }

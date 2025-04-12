@@ -12,6 +12,7 @@ import dan200.computercraft.api.filesystem.WritableMount;
 import dan200.computercraft.api.lua.GenericSource;
 import dan200.computercraft.api.lua.ILuaAPIFactory;
 import dan200.computercraft.api.media.MediaProvider;
+import dan200.computercraft.api.media.PrintoutContents;
 import dan200.computercraft.api.network.PacketNetwork;
 import dan200.computercraft.api.network.wired.WiredElement;
 import dan200.computercraft.api.network.wired.WiredNode;
@@ -27,8 +28,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Backing interface for {@link ComputerCraftAPI}
@@ -74,6 +74,9 @@ public interface ComputerCraftAPIService {
     DetailRegistry<ItemStack> getItemStackDetailRegistry();
 
     DetailRegistry<BlockReference> getBlockInWorldDetailRegistry();
+
+    @Nullable
+    PrintoutContents getPrintoutContents(ItemStack stack);
 
     final class Instance {
         static final @Nullable ComputerCraftAPIService INSTANCE;

@@ -11,8 +11,8 @@ import dan200.computercraft.shared.network.NetworkMessage;
 import dan200.computercraft.shared.network.NetworkMessages;
 import dan200.computercraft.shared.pocket.core.PocketServerComputer;
 import net.minecraft.network.FriendlyByteBuf;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**

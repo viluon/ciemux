@@ -1,0 +1,39 @@
+{
+    DataVersion: 3465,
+    size: [5, 5, 5],
+    data: [
+        {pos: [0, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [0, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [1, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [2, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [3, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 0], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 1], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 2], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 3], state: "minecraft:polished_andesite"},
+        {pos: [4, 0, 4], state: "minecraft:polished_andesite"},
+        {pos: [2, 1, 1], state: "computercraft:turtle_normal{facing:south,waterlogged:false}", nbt: {ComputerId: 1, Fuel: 0, Items: [{Count: 2b, Slot: 0b, id: "minecraft:pumpkin_pie"}], Label: "turtle_test.place_into_composter", On: 1b, Owner: {LowerId: -8822842774267890833L, Name: "Player328", UpperId: -1898723855450425618L}, Slot: 0, id: "computercraft:turtle_normal"}},
+        {pos: [2, 1, 2], state: "minecraft:composter{level:1}"}
+    ],
+    entities: [],
+    palette: [
+        "minecraft:polished_andesite",
+        "minecraft:composter{level:1}",
+        "computercraft:turtle_normal{facing:south,waterlogged:false}"
+    ]
+}

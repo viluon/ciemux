@@ -21,8 +21,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static dan200.computercraft.shared.turtle.core.TurtleBrain.*;
 

@@ -10,9 +10,9 @@ import dan200.computercraft.api.lua.LuaTable;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jspecify.annotations.Nullable;
 import org.teavm.jso.webaudio.AudioContext;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 import static dan200.computercraft.api.lua.LuaValues.checkFinite;

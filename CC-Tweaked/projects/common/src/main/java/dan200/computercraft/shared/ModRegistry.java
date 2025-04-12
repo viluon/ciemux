@@ -10,6 +10,8 @@ import dan200.computercraft.api.component.ComputerComponents;
 import dan200.computercraft.api.detail.DetailProvider;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.media.IMedia;
+import dan200.computercraft.api.network.wired.WiredElement;
+import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.pocket.PocketUpgradeSerialiser;
 import dan200.computercraft.api.turtle.TurtleUpgradeSerialiser;
 import dan200.computercraft.api.upgrades.UpgradeData;
@@ -28,6 +30,7 @@ import dan200.computercraft.shared.computer.blocks.CommandComputerBlock;
 import dan200.computercraft.shared.computer.blocks.ComputerBlock;
 import dan200.computercraft.shared.computer.blocks.ComputerBlockEntity;
 import dan200.computercraft.shared.computer.core.ComputerFamily;
+import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.computer.inventory.ComputerMenuWithoutInventory;
 import dan200.computercraft.shared.computer.items.CommandComputerItem;
 import dan200.computercraft.shared.computer.items.ComputerItem;
@@ -42,15 +45,14 @@ import dan200.computercraft.shared.details.ItemDetails;
 import dan200.computercraft.shared.integration.PermissionRegistry;
 import dan200.computercraft.shared.lectern.CustomLecternBlock;
 import dan200.computercraft.shared.lectern.CustomLecternBlockEntity;
+import dan200.computercraft.shared.media.MountMedia;
 import dan200.computercraft.shared.media.PrintoutMenu;
-import dan200.computercraft.shared.media.items.DiskItem;
-import dan200.computercraft.shared.media.items.PrintoutItem;
-import dan200.computercraft.shared.media.items.RecordMedia;
-import dan200.computercraft.shared.media.items.TreasureDiskItem;
+import dan200.computercraft.shared.media.items.*;
 import dan200.computercraft.shared.media.recipes.DiskRecipe;
 import dan200.computercraft.shared.media.recipes.PrintoutRecipe;
 import dan200.computercraft.shared.network.container.ComputerContainerData;
 import dan200.computercraft.shared.network.container.ContainerData;
+import dan200.computercraft.shared.peripheral.commandblock.CommandBlockPeripheral;
 import dan200.computercraft.shared.peripheral.diskdrive.DiskDriveBlock;
 import dan200.computercraft.shared.peripheral.diskdrive.DiskDriveBlockEntity;
 import dan200.computercraft.shared.peripheral.diskdrive.DiskDriveMenu;
@@ -89,11 +91,11 @@ import dan200.computercraft.shared.turtle.recipes.TurtleOverlayRecipe;
 import dan200.computercraft.shared.turtle.recipes.TurtleRecipe;
 import dan200.computercraft.shared.turtle.recipes.TurtleUpgradeRecipe;
 import dan200.computercraft.shared.turtle.upgrades.*;
-import dan200.computercraft.shared.util.ComponentMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -103,6 +105,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -112,6 +115,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -260,11 +264,11 @@ public final class ModRegistry {
             REGISTRY.register("treasure_disk", () -> new TreasureDiskItem(properties().stacksTo(1)));
 
         public static final RegistryEntry<PrintoutItem> PRINTED_PAGE = REGISTRY.register("printed_page",
-            () -> new PrintoutItem(properties().stacksTo(1), PrintoutItem.Type.PAGE));
+            () -> new PrintoutItem(properties().stacksTo(1)));
         public static final RegistryEntry<PrintoutItem> PRINTED_PAGES = REGISTRY.register("printed_pages",
-            () -> new PrintoutItem(properties().stacksTo(1), PrintoutItem.Type.PAGES));
+            () -> new PrintoutItem(properties().stacksTo(1)));
         public static final RegistryEntry<PrintoutItem> PRINTED_BOOK = REGISTRY.register("printed_book",
-            () -> new PrintoutItem(properties().stacksTo(1), PrintoutItem.Type.BOOK));
+            () -> new PrintoutItem(properties().stacksTo(1)));
 
         public static final RegistryEntry<BlockItem> SPEAKER = ofBlock(Blocks.SPEAKER, BlockItem::new);
         public static final RegistryEntry<BlockItem> DISK_DRIVE = ofBlock(Blocks.DISK_DRIVE, BlockItem::new);
@@ -462,16 +466,10 @@ public final class ModRegistry {
         // Register bundled power providers
         ComputerCraftAPI.registerBundledRedstoneProvider(new DefaultBundledRedstoneProvider());
         ComputerCraftAPI.registerRefuelHandler(new FurnaceRefuelHandler());
-        ComputerCraftAPI.registerMediaProvider(stack -> {
-            var item = stack.getItem();
-            if (item instanceof IMedia media) return media;
-            if (item instanceof RecordItem) return RecordMedia.INSTANCE;
-            return null;
-        });
 
         ComputerCraftAPI.registerAPIFactory(computer -> {
             var turtle = computer.getComponent(ComputerComponents.TURTLE);
-            var metrics = Objects.requireNonNull(computer.getComponent(ComponentMap.METRICS));
+            var metrics = Objects.requireNonNull(computer.getComponent(ServerComputer.METRICS));
             return turtle == null ? null : new TurtleAPI(metrics, (TurtleAccessInternal) turtle);
         });
 
@@ -495,6 +493,76 @@ public final class ModRegistry {
     public static void registerMainThread() {
         CauldronInteraction.WATER.put(Items.TURTLE_NORMAL.get(), TurtleItem.CAULDRON_INTERACTION);
         CauldronInteraction.WATER.put(Items.TURTLE_ADVANCED.get(), TurtleItem.CAULDRON_INTERACTION);
+    }
+
+    /**
+     * Register our peripherals.
+     *
+     * @param peripherals The object to register our peripheral capability/lookups with.
+     */
+    public static void registerPeripherals(BlockComponent<IPeripheral, Direction> peripherals) {
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.COMPUTER_NORMAL.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.COMPUTER_ADVANCED.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.TURTLE_NORMAL.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.TURTLE_ADVANCED.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.SPEAKER.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.PRINTER.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.DISK_DRIVE.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.MONITOR_NORMAL.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.MONITOR_ADVANCED.get(), (b, d) -> b.peripheral());
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.WIRELESS_MODEM_NORMAL.get(), WirelessModemBlockEntity::getPeripheral);
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.WIRELESS_MODEM_ADVANCED.get(), WirelessModemBlockEntity::getPeripheral);
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.WIRED_MODEM_FULL.get(), WiredModemFullBlockEntity::getPeripheral);
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.CABLE.get(), CableBlockEntity::getPeripheral);
+        peripherals.registerForBlockEntity(ModRegistry.BlockEntities.REDSTONE_RELAY.get(), (b, d) -> b.peripheral());
+
+        peripherals.registerForBlockEntity(BlockEntityType.COMMAND_BLOCK, (b, d) -> Config.enableCommandBlock ? new CommandBlockPeripheral(b) : null);
+    }
+
+    public static void registerWiredElements(BlockComponent<WiredElement, Direction> wiredElements) {
+        wiredElements.registerForBlockEntity(ModRegistry.BlockEntities.WIRED_MODEM_FULL.get(), (b, d) -> b.getElement());
+        wiredElements.registerForBlockEntity(ModRegistry.BlockEntities.CABLE.get(), CableBlockEntity::getWiredElement);
+    }
+
+    /**
+     * Register our custom {@link IMedia} implementations.
+     *
+     * @param media The object to register our media capabilities/lookups with.
+     */
+    public static void registerMedia(ItemComponent<IMedia> media) {
+        media.registerForItems((s, c) -> MountMedia.COMPUTER,
+            ModRegistry.Items.COMPUTER_NORMAL.get(), ModRegistry.Items.COMPUTER_ADVANCED.get(),
+            ModRegistry.Items.TURTLE_NORMAL.get(), ModRegistry.Items.TURTLE_ADVANCED.get(),
+            ModRegistry.Items.POCKET_COMPUTER_NORMAL.get(), ModRegistry.Items.POCKET_COMPUTER_ADVANCED.get()
+        );
+        media.registerForItems((s, c) -> MountMedia.DISK, ModRegistry.Items.DISK.get());
+        media.registerForItems((s, c) -> TreasureDiskMedia.INSTANCE, ModRegistry.Items.TREASURE_DISK.get());
+        media.registerFallback((stack, ctx) -> {
+            if (stack.getItem() instanceof IMedia m) return m;
+            if (stack.getItem() instanceof RecordItem) return RecordMedia.INSTANCE;
+            return null;
+        });
+    }
+
+    /**
+     * An abstraction for registering capabilities/block lookups for blocks and block entities.
+     *
+     * @param <T> The type of the component.
+     * @param <C> The context parameter to the component.
+     */
+    public interface BlockComponent<T, C extends @Nullable Object> {
+        <B extends BlockEntity> void registerForBlockEntity(BlockEntityType<B> blockEntityType, BiFunction<? super B, C, @Nullable T> provider);
+    }
+
+    /**
+     * An abstraction for registering capabilities/block lookups for items.
+     *
+     * @param <T> The type of the component.
+     */
+    public interface ItemComponent<T> {
+        void registerForItems(BiFunction<ItemStack, @Nullable Void, @Nullable T> provider, ItemLike... items);
+
+        void registerFallback(BiFunction<ItemStack, @Nullable Void, @Nullable T> provider);
     }
 
     private static void addTurtle(CreativeModeTab.Output out, TurtleItem turtle) {

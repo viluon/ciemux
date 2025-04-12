@@ -5,8 +5,8 @@
 package dan200.computercraft.impl.network.wired;
 
 import dan200.computercraft.api.network.wired.WiredNode;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**

@@ -7,8 +7,8 @@ package dan200.computercraft.shared.peripheral.modem;
 import dan200.computercraft.api.lua.LuaException;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ModemState {

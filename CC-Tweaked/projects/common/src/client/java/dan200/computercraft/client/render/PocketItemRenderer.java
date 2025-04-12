@@ -38,8 +38,8 @@ public final class PocketItemRenderer extends ItemMapLikeRenderer {
 
         int termWidth, termHeight;
         if (terminal == null) {
-            termWidth = Config.pocketTermWidth;
-            termHeight = Config.pocketTermHeight;
+            termWidth = Config.DEFAULT_POCKET_TERM_WIDTH;
+            termHeight = Config.DEFAULT_POCKET_TERM_HEIGHT;
         } else {
             termWidth = terminal.getWidth();
             termHeight = terminal.getHeight();

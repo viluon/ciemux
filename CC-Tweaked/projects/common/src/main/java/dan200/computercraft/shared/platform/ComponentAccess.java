@@ -5,8 +5,7 @@
 package dan200.computercraft.shared.platform;
 
 import net.minecraft.core.Direction;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A (possibly cached) provider of a component at a specific location.

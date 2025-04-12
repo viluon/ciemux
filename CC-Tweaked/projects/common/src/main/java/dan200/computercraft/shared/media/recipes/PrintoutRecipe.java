@@ -58,7 +58,7 @@ public final class PrintoutRecipe extends CustomRecipe {
             for (var x = 0; x < inventory.getWidth(); x++) {
                 var stack = inventory.getItem(x + y * inventory.getWidth());
                 if (!stack.isEmpty()) {
-                    if (stack.getItem() instanceof PrintoutItem printout && printout.getType() != PrintoutItem.Type.BOOK) {
+                    if (stack.is(ModRegistry.Items.PRINTED_PAGE.get()) || stack.is(ModRegistry.Items.PRINTED_PAGES.get())) {
                         if (printouts == null) printouts = new ItemStack[9];
                         printouts[numPrintouts] = stack;
                         numPages += PrintoutItem.getPageCount(stack);

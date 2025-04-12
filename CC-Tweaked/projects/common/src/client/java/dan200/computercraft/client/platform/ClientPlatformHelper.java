@@ -13,8 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.sounds.SoundEvent;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface ClientPlatformHelper extends dan200.computercraft.impl.client.ClientPlatformHelper {
     static ClientPlatformHelper get() {
@@ -39,7 +38,7 @@ public interface ClientPlatformHelper extends dan200.computercraft.impl.client.C
      * @param overlayLight  The current overlay light.
      * @param tints         Block colour tints to apply to the model.
      */
-    void renderBakedModel(PoseStack transform, MultiBufferSource buffers, BakedModel model, int lightmapCoord, int overlayLight, @Nullable int[] tints);
+    void renderBakedModel(PoseStack transform, MultiBufferSource buffers, BakedModel model, int lightmapCoord, int overlayLight, int @Nullable [] tints);
 
     /**
      * Play a record at a particular position.

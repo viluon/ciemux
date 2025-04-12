@@ -5,9 +5,9 @@
 package dan200.computercraft.core.apis.handles;
 
 import dan200.computercraft.api.lua.LuaException;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

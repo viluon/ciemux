@@ -35,7 +35,7 @@ class MultiTestReporter(private val reporters: List<TestReporter>) : TestReporte
  * Reports tests to a JUnit XML file. This is equivalent to [JUnitLikeTestReporter], except it ensures the destination
  * directory exists.
  */
-class JunitTestReporter constructor(destination: File) : JUnitLikeTestReporter(destination) {
+class JunitTestReporter(destination: File) : JUnitLikeTestReporter(destination) {
     override fun save(file: File) {
         try {
             Files.createDirectories(file.toPath().parent)

@@ -1,3 +1,41 @@
+# New features in CC: Tweaked 1.115.1
+
+* Update various translations (cyb3r, kevk2156, teamer337, yakku).
+* Support Fabric's item lookup API for registering media providers.
+
+Several bug fixes:
+* Fix crashes on Create 6.0 (ellellie).
+* Fix `speaker.playAudio` not updating speaker volume.
+* Resize pocket lectern textures to fix issues with generating mipmaps.
+
+# New features in CC: Tweaked 1.115.0
+
+* Support placing pocket computers on lecterns.
+* Suggest alternative table keys on `nil` errors.
+* Errors from inside `parallel` functions now have source information attached.
+* Expose printout contents to the Java API.
+
+Several bug fixes:
+* Ignore unrepresentable characters in `char`/`paste` events.
+
+# New features in CC: Tweaked 1.114.4
+
+* Allow typing/pasting any character in the CC charset.
+
+Several bug fixes:
+* Fix command computers being exposed as peripherals (Forge only).
+* Fix command computers having NBT set when placed in a Create contraption.
+* Use correct bounding box when checking for entities in turtle movement.
+
+# New features in CC: Tweaked 1.114.3
+
+* `wget` now prints the error that occurred, rather than a generic "Failed" (tizu69).
+* Update several translations.
+
+Several bug fixes:
+* Fix `fs.isDriveRoot` returning true for non-existent files.
+* Fix possible memory leak when sending terminal contents.
+
 # New features in CC: Tweaked 1.114.2
 
 One bug fix:

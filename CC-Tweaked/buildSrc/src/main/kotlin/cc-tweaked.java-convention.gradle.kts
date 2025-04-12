@@ -29,7 +29,7 @@ base.archivesName.convention("cc-tweaked-$mcVersion-${project.name}")
 
 java {
     toolchain {
-        languageVersion.set(CCTweakedPlugin.JAVA_VERSION)
+        languageVersion = CCTweakedPlugin.JAVA_VERSION
     }
 
     withSourcesJar()
@@ -45,13 +45,6 @@ repositories {
 
     exclusiveContent {
         forRepositories(mainMaven)
-
-        // Include the ForgeGradle repository if present. This requires that ForgeGradle is already present, which we
-        // enforce in our Forge overlay.
-        val fg =
-            project.extensions.findByType(net.minecraftforge.gradle.userdev.DependencyManagementExtension::class.java)
-        if (fg != null) forRepositories(fg.repository)
-
         filter {
             includeGroup("cc.tweaked")
             // Things we mirror
@@ -92,14 +85,15 @@ sourceSets.all {
 
         options.errorprone {
             check("InvalidBlockTag", CheckSeverity.OFF) // Broken by @cc.xyz
-            check("InvalidParam", CheckSeverity.OFF) // Broken by records.
             check("InlineMeSuggester", CheckSeverity.OFF) // Minecraft uses @Deprecated liberally
             // Too many false positives right now. Maybe we need an indirection for it later on.
+            check("AssignmentExpression", CheckSeverity.OFF) // I'm a bad person.
             check("ReferenceEquality", CheckSeverity.OFF)
             check("EnumOrdinal", CheckSeverity.OFF) // For now. We could replace most of these with EnumMap.
             check("OperatorPrecedence", CheckSeverity.OFF) // For now.
             check("NonOverridingEquals", CheckSeverity.OFF) // Peripheral.equals makes this hard to avoid
             check("FutureReturnValueIgnored", CheckSeverity.OFF) // Too many false positives with Netty
+            check("InvalidInlineTag", CheckSeverity.OFF) // Triggered by @snippet. Can be removed on Java 21.
 
             check("NullAway", CheckSeverity.ERROR)
             option(
@@ -121,7 +115,6 @@ tasks.compileTestJava {
         check("NullAway", CheckSeverity.OFF)
     }
 }
-
 
 tasks.withType(JavaCompile::class.java).configureEach {
     options.encoding = "UTF-8"
@@ -170,8 +163,8 @@ tasks.test {
 }
 
 tasks.withType(JacocoReport::class.java).configureEach {
-    reports.xml.required.set(true)
-    reports.html.required.set(true)
+    reports.xml.required = true
+    reports.html.required = true
 }
 
 project.plugins.withType(CCTweakedPlugin::class.java) {
@@ -195,30 +188,23 @@ spotless {
     fun FormatExtension.defaults() {
         endWithNewline()
         trimTrailingWhitespace()
-        indentWithSpaces(4)
+        leadingTabsToSpaces(4)
     }
 
     java {
         defaults()
+        importOrder("", "javax|java", "\\#")
         removeUnusedImports()
     }
 
-    val ktlintConfig = mapOf(
-        "ktlint_standard_no-wildcard-imports" to "disabled",
-        "ktlint_standard_class-naming" to "disabled",
-        "ktlint_standard_function-naming" to "disabled",
-        "ij_kotlin_allow_trailing_comma" to "true",
-        "ij_kotlin_allow_trailing_comma_on_call_site" to "true",
-    )
-
     kotlinGradle {
         defaults()
-        ktlint().editorConfigOverride(ktlintConfig)
+        ktlint()
     }
 
     kotlin {
         defaults()
-        ktlint().editorConfigOverride(ktlintConfig)
+        ktlint()
     }
 }
 
@@ -227,6 +213,5 @@ idea.module {
 
     // Force Gradle to write to inherit the output directory from the parent, instead of writing to out/xxx/classes.
     // This is required for Loom, and we patch Forge's run configurations to work there.
-    // TODO: Submit a patch to Forge to support ProjectRootManager.
     inheritOutputDirs = true
 }
