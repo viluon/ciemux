@@ -368,6 +368,7 @@ object LuaToScalaCompiler:
 						assert(GET_OPCODE(code(pc)) == OP_TFORLOOP)
 						// TODO: no fallthrough atm
 						// fallthrough to OP_TFORLOOP, avoiding an extra interpreter loop.
+						di.pc = pc;
 						return LuaToScalaCompiler.execute(state, di, function)
 
 					case OP_TFORLOOP =>
