@@ -3,17 +3,17 @@ package org.squiddev.cobalt.function
 import org.squiddev.cobalt.Constants.{FALSE, NIL, NONE, TRUE}
 import org.squiddev.cobalt.Lua.{GETARG_A, GETARG_Ax, GETARG_B, GETARG_Bx, GETARG_C, GETARG_sBx, GET_OPCODE, LFIELDS_PER_FLUSH, OP_ADD, OP_CALL, OP_CLOSURE, OP_CONCAT, OP_DIV, OP_EQ, OP_EXTRAARG, OP_FORLOOP, OP_FORPREP, OP_GETTABLE, OP_GETTABUP, OP_GETUPVAL, OP_JMP, OP_LE, OP_LEN, OP_LOADBOOL, OP_LOADK, OP_LOADKX, OP_LOADNIL, OP_LT, OP_MOD, OP_MOVE, OP_MUL, OP_NEWTABLE, OP_NOT, OP_POW, OP_RETURN, OP_SELF, OP_SETLIST, OP_SETTABLE, OP_SETTABUP, OP_SETUPVAL, OP_SUB, OP_TAILCALL, OP_TEST, OP_TESTSET, OP_TFORCALL, OP_TFORLOOP, OP_UNM, OP_VARARG}
 import org.squiddev.cobalt.LuaDouble.valueOf
-import org.squiddev.cobalt.{LuaError, LuaNumber, LuaState, LuaTable, LuaValue, OperationHelper, Prototype, UnwindThrowable, ValueFactory, Varargs}
 import org.squiddev.cobalt.debug.DebugFrame.{FLAG_FRESH, FLAG_TAIL}
-import org.squiddev.cobalt.debug.{DebugFrame, DebugState, Upvalue}
-import org.squiddev.cobalt.function.LuaInterpreter.{concat, createStack, doJump, getRK, luaO_fb2int, nativeCall, setupStack}
+import org.squiddev.cobalt.debug.{DebugFrame, DebugState}
+import org.squiddev.cobalt.function.LuaInterpreter.{concat, createStack, doJump, getRK, luaO_fb2int, nativeCall, resume, setupCall, setupFrame, setupStack}
+import org.squiddev.cobalt.{LuaError, LuaState, LuaTable, OperationHelper, UnwindThrowable, ValueFactory, Varargs}
 
 object LuaToScalaCompiler:
 	@throws[LuaError]
 	@throws[UnwindThrowable]
 	def execute(state: LuaState, di: DebugFrame, function: LuaInterpretedFunction): Varargs = {
 		val ds = DebugState.get(state)
-		newFrame //todo: labels are not supported
+//		newFrame //todo: labels are not supported
 		while (true) {
 			// Fetch all info from the function
 			val p = function.p
@@ -24,6 +24,7 @@ object LuaToScalaCompiler:
 			val stack = di.stack
 			val varargs = di.varargs
 			var pc = di.pc
+
 			// process instructions
 			while (true) {
 				di.pc = pc
@@ -63,13 +64,16 @@ object LuaToScalaCompiler:
 					case OP_LOADNIL =>
 						// A B     R(A), R(A+1), ..., R(A+B) := nil
 						var b = GETARG_B(i)
-						do stack({
-							a += 1;
-							a - 1
-						}) = NIL while ( {
-							b -= 1;
-							b + 1
-						} > 0)
+						while
+							stack({
+								a += 1;
+								a - 1
+							}) = NIL
+							{
+								b -= 1;
+								b + 1
+							} > 0
+						do ()
 
 
 					case OP_GETUPVAL => // A B: R(A):= UpValue[B]
@@ -113,7 +117,8 @@ object LuaToScalaCompiler:
 						// A B C: R(A+1):= R(B): R(A):= R(B)[RK(C)]
 						val b = GETARG_B(i)
 						val c = GETARG_C(i)
-						val o = stack(a + 1) = stack(b)
+						val o = stack(b)
+						stack(a + 1) = o
 						stack(a) = OperationHelper.getTable(state, o, getRK(stack, k, c), b)
 
 
@@ -242,7 +247,7 @@ object LuaToScalaCompiler:
 						val c = GETARG_C(i)
 						val `val` = stack(a)
 						if (`val`.isInstanceOf[LuaInterpretedFunction]) {
-							function = `val`.asInstanceOf[LuaInterpretedFunction]
+							val function = `val`.asInstanceOf[LuaInterpretedFunction]
 							val newPrototype = function.p
 							val newStack = createStack(newPrototype)
 							val newFrame = ds.pushInfo
@@ -250,9 +255,7 @@ object LuaToScalaCompiler:
 							else setupStack(newPrototype, newStack, ValueFactory.varargsOfCopy(stack, a + 1, di.top - di.extras.count - (a + 1), di.extras)) // From previous top
 
 							setupFrame(ds, newFrame, function, args, newStack, 0)
-							di = newFrame
-							continue newFrame //todo: continue is not supported
-
+							return LuaToScalaCompiler.execute(state, newFrame, function)
 						}
 						else nativeCall(state, di, stack, `val`, i, a, b, c)
 
@@ -260,6 +263,7 @@ object LuaToScalaCompiler:
 					case OP_TAILCALL =>
 						// A B C: return R(A)(R(A+1), ... ,R(A+B-1))
 						val b = GETARG_B(i)
+
 						val `val` = stack(a)
 						var args: Varargs = null
 						b match {
@@ -269,33 +273,35 @@ object LuaToScalaCompiler:
 								args = if (b > 0) ValueFactory.varargsOfCopy(stack, a + 1, b - 1)
 								else ValueFactory.varargsOfCopy(stack, a + 1, di.top - v.count - (a + 1), v) // exact arg count
 							// from prev top
-
-
 						}
+
 						var functionVal: LuaFunction = null
-						if (`val`.isInstanceOf[LuaFunction]) functionVal = func
+						if (`val`.isInstanceOf[LuaFunction]) functionVal = `val`.asInstanceOf[LuaFunction]
 						else {
 							functionVal = Dispatch.getCallMetamethod(state, `val`, a)
 							args = ValueFactory.varargsOf(`val`, args)
 						}
+
 						if (functionVal.isInstanceOf[LuaInterpretedFunction]) {
 							val flags = di.flags
 							di.cleanup()
 							ds.popInfo()
-							// FIXME: Return hook???!?
-							// Replace the current frame with a new one.
-							function = functionVal.asInstanceOf[LuaInterpretedFunction]
-							di = if ((flags & FLAG_FRESH) != 0) ds.pushJavaInfo
-							else ds.pushInfo
-							setupCall(ds, di, function, args, (flags & FLAG_FRESH) | FLAG_TAIL)
-							continue newFrame //todo: continue is not supported
 
+							// FIXME: Return hook???!?
+
+							// Replace the current frame with a new one.
+							val function = functionVal.asInstanceOf[LuaInterpretedFunction]
+							val di2 = if ((flags & FLAG_FRESH) != 0) ds.pushJavaInfo
+							else ds.pushInfo
+							setupCall(ds, di2, function, args, (flags & FLAG_FRESH) | FLAG_TAIL)
+							return LuaToScalaCompiler.execute(state, di2, function)
 						}
 						else {
 							val v = Dispatch.invoke(state, functionVal, args)
 							di.top = a + v.count
 							di.extras = v
 
+							// TODO: break
 						}
 
 					case OP_RETURN =>
@@ -313,11 +319,10 @@ object LuaToScalaCompiler:
 						}
 						else {
 							ds.onReturn(di, ret)
-							di = ds.getStackUnsafe
-							function = di.func.asInstanceOf[LuaInterpretedFunction]
-							resume(state, di, function, ret)
-							continue newFrame //todo: continue is not supported
-
+							val di2 = ds.getStackUnsafe
+							val function = di2.func.asInstanceOf[LuaInterpretedFunction]
+							resume(state, di2, function, ret)
+							return LuaToScalaCompiler.execute(state, di2, function)
 						}
 
 					case OP_FORLOOP =>
@@ -328,7 +333,9 @@ object LuaToScalaCompiler:
 						val idx = step + value
 						if (if (0 < step) idx <= limit
 						else limit <= idx) {
-							stack(a + 3) = stack(a) = valueOf(idx)
+							val v = valueOf(idx)
+							stack(a) = v
+							stack(a + 3) = v
 							pc += GETARG_sBx(i)
 						}
 
@@ -345,7 +352,8 @@ object LuaToScalaCompiler:
 
 
 					case OP_TFORCALL =>
-						val result = Dispatch.invoke(state, stack(a), ValueFactory.varargsOf(stack(a + 1), stack(a + 2)), a)
+						val varargs = ValueFactory.varargsOf(stack(a + 1), stack(a + 2))
+						val result = Dispatch.invoke(state, stack(a), varargs, a)
 						for (c <- GETARG_C(i) to 1 by -1) {
 							stack(a + 2 + c) = result.arg(c)
 						}
@@ -356,6 +364,7 @@ object LuaToScalaCompiler:
 						a = GETARG_A(i)
 						assert(GET_OPCODE(i) == OP_TFORLOOP)
 
+					// TODO: no fallthrough atm
 					// fallthrough to OP_TFORLOOP, avoiding an extra interpreter loop.
 					case OP_TFORLOOP =>
 						val value = stack(a + 1)
@@ -434,4 +443,6 @@ object LuaToScalaCompiler:
 				}
 			}
 		}
+
+		???
 	}

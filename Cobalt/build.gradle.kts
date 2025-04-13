@@ -37,6 +37,11 @@ val checkerFramework by configurations.creating {
 
 tasks.withType<ScalaCompile> {
 	source = source.filter { it.name != "module-info.java" }.asFileTree
+
+//	scalaCompileOptions.debugLevel = "verbose"
+	scalaCompileOptions.additionalParameters = listOf(
+		"--explain-types",
+	)
 }
 
 dependencies {

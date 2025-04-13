@@ -131,7 +131,7 @@ final class LuaInterpreter {
 		setupFrame(ds, frame, function, args, stack, flags);
 	}
 
-	private static void setupFrame(DebugState ds, DebugFrame di, LuaClosure function, Varargs varargs, LuaValue[] stack, int flags) throws UnwindThrowable, LuaError {
+	static void setupFrame(DebugState ds, DebugFrame di, LuaClosure function, Varargs varargs, LuaValue[] stack, int flags) throws UnwindThrowable, LuaError {
 		di.func = function;
 		di.closure = function;
 		di.varargs = varargs;

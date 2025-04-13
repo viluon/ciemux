@@ -203,7 +203,7 @@ public final class StringLib {
 		for (int i = 0; i < n; i++) {
 			v[i] = valueOf(s.charAt(posi + i - 1));
 		}
-		return varargsOf(v);
+		return varargsOfMany(v);
 	}
 
 	/**

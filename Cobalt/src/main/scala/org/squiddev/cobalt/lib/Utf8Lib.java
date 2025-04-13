@@ -219,7 +219,7 @@ public final class Utf8Lib {
 			while (isCont(s, idx)) idx++;
 		}
 		if (idx >= s.length()) {
-			return varargsOf();
+			return ValueFactory.varargsOfMany();
 		} else {
 			long codepoint = decodeUtf8(s, idx, off);
 			if (codepoint == -1 || isCont(s, idx + off.value)) throw new LuaError("invalid UTF-8 code");

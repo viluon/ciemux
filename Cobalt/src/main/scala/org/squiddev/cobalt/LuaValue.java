@@ -768,7 +768,7 @@ public abstract class LuaValue extends Varargs {
 	 * This is an internal class not intended to be used directly.
 	 * Instead use the corresponding static methods on LuaValue.
 	 *
-	 * @see ValueFactory#varargsOf(LuaValue[])
+	 * @see ValueFactory#varargsOfMany(LuaValue[])
 	 */
 	protected static final class ArrayVarargs extends DepthVarargs {
 		private final LuaValue[] v;
@@ -782,7 +782,7 @@ public abstract class LuaValue extends Varargs {
 		 *
 		 * @param v The initial values
 		 * @param r Remaining arguments
-		 * @see ValueFactory#varargsOf(LuaValue[])
+		 * @see ValueFactory#varargsOfMany(LuaValue[])
 		 */
 		public ArrayVarargs(LuaValue[] v, Varargs r) {
 			super(depth(r) + 1);

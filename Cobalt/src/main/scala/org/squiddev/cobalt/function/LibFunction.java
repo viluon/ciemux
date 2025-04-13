@@ -254,7 +254,7 @@ public sealed abstract class LibFunction extends LuaFunction
 	 * @return All return values as a {@link Varargs} instance.
 	 * @throws LuaError        If the invoked function throws an error.
 	 * @throws UnwindThrowable If this function transfers control to another coroutine.
-	 * @see ValueFactory#varargsOf(LuaValue[])
+	 * @see ValueFactory#varargsOfMany(LuaValue[])
 	 * @see #call(LuaState, LuaValue)
 	 */
 	protected abstract Varargs invoke(LuaState state, Varargs args) throws LuaError, UnwindThrowable;

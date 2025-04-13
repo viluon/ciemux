@@ -390,7 +390,7 @@ public final class TableLib {
 
 			LuaValue[] values = new LuaValue[(int) size];
 			for (int i = 0; i < size; i++) values[i] = tbl.rawget(start + i);
-			return varargsOf(values);
+			return ValueFactory.varargsOfMany(values);
 		}
 
 		// Exactly the same code as above, but using OperationHelper.
@@ -403,7 +403,7 @@ public final class TableLib {
 				LuaValue value = OperationHelper.getTable(state, table, i);
 				values[i - start] = value;
 			}
-			return varargsOf(values);
+			return ValueFactory.varargsOfMany(values);
 		});
 	}
 }
