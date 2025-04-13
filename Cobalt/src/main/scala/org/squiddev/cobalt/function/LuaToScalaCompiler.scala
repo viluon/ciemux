@@ -1,0 +1,437 @@
+package org.squiddev.cobalt.function
+
+import org.squiddev.cobalt.Constants.{FALSE, NIL, NONE, TRUE}
+import org.squiddev.cobalt.Lua.{GETARG_A, GETARG_Ax, GETARG_B, GETARG_Bx, GETARG_C, GETARG_sBx, GET_OPCODE, LFIELDS_PER_FLUSH, OP_ADD, OP_CALL, OP_CLOSURE, OP_CONCAT, OP_DIV, OP_EQ, OP_EXTRAARG, OP_FORLOOP, OP_FORPREP, OP_GETTABLE, OP_GETTABUP, OP_GETUPVAL, OP_JMP, OP_LE, OP_LEN, OP_LOADBOOL, OP_LOADK, OP_LOADKX, OP_LOADNIL, OP_LT, OP_MOD, OP_MOVE, OP_MUL, OP_NEWTABLE, OP_NOT, OP_POW, OP_RETURN, OP_SELF, OP_SETLIST, OP_SETTABLE, OP_SETTABUP, OP_SETUPVAL, OP_SUB, OP_TAILCALL, OP_TEST, OP_TESTSET, OP_TFORCALL, OP_TFORLOOP, OP_UNM, OP_VARARG}
+import org.squiddev.cobalt.LuaDouble.valueOf
+import org.squiddev.cobalt.{LuaError, LuaNumber, LuaState, LuaTable, LuaValue, OperationHelper, Prototype, UnwindThrowable, ValueFactory, Varargs}
+import org.squiddev.cobalt.debug.DebugFrame.{FLAG_FRESH, FLAG_TAIL}
+import org.squiddev.cobalt.debug.{DebugFrame, DebugState, Upvalue}
+import org.squiddev.cobalt.function.LuaInterpreter.{concat, createStack, doJump, getRK, luaO_fb2int, nativeCall, setupStack}
+
+object LuaToScalaCompiler:
+	@throws[LuaError]
+	@throws[UnwindThrowable]
+	def execute(state: LuaState, di: DebugFrame, function: LuaInterpretedFunction): Varargs = {
+		val ds = DebugState.get(state)
+		newFrame //todo: labels are not supported
+		while (true) {
+			// Fetch all info from the function
+			val p = function.p
+			val upvalues = function.upvalues
+			val code = p.code
+			val k = p.constants
+			// And from the debug info
+			val stack = di.stack
+			val varargs = di.varargs
+			var pc = di.pc
+			// process instructions
+			while (true) {
+				di.pc = pc
+				if (state.isInterrupted) state.handleInterrupt()
+				ds.onInstruction(di, pc)
+				// pull out instruction
+				var i = code({
+					pc += 1;
+					pc - 1
+				})
+				var a = GETARG_A(i)
+				// process the instruction
+				GET_OPCODE(i) match {
+					case OP_MOVE => // A B: R(A):= R(B)
+						stack(a) = stack(GETARG_B(i))
+
+					case OP_LOADK => // A Bx: R(A):= Kst(Bx)
+						stack(a) = k(GETARG_Bx(i))
+
+					case OP_LOADKX =>
+						// A: R(A) := Kst(extra arg)
+						assert(GET_OPCODE(code(pc)) == OP_EXTRAARG)
+						val rb = GETARG_Ax(code({
+							pc += 1;
+							pc - 1
+						}))
+						stack(a) = k(rb)
+
+
+					case OP_LOADBOOL =>
+						// A B C: R(A):= (Bool)B: if (C) pc++
+						stack(a) = if (GETARG_B(i) != 0) TRUE
+						else FALSE
+						if (GETARG_C(i) != 0) pc += 1 // skip next instruction (if C)
+
+
+					case OP_LOADNIL =>
+						// A B     R(A), R(A+1), ..., R(A+B) := nil
+						var b = GETARG_B(i)
+						do stack({
+							a += 1;
+							a - 1
+						}) = NIL while ( {
+							b -= 1;
+							b + 1
+						} > 0)
+
+
+					case OP_GETUPVAL => // A B: R(A):= UpValue[B]
+						stack(a) = upvalues(GETARG_B(i)).getValue
+
+					case OP_GETTABUP =>
+						// A B C: R(A) := UpValue[B][RK(C)]
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.getTable(state, upvalues(b).getValue, getRK(stack, k, c), -b - 1)
+
+
+					case OP_GETTABLE =>
+						// A B C: R(A):= R(B)[RK(C)]
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.getTable(state, stack(b), getRK(stack, k, c), b)
+
+
+					case OP_SETTABUP =>
+						// A B C: UpValue[A][RK(B)] := RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						OperationHelper.setTable(state, upvalues(a).getValue, getRK(stack, k, b), getRK(stack, k, c), -b - 1)
+
+
+					case OP_SETUPVAL => // A B: UpValue[B]:= R(A)
+						upvalues(GETARG_B(i)).setValue(stack(a))
+
+					case OP_SETTABLE =>
+						// A B C: R(A)[RK(B)]:= RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						OperationHelper.setTable(state, stack(a), getRK(stack, k, b), getRK(stack, k, c), a)
+
+
+					case OP_NEWTABLE => // A B C: R(A):= {} (size = B,C)
+						stack(a) = new LuaTable(luaO_fb2int(GETARG_B(i)), luaO_fb2int(GETARG_C(i)))
+
+					case OP_SELF =>
+						// A B C: R(A+1):= R(B): R(A):= R(B)[RK(C)]
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						val o = stack(a + 1) = stack(b)
+						stack(a) = OperationHelper.getTable(state, o, getRK(stack, k, c), b)
+
+
+					case OP_ADD =>
+						// A B C: R(A):= RK(B) + RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.add(state, getRK(stack, k, b), getRK(stack, k, c))
+
+
+					case OP_SUB =>
+						// A B C: R(A):= RK(B) - RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.sub(state, getRK(stack, k, b), getRK(stack, k, c))
+
+
+					case OP_MUL =>
+						// A B C: R(A):= RK(B) * RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.mul(state, getRK(stack, k, b), getRK(stack, k, c))
+
+
+					case OP_DIV =>
+						// A B C: R(A):= RK(B) / RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.div(state, getRK(stack, k, b), getRK(stack, k, c))
+
+
+					case OP_MOD =>
+						// A B C: R(A):= RK(B) % RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.mod(state, getRK(stack, k, b), getRK(stack, k, c))
+
+
+					case OP_POW =>
+						// A B C: R(A):= RK(B) ^ RK(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						stack(a) = OperationHelper.pow(state, getRK(stack, k, b), getRK(stack, k, c))
+
+
+					case OP_UNM =>
+						// A B: R(A):= -R(B)
+						val b = GETARG_B(i)
+						stack(a) = OperationHelper.neg(state, getRK(stack, k, b))
+
+
+					case OP_NOT => // A B: R(A):= not R(B)
+
+						stack(a) = if (stack(GETARG_B(i)).toBoolean) FALSE
+						else TRUE
+
+					case OP_LEN =>
+						// A B: R(A):= length of R(B)
+						val b = GETARG_B(i)
+						stack(a) = OperationHelper.length(state, stack(b))
+
+
+					case OP_CONCAT =>
+						// A B C: R(A):= R(B).. ... ..R(C)
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						di.top = c + 1
+						concat(state, di, stack, di.top, c - b + 1)
+						stack(a) = stack(b)
+						di.top = b
+
+
+					case OP_JMP => // sBx: pc+=sBx
+
+						pc += doJump(di, i, 0)
+
+					case OP_EQ =>
+						// A B C: if ((RK(B) == RK(C)) ~= A) then pc++
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						if (OperationHelper.eq(state, getRK(stack, k, b), getRK(stack, k, c)) == (a != 0)) {
+							// We assume the next instruction is a jump and read the branch from there.
+							pc += doJump(di, code(pc), 1)
+						}
+						else pc += 1
+
+
+					case OP_LT =>
+						// A B C: if ((RK(B) <  RK(C)) ~= A) then pc++
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						if (OperationHelper.lt(state, getRK(stack, k, b), getRK(stack, k, c)) == (a != 0)) pc += doJump(di, code(pc), 1)
+						else pc += 1
+
+
+					case OP_LE =>
+						// A B C: if ((RK(B) <= RK(C)) ~= A) then pc++
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						if (OperationHelper.le(state, getRK(stack, k, b), getRK(stack, k, c)) == (a != 0)) pc += doJump(di, code(pc), 1)
+						else pc += 1
+
+
+					case OP_TEST =>
+						// A C: if not (R(A) <=> C) then pc++
+						if (stack(a).toBoolean == (GETARG_C(i) != 0)) pc += doJump(di, code(pc), 1)
+						else pc += 1
+
+
+					case OP_TESTSET =>
+						// A B C: if (R(B) <=> C) then R(A):= R(B) else pc++
+						/* note: doc appears to be reversed */
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						val `val` = stack(b)
+						if (`val`.toBoolean == (c != 0)) {
+							stack(a) = `val`
+							pc += doJump(di, code(pc), 1)
+						}
+						else pc += 1
+
+
+					case OP_CALL =>
+						// A B C: R(A), ... ,R(A+C-2):= R(A)(R(A+1), ... ,R(A+B-1)) */
+						val b = GETARG_B(i)
+						val c = GETARG_C(i)
+						val `val` = stack(a)
+						if (`val`.isInstanceOf[LuaInterpretedFunction]) {
+							function = `val`.asInstanceOf[LuaInterpretedFunction]
+							val newPrototype = function.p
+							val newStack = createStack(newPrototype)
+							val newFrame = ds.pushInfo
+							val args = if (b > 0) setupStack(newPrototype, newStack, stack, a + 1, b - 1) // Exact args count
+							else setupStack(newPrototype, newStack, ValueFactory.varargsOfCopy(stack, a + 1, di.top - di.extras.count - (a + 1), di.extras)) // From previous top
+
+							setupFrame(ds, newFrame, function, args, newStack, 0)
+							di = newFrame
+							continue newFrame //todo: continue is not supported
+
+						}
+						else nativeCall(state, di, stack, `val`, i, a, b, c)
+
+
+					case OP_TAILCALL =>
+						// A B C: return R(A)(R(A+1), ... ,R(A+B-1))
+						val b = GETARG_B(i)
+						val `val` = stack(a)
+						var args: Varargs = null
+						b match {
+							case 1 => args = NONE
+							case 2 => args = stack(a + 1)
+							case _ => val v = di.extras
+								args = if (b > 0) ValueFactory.varargsOfCopy(stack, a + 1, b - 1)
+								else ValueFactory.varargsOfCopy(stack, a + 1, di.top - v.count - (a + 1), v) // exact arg count
+							// from prev top
+
+
+						}
+						var functionVal: LuaFunction = null
+						if (`val`.isInstanceOf[LuaFunction]) functionVal = func
+						else {
+							functionVal = Dispatch.getCallMetamethod(state, `val`, a)
+							args = ValueFactory.varargsOf(`val`, args)
+						}
+						if (functionVal.isInstanceOf[LuaInterpretedFunction]) {
+							val flags = di.flags
+							di.cleanup()
+							ds.popInfo()
+							// FIXME: Return hook???!?
+							// Replace the current frame with a new one.
+							function = functionVal.asInstanceOf[LuaInterpretedFunction]
+							di = if ((flags & FLAG_FRESH) != 0) ds.pushJavaInfo
+							else ds.pushInfo
+							setupCall(ds, di, function, args, (flags & FLAG_FRESH) | FLAG_TAIL)
+							continue newFrame //todo: continue is not supported
+
+						}
+						else {
+							val v = Dispatch.invoke(state, functionVal, args)
+							di.top = a + v.count
+							di.extras = v
+
+						}
+
+					case OP_RETURN =>
+						// A B: return R(A), ... ,R(A+B-2) (see note)
+						val b = GETARG_B(i)
+						val flags = di.flags
+						val top = di.top
+						val v = di.extras
+						di.cleanup()
+						val ret = if (b > 0) ValueFactory.varargsOfCopy(stack, a, b - 1)
+						else ValueFactory.varargsOfCopy(stack, a, top - v.count - a, v)
+						if ((flags & FLAG_FRESH) != 0) {
+							// If we're a fresh invocation then return to the parent.
+							return ret
+						}
+						else {
+							ds.onReturn(di, ret)
+							di = ds.getStackUnsafe
+							function = di.func.asInstanceOf[LuaInterpretedFunction]
+							resume(state, di, function, ret)
+							continue newFrame //todo: continue is not supported
+
+						}
+
+					case OP_FORLOOP =>
+						// A sBx: R(A)+=R(A+2): if R(A) <?= R(A+1) then { pc+=sBx: R(A+3)=R(A) }
+						val limit = stack(a + 1).checkDouble
+						val step = stack(a + 2).checkDouble
+						val value = stack(a).checkDouble
+						val idx = step + value
+						if (if (0 < step) idx <= limit
+						else limit <= idx) {
+							stack(a + 3) = stack(a) = valueOf(idx)
+							pc += GETARG_sBx(i)
+						}
+
+
+					case OP_FORPREP =>
+						// A sBx: R(A)-=R(A+2): pc+=sBx
+						val init = stack(a).checkNumber("'for' initial value must be a number")
+						val limit = stack(a + 1).checkNumber("'for' limit must be a number")
+						val step = stack(a + 2).checkNumber("'for' step must be a number")
+						stack(a) = valueOf(init.toDouble - step.toDouble)
+						stack(a + 1) = limit
+						stack(a + 2) = step
+						pc += GETARG_sBx(i)
+
+
+					case OP_TFORCALL =>
+						val result = Dispatch.invoke(state, stack(a), ValueFactory.varargsOf(stack(a + 1), stack(a + 2)), a)
+						for (c <- GETARG_C(i) to 1 by -1) {
+							stack(a + 2 + c) = result.arg(c)
+						}
+						i = code({
+							pc += 1;
+							pc - 1
+						})
+						a = GETARG_A(i)
+						assert(GET_OPCODE(i) == OP_TFORLOOP)
+
+					// fallthrough to OP_TFORLOOP, avoiding an extra interpreter loop.
+					case OP_TFORLOOP =>
+						val value = stack(a + 1)
+						if (!value.isNil) {
+							stack(a) = value
+							pc += GETARG_sBx(i)
+						}
+
+
+					case OP_SETLIST =>
+						// A B C: R(A)[(C-1)*FPF+i]:= R(A+i), 1 <= i <= B
+						var b = GETARG_B(i)
+						var c = GETARG_C(i)
+						if (c == 0) c = GETARG_Ax(code({
+							pc += 1;
+							pc - 1
+						}))
+						val offset = (c - 1) * LFIELDS_PER_FLUSH
+						val tbl = stack(a).checkTable
+						if (b == 0) {
+							b = di.top - a - 1
+							val m = b - di.extras.count
+							tbl.presize(offset + b)
+							var j = 1
+
+							while (j <= m) {
+								tbl.rawset(offset + j, stack(a + j))
+								j += 1
+							}
+
+							while (j <= b) {
+								tbl.rawset(offset + j, di.extras.arg(j - m))
+								j += 1
+							}
+						}
+						else {
+							tbl.presize(offset + b)
+							for (j <- 1 to b) {
+								tbl.rawset(offset + j, stack(a + j))
+							}
+						}
+
+
+					case OP_CLOSURE =>
+						// A Bx: R(A):= closure(KPROTO[Bx], R(A), ... ,R(A+n))
+						val newp = p.children(GETARG_Bx(i))
+						val newcl = new LuaInterpretedFunction(newp)
+						var j = 0
+						val nup = newp.upvalues
+						while (j < nup) {
+							val up = newp.getUpvalue(j)
+							newcl.upvalues(j) = if (up.fromLocal) di.getUpvalue(up.index)
+							else upvalues(up.index)
+
+							j += 1
+						}
+						stack(a) = newcl
+
+
+					case OP_VARARG =>
+						// A B: R(A), R(A+1), ..., R(A+B-1) = vararg
+						val b = GETARG_B(i)
+						if (b == 0) {
+							di.top = a + varargs.count
+							di.extras = varargs
+						}
+						else for (j <- 1 until b) {
+							stack(a + j - 1) = varargs.arg(j)
+						}
+
+
+					case _ =>
+						assert(false, "Unknown opcode")
+						throw new IllegalStateException("Unknown opcode")
+
+				}
+			}
+		}
+	}

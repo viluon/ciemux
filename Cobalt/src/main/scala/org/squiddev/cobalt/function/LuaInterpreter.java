@@ -41,7 +41,7 @@ final class LuaInterpreter {
 	private LuaInterpreter() {
 	}
 
-	private static LuaValue[] createStack(Prototype prototype) {
+	static LuaValue[] createStack(Prototype prototype) {
 		LuaValue[] stack = new LuaValue[prototype.maxStackSize];
 		System.arraycopy(NILS, 0, stack, 0, prototype.maxStackSize);
 		return stack;
@@ -112,14 +112,14 @@ final class LuaInterpreter {
 		}
 	}
 
-	private static Varargs setupStack(Prototype prototype, LuaValue[] stack, LuaValue[] args, int argsStart, int argsSize) {
+	static Varargs setupStack(Prototype prototype, LuaValue[] stack, LuaValue[] args, int argsStart, int argsSize) {
 		System.arraycopy(args, argsStart, stack, 0, Math.min(argsSize, prototype.parameters));
 		return prototype.isVarArg && argsSize > prototype.parameters
 			? ValueFactory.varargsOfCopy(args, argsStart + prototype.parameters, argsSize - prototype.parameters)
 			: NONE;
 	}
 
-	private static Varargs setupStack(Prototype prototype, LuaValue[] stack, Varargs varargs) {
+	static Varargs setupStack(Prototype prototype, LuaValue[] stack, Varargs varargs) {
 		for (int i = 0; i < prototype.parameters; i++) stack[i] = varargs.arg(i + 1);
 		return prototype.isVarArg ? varargs.subargs(prototype.parameters + 1) : NONE;
 	}
@@ -148,7 +148,7 @@ final class LuaInterpreter {
 	 ** (eeeeexxx), where the real value is (1xxx) * 2^(eeeee - 1) if
 	 ** eeeee != 0 and (xxx) otherwise.
 	 */
-	private static int luaO_fb2int(int x) {
+	static int luaO_fb2int(int x) {
 		int e = (x >> 3) & 31;
 		if (e == 0) return x;
 		else return ((x & 7) + 8) << (e - 1);
@@ -578,17 +578,17 @@ final class LuaInterpreter {
 		}
 	}
 
-	private static LuaValue getRK(LuaValue[] stack, LuaValue[] k, int slot) {
+	static LuaValue getRK(LuaValue[] stack, LuaValue[] k, int slot) {
 		return ISK(slot) ? k[INDEXK(slot)] : stack[slot];
 	}
 
-	private static int doJump(DebugFrame frame, int i, int e) {
+	static int doJump(DebugFrame frame, int i, int e) {
 		int a = GETARG_A(i);
 		if (a > 0) frame.closeUpvalues(a - 1);
 		return GETARG_sBx(i) + e;
 	}
 
-	private static void nativeCall(LuaState state, DebugFrame di, LuaValue[] stack, LuaValue val, int i, int a, int b, int c) throws UnwindThrowable, LuaError {
+	static void nativeCall(LuaState state, DebugFrame di, LuaValue[] stack, LuaValue val, int i, int a, int b, int c) throws UnwindThrowable, LuaError {
 		switch (i & (MASK_B | MASK_C)) {
 			case (1 << POS_B) | (0 << POS_C) -> {
 				Varargs v = di.extras = Dispatch.invoke(state, val, NONE, a);
@@ -622,7 +622,7 @@ final class LuaInterpreter {
 		}
 	}
 
-	private static void concat(LuaState state, DebugFrame frame, LuaValue[] stack, int top, int total) throws LuaError, UnwindThrowable {
+	static void concat(LuaState state, DebugFrame frame, LuaValue[] stack, int top, int total) throws LuaError, UnwindThrowable {
 		try {
 			do {
 				LuaValue left = stack[top - 2];
