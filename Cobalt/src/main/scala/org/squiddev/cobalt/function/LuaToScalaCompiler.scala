@@ -11,9 +11,26 @@ import org.squiddev.cobalt.{LuaError, LuaState, LuaTable, OperationHelper, Proto
 
 import java.io.FileOutputStream
 import scala.annotation.tailrec
+import scala.quoted.*
 import scala.util.Using
 
+given staging.Compiler = staging.Compiler.make(getClass.getClassLoader)
+
 object LuaToScalaCompiler:
+	private def unrolledPowerCode(x: Expr[Double], n: Int)(using Quotes): Expr[Double] =
+		if n == 0 then '{ 1.0 }
+		else if n == 1 then x
+		else '{ $x * ${ unrolledPowerCode(x, n - 1) } }
+
+	private val power3: Double => Double = staging.run {
+		val stagedPower3: Expr[Double => Double] =
+			'{ (x: Double) => ${ unrolledPowerCode('x, 3) } }
+		println(stagedPower3.show) // Prints "((x: scala.Double) => x.*(x.*(x)))"
+		stagedPower3
+	}
+
+	println(s"2³ = ${power3(2.0)}") // Returns 8.0
+
 	def dump(state: LuaState, function: LuaInterpretedFunction): String = {
 		val file = java.nio.file.Files.createTempFile("bytecode:", "").toFile
 		val bytecode = StringLib.dump(state, function, NIL).checkString()

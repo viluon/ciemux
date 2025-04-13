@@ -18,7 +18,7 @@ java {
 }
 
 scala {
-	scalaVersion = "3.6.3"
+	scalaVersion = libs.scala.staging.get().version!!
 }
 
 repositories {
@@ -46,6 +46,8 @@ tasks.withType<ScalaCompile> {
 
 dependencies {
 	compileOnly(libs.checkerFramework.qual)
+
+	implementation(libs.scala.staging)
 
 	"checkerFramework"(libs.checkerFramework)
 
