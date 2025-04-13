@@ -27,6 +27,7 @@ package org.squiddev.cobalt.compiler;
 import cc.tweaked.cobalt.internal.unwind.AutoUnwind;
 import org.squiddev.cobalt.*;
 import org.squiddev.cobalt.function.LocalVariable;
+import org.squiddev.cobalt.function.UnwindableCallable;
 
 import static org.squiddev.cobalt.Constants.*;
 import static org.squiddev.cobalt.compiler.LuaBytecodeFormat.*;
@@ -281,7 +282,7 @@ final class BytecodeLoader {
 
 		return new Prototype(
 			source, LoadState.getShortName(source),
-			constants, code, children, numParams, isVarArg, maxStackSize, upvalues,
+			constants, code, new UnwindableCallable[code.length], children, numParams, isVarArg, maxStackSize, upvalues,
 			lineDefined, lastLineDefined, lineInfo, NOINTS, locals
 		);
 	}

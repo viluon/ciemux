@@ -27,8 +27,10 @@ package org.squiddev.cobalt.compiler;
 import org.squiddev.cobalt.*;
 import org.squiddev.cobalt.compiler.Parser.ExpDesc;
 import org.squiddev.cobalt.function.LocalVariable;
+import org.squiddev.cobalt.function.UnwindableCallable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +96,7 @@ final class FuncState {
 		return new Prototype(
 			lexer.source, lexer.shortSource,
 			// Code
-			constants.toArray(new LuaValue[0]), LuaC.realloc(code, pc),
+			constants.toArray(new LuaValue[0]), LuaC.realloc(code, pc), new UnwindableCallable[pc],
 			children.toArray(new Prototype[0]),
 			numParams, isVararg, maxStackSize, upvalues.toArray(Prototype.UpvalueInfo[]::new),
 			// Debug information
