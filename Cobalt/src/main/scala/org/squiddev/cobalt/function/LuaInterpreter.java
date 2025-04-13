@@ -155,6 +155,8 @@ final class LuaInterpreter {
 	}
 
 	static Varargs execute(final LuaState state, DebugFrame di, LuaInterpretedFunction function) throws LuaError, UnwindThrowable {
+		if (true) return LuaToScalaCompiler.execute(state, di, function);
+
 		final DebugState ds = DebugState.get(state);
 
 		newFrame:
