@@ -23,7 +23,7 @@ netty = "4.1.117.Final"
 slf4j = "2.0.16"
 
 # Core dependencies (independent of Minecraft)
-asm = "9.7.1"
+asm = "9.8"
 autoService = "1.1.1"
 checkerFramework = "3.48.4"
 cobalt = { strictly = "0.9.6-SNAPSHOT" }
