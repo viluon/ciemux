@@ -27,10 +27,8 @@ package org.squiddev.cobalt.compiler;
 import org.squiddev.cobalt.*;
 import org.squiddev.cobalt.compiler.Parser.ExpDesc;
 import org.squiddev.cobalt.function.LocalVariable;
-import org.squiddev.cobalt.function.UnwindableCallable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

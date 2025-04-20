@@ -172,7 +172,7 @@ object LuaToScalaCompiler:
 				.mkString("\n")
 	}
 
-	private def continuation(proto: Prototype, pc: Int): UnwindableRunnable => UnwindableCallable = f => {
+	private inline def continuation(proto: Prototype, pc: Int): UnwindableRunnable => UnwindableCallable = f => {
 		val callable: UnwindableCallable = (thread, di, c) => {
 			f.run(di)
 			c.programCounter = di.pc + 1
@@ -181,7 +181,7 @@ object LuaToScalaCompiler:
 		callable
 	}
 
-	private def rawCont(proto: Prototype, pc: Int): UnwindableCallable => UnwindableCallable = raw => {
+	private inline def rawCont(proto: Prototype, pc: Int): UnwindableCallable => UnwindableCallable = raw => {
 		proto.compiledInstructions(pc) = raw
 		raw
 	}
