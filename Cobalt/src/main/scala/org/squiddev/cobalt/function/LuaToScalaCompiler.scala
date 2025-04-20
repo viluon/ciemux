@@ -173,7 +173,7 @@ object LuaToScalaCompiler:
 	}
 
 	private def continuation(proto: Prototype, pc: Int): UnwindableRunnable => UnwindableCallable = f => {
-		val callable: UnwindableCallable = (di, c) => {
+		val callable: UnwindableCallable = (thread, di, c) => {
 			f.run(di)
 			c.programCounter = di.pc + 1
 		}
@@ -187,8 +187,6 @@ object LuaToScalaCompiler:
 	}
 
 	def partialEvalStep(state: LuaState, p: Prototype, pc: Int): UnwindableCallable = {
-		val ds = DebugState.get(state)
-
 		// fetch all info from the function
 		val code = p.code
 		val k = p.constants
@@ -216,7 +214,7 @@ object LuaToScalaCompiler:
 				assert(GET_OPCODE(code(pc + 1)) == OP_EXTRAARG)
 				val rb = GETARG_Ax(code(pc + 1))
 				val constant = k(rb)
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					di.stack(a) = constant
 					cont.programCounter += 2
 				})
@@ -227,7 +225,7 @@ object LuaToScalaCompiler:
 				val constant = if (GETARG_B(i) != 0) TRUE else FALSE
 				if (GETARG_C(i) != 0) {
 					// skip next instruction (if C)
-					raw((di, c) => {
+					raw((thread, di, c) => {
 						di.stack(a) = constant
 						c.programCounter += 2
 					})
@@ -388,7 +386,7 @@ object LuaToScalaCompiler:
 
 
 			case OP_JMP => // sBx: pc+=sBx
-				raw((di, c) => c.programCounter += doJump(di, i, 1))
+				raw((thread, di, c) => c.programCounter += doJump(di, i, 1))
 
 			case OP_EQ =>
 				// A B C: if ((RK(B) == RK(C)) ~= A) then pc++
@@ -397,7 +395,7 @@ object LuaToScalaCompiler:
 				val aNonZero = a != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					if (OperationHelper.eq(state, getRK(di.stack, k, b), getRK(di.stack, k, c)) == aNonZero) {
 						// We assume the next instruction is a jump and read the branch from there.
 						cont.programCounter += doJump(di, nextInstruction, 2)
@@ -412,7 +410,7 @@ object LuaToScalaCompiler:
 				val aNonZero = a != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					if (OperationHelper.lt(state, getRK(di.stack, k, b), getRK(di.stack, k, c)) == aNonZero) {
 						// We assume the next instruction is a jump and read the branch from there.
 						cont.programCounter += doJump(di, nextInstruction, 2)
@@ -427,7 +425,7 @@ object LuaToScalaCompiler:
 				val aNonZero = a != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					if (OperationHelper.le(state, getRK(di.stack, k, b), getRK(di.stack, k, c)) == aNonZero) {
 						// We assume the next instruction is a jump and read the branch from there.
 						cont.programCounter += doJump(di, nextInstruction, 2)
@@ -440,7 +438,7 @@ object LuaToScalaCompiler:
 				val cond = GETARG_C(i) != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					if (di.stack(a).toBoolean == cond) {
 						// We assume the next instruction is a jump and read the branch from there.
 						cont.programCounter += doJump(di, nextInstruction, 2)
@@ -455,7 +453,7 @@ object LuaToScalaCompiler:
 				val cNonZero = c != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					val value = di.stack(b)
 					if (value.toBoolean == cNonZero) {
 						di.stack(a) = value
@@ -468,12 +466,13 @@ object LuaToScalaCompiler:
 				// A B C: R(A), ... ,R(A+C-2):= R(A)(R(A+1), ... ,R(A+B-1))
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					val `val` = di.stack(a)
 					if (`val`.isInstanceOf[LuaInterpretedFunction]) {
 						val function = `val`.asInstanceOf[LuaInterpretedFunction]
 						val newPrototype = function.p
 						val newStack = createStack(newPrototype)
+						val ds = thread.getDebugState
 						val newFrame = ds.pushInfo
 						val args = if (b > 0) setupStack(newPrototype, newStack, di.stack, a + 1, b - 1) // Exact args count
 						else setupStack(newPrototype, newStack, ValueFactory.varargsOfCopy(di.stack, a + 1, di.top - di.extras.count - (a + 1), di.extras)) // From previous top
@@ -492,7 +491,7 @@ object LuaToScalaCompiler:
 				// A B C: return R(A)(R(A+1), ... ,R(A+B-1))
 				val b = GETARG_B(i)
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					val `val` = di.stack(a)
 					var args: Varargs = null
 					b match {
@@ -515,6 +514,7 @@ object LuaToScalaCompiler:
 					}
 
 					if (functionVal.isInstanceOf[LuaInterpretedFunction]) {
+						val ds = thread.getDebugState
 						val flags = di.flags
 						di.cleanup()
 						ds.popInfo()
@@ -540,7 +540,7 @@ object LuaToScalaCompiler:
 				// A B: return R(A), ... ,R(A+B-2) (see note)
 				val b = GETARG_B(i)
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					val flags = di.flags
 					val top = di.top
 					val v = di.extras
@@ -556,8 +556,9 @@ object LuaToScalaCompiler:
 						// If we're a fresh invocation then return to the parent.
 						cont.varargs = ret
 					} else {
-						ds.onReturn(di, ret)
-						val di2 = ds.getStackUnsafe
+						val debugState = thread.getDebugState
+						debugState.onReturn(di, ret)
+						val di2 = debugState.getStackUnsafe
 						val function = di2.func.asInstanceOf[LuaInterpretedFunction]
 						resume(state, di2, function, ret)
 						cont.debugFrame = di2
@@ -569,7 +570,7 @@ object LuaToScalaCompiler:
 				// A sBx: R(A)+=R(A+2): if R(A) <?= R(A+1) then { pc+=sBx: R(A+3)=R(A) }
 				val offset = GETARG_sBx(i) + 1
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					val limit = di.stack(a + 1).checkDouble
 					val step = di.stack(a + 2).checkDouble
 					val value = di.stack(a).checkDouble
@@ -596,7 +597,7 @@ object LuaToScalaCompiler:
 				// A sBx: R(A)-=R(A+2): pc+=sBx
 				val offset = GETARG_sBx(i) + 1
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					val init = di.stack(a).checkNumber("'for' initial value must be a number")
 					val limit = di.stack(a + 1).checkNumber("'for' limit must be a number")
 					val step = di.stack(a + 2).checkNumber("'for' step must be a number")
@@ -623,7 +624,7 @@ object LuaToScalaCompiler:
 
 			case OP_TFORLOOP =>
 				val offset = GETARG_sBx(i) + 1
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					val value = di.stack(a + 1)
 					if (!value.isNil) {
 						di.stack(a) = value
@@ -644,7 +645,7 @@ object LuaToScalaCompiler:
 
 				val offset = (c - 1) * LFIELDS_PER_FLUSH
 
-				raw((di, cont) => {
+				raw((thread, di, cont) => {
 					cont.programCounter += 1 + increment
 					val tbl = di.stack(a).checkTable
 

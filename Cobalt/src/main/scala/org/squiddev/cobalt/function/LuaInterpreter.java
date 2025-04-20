@@ -183,7 +183,7 @@ final class LuaInterpreter {
 				callable = LuaToScalaCompiler.partialEvalStep(state, prototype, pc);
 			}
 
-			callable.call(di, cont);
+			callable.call(state.getCurrentThread(), di, cont);
 			// Handle function switching (for calls and returns)
 			if (cont.debugFrame != null) {
 				di = cont.debugFrame;
