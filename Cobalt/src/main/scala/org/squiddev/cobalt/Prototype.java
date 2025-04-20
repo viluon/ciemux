@@ -50,7 +50,7 @@ public final class Prototype {
 	public final LuaValue[] constants;
 
 	public final int[] code;
-	public final UnwindableCallable[] compiledInstructions;
+	public @Nullable UnwindableCallable[] compiledInstructions;
 
 	/**
 	 * Functions defined inside the function

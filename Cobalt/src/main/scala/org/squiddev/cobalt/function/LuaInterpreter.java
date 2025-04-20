@@ -154,9 +154,24 @@ final class LuaInterpreter {
 		else return ((x & 7) + 8) << (e - 1);
 	}
 
+	private static void precompile(LuaState state, Prototype prototype) {
+		prototype.compiledInstructions = new UnwindableCallable[prototype.code.length];
+
+		for (int i = prototype.code.length - 1; i >= 0; i--) {
+			LuaToScalaCompiler.partialEvalStep(state, prototype, i);
+		}
+	}
+
+	private static void ensureCompiled(LuaState state, Prototype prototype) {
+		if (prototype.compiledInstructions == null) {
+			precompile(state, prototype);
+		}
+	}
+
 	private static Varargs partialEval(final LuaState state, DebugFrame di, LuaInterpretedFunction function) throws LuaError, UnwindThrowable {
 		final DebugState ds = DebugState.get(state);
 		Prototype prototype = function.p;
+		ensureCompiled(state, prototype);
 
 		// Initialize continuation object for tracking execution state
 		EvalCont cont = new EvalCont();
@@ -172,23 +187,15 @@ final class LuaInterpreter {
 			ds.onInstruction(di, pc);
 			assert pc == di.pc;
 
-			if (pc > 106) {
-				System.out.print("");
-			}
-
-			// Get or compile the instruction
 			UnwindableCallable callable = prototype.compiledInstructions[pc];
-			if (callable == null) {
-				// Compile the instruction if not already compiled
-				callable = LuaToScalaCompiler.partialEvalStep(state, prototype, pc);
-			}
-
+			assert callable != null;
 			callable.call(state.getCurrentThread(), di, cont);
 			// Handle function switching (for calls and returns)
 			if (cont.debugFrame != null) {
 				di = cont.debugFrame;
 				function = cont.function;
 				prototype = function.p;
+				ensureCompiled(state, prototype);
 
 				cont.programCounter = di.pc;
 				cont.debugFrame = null;
@@ -807,4 +814,3 @@ final class LuaInterpreter {
 		return err;
 	}
 }
-

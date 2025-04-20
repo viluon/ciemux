@@ -705,6 +705,9 @@ object LuaToScalaCompiler:
 					}
 				})
 
+			case OP_EXTRAARG =>
+				// trap, pc should never point here
+				cont(di => throw new IllegalStateException("pc should never point at OP_EXTRAARG"))
 
 			case _ =>
 				val opcode = java.lang.StringBuilder()

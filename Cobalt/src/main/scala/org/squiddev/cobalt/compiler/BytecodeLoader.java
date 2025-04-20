@@ -282,7 +282,7 @@ final class BytecodeLoader {
 
 		return new Prototype(
 			source, LoadState.getShortName(source),
-			constants, code, new UnwindableCallable[code.length], children, numParams, isVarArg, maxStackSize, upvalues,
+			constants, code, null, children, numParams, isVarArg, maxStackSize, upvalues,
 			lineDefined, lastLineDefined, lineInfo, NOINTS, locals
 		);
 	}
