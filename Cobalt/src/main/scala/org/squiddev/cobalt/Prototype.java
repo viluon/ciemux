@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.squiddev.cobalt.function.LocalVariable;
 import org.squiddev.cobalt.function.LuaInterpretedFunction;
 import org.squiddev.cobalt.function.UnwindableCallable;
+import org.squiddev.cobalt.function.WrappedCompiledInstruction;
 
 /**
  * Prototype representing compiled lua code.
@@ -50,7 +51,7 @@ public final class Prototype {
 	public final LuaValue[] constants;
 
 	public final int[] code;
-	public @Nullable UnwindableCallable[] compiledInstructions;
+	public @Nullable WrappedCompiledInstruction[] compiledInstructions;
 
 	/**
 	 * Functions defined inside the function

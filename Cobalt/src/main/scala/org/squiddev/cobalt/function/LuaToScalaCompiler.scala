@@ -1,5 +1,6 @@
 package org.squiddev.cobalt.function
 
+import org.squiddev.cobalt
 import org.squiddev.cobalt.Constants.{FALSE, NIL, NONE, TRUE}
 import org.squiddev.cobalt.Lua.{GETARG_A, GETARG_Ax, GETARG_B, GETARG_Bx, GETARG_C, GETARG_sBx, GET_OPCODE, LFIELDS_PER_FLUSH, OP_ADD, OP_CALL, OP_CLOSURE, OP_CONCAT, OP_DIV, OP_EQ, OP_EXTRAARG, OP_FORLOOP, OP_FORPREP, OP_GETTABLE, OP_GETTABUP, OP_GETUPVAL, OP_JMP, OP_LE, OP_LEN, OP_LOADBOOL, OP_LOADK, OP_LOADKX, OP_LOADNIL, OP_LT, OP_MOD, OP_MOVE, OP_MUL, OP_NEWTABLE, OP_NOT, OP_POW, OP_RETURN, OP_SELF, OP_SETLIST, OP_SETTABLE, OP_SETTABUP, OP_SETUPVAL, OP_SUB, OP_TAILCALL, OP_TEST, OP_TESTSET, OP_TFORCALL, OP_TFORLOOP, OP_UNM, OP_VARARG}
 import org.squiddev.cobalt.LuaDouble.valueOf
@@ -7,7 +8,7 @@ import org.squiddev.cobalt.debug.DebugFrame.{FLAG_FRESH, FLAG_TAIL}
 import org.squiddev.cobalt.debug.{DebugFrame, DebugState}
 import org.squiddev.cobalt.function.LuaInterpreter.{concat, createStack, doJump, getRK, luaO_fb2int, nativeCall, resume, setupCall, setupFrame, setupStack}
 import org.squiddev.cobalt.lib.StringLib
-import org.squiddev.cobalt.{LuaError, LuaState, LuaTable, OperationHelper, Print, Prototype, UnwindThrowable, ValueFactory, Varargs}
+import org.squiddev.cobalt.{LuaBoolean, LuaError, LuaState, LuaTable, LuaThread, LuaValue, OperationHelper, Print, Prototype, UnwindThrowable, ValueFactory, Varargs}
 
 import java.io.FileOutputStream
 import java.lang
@@ -16,6 +17,10 @@ import scala.quoted.*
 import scala.util.Using
 
 given staging.Compiler = staging.Compiler.make(getClass.getClassLoader)
+
+type CompiledInstruction = (thread: Expr[LuaThread], di: Expr[DebugFrame], cont: Expr[EvalCont]) => Expr[Unit]
+
+case class WrappedCompiledInstruction(i: CompiledInstruction)
 
 object LuaToScalaCompiler:
 	private def unrolledPowerCode(x: Expr[Double], n: Int)(using Quotes): Expr[Double] =
@@ -56,21 +61,50 @@ object LuaToScalaCompiler:
 				.mkString("\n")
 	}
 
-	private inline def continuation(proto: Prototype, pc: Int): UnwindableRunnable => UnwindableCallable = f => {
-		val callable: UnwindableCallable = (thread, di, c) => {
-			f.run(di)
-			c.programCounter = di.pc + 1
+	private def continuation(proto: Prototype, pc: Int)(using Quotes): (Expr[DebugFrame] => Expr[Unit]) => CompiledInstruction = f => {
+		val next: CompiledInstruction = if (pc + 1 < proto.code.length) {
+			proto.compiledInstructions(pc + 1).i
+		} else {
+			(_, _, _) => '{}
 		}
-		proto.compiledInstructions(pc) = callable
-		callable
+
+		val instr: CompiledInstruction = (thread, di, c) => '{
+			${f(di)}
+			${c}.programCounter = ${di}.pc + 1
+			${next(thread, di, c)}
+		}
+
+		proto.compiledInstructions(pc) = WrappedCompiledInstruction(instr)
+		instr
 	}
 
-	private inline def rawCont(proto: Prototype, pc: Int): UnwindableCallable => UnwindableCallable = raw => {
-		proto.compiledInstructions(pc) = raw
+	private def rawCont(proto: Prototype, pc: Int): CompiledInstruction => CompiledInstruction = raw => {
+		proto.compiledInstructions(pc) = WrappedCompiledInstruction(raw)
 		raw
 	}
 
 	def partialEvalStep(state: LuaState, p: Prototype, pc: Int): UnwindableCallable = {
+		???
+	}
+
+	given ToExpr[LuaBoolean] with {
+		override def apply(x: LuaBoolean)(using Quotes): Expr[LuaBoolean] = x match {
+			case TRUE => '{ TRUE }
+			case FALSE => '{ FALSE }
+			case _ => throw new IllegalArgumentException("Invalid LuaBoolean")
+		}
+	}
+
+	extension (di: Expr[DebugFrame])
+		def k(index: Int)(using Quotes): Expr[LuaValue] = '{
+			${ di }.closure.asInstanceOf[LuaInterpretedFunction].p.constants(${ Expr(index) })
+		}
+
+	def stagedPartialEvalStep(
+			state: LuaState,
+			p: Prototype,
+			pc: Int,
+	)(using Quotes): CompiledInstruction = {
 		// fetch all info from the function
 		val code = p.code
 		val k = p.constants
@@ -87,45 +121,44 @@ object LuaToScalaCompiler:
 		GET_OPCODE(i) match {
 			case OP_MOVE => // A B: R(A):= R(B)
 				val b = GETARG_B(i)
-				cont(di => di.stack(a) = di.stack(b))
+				cont(di => '{${di}.stack(${Expr(a)}) = ${di}.stack(${Expr(b)})})
 
 			case OP_LOADK => // A Bx: R(A):= Kst(Bx)
-				val constant = k(GETARG_Bx(i))
-				cont(di => di.stack(a) = constant)
+				val bx = GETARG_Bx(i)
+				cont(di => '{${di}.stack(${Expr(a)}) = ${di.k(bx)}})
 
 			case OP_LOADKX =>
 				// A: R(A) := Kst(extra arg)
 				assert(GET_OPCODE(code(pc + 1)) == OP_EXTRAARG)
 				val rb = GETARG_Ax(code(pc + 1))
-				val constant = k(rb)
-				raw((thread, di, cont) => {
-					di.stack(a) = constant
-					cont.programCounter += 2
+				raw((thread, di, cont) => '{
+					${di}.stack(${Expr(a)}) = ${di.k(rb)}
+					${cont}.programCounter += 2
 				})
 
 
 			case OP_LOADBOOL =>
 				// A B C: R(A):= (Bool)B: if (C) pc++
-				val constant = if (GETARG_B(i) != 0) TRUE else FALSE
+				val constant = Expr(if (GETARG_B(i) != 0) TRUE else FALSE)
 				if (GETARG_C(i) != 0) {
 					// skip next instruction (if C)
-					raw((thread, di, c) => {
-						di.stack(a) = constant
-						c.programCounter += 2
+					raw((thread, di, c) => '{
+						${di}.stack(${Expr(a)}) = ${constant}
+						${c}.programCounter += 2
 					})
 				} else {
-					cont(di => di.stack(a) = constant)
+					cont(di => '{${di}.stack(${Expr(a)}) = ${constant}})
 				}
 
 
 			case OP_LOADNIL =>
 				// A B     R(A), R(A+1), ..., R(A+B) := nil
 				val initB = GETARG_B(i)
-				cont(di => {
-					var a2 = a
-					var b = initB
+				cont(di => '{
+					var a2 = ${Expr(a)}
+					var b = ${Expr(initB)}
 					while
-						di.stack({
+						${di}.stack({
 							a2 += 1;
 							a2 - 1
 						}) = NIL
@@ -139,15 +172,15 @@ object LuaToScalaCompiler:
 
 			case OP_GETUPVAL => // A B: R(A):= UpValue[B]
 				val index = GETARG_B(i)
-				cont(di => di.stack(a) = di.closure.asInstanceOf[LuaInterpretedFunction].upvalues(index).getValue)
+				cont(di => '{${di}.stack(${Expr(a)}) = ${di}.closure.asInstanceOf[LuaInterpretedFunction].upvalues(${Expr(index)}).getValue})
 
 			case OP_GETTABUP =>
 				// A B C: R(A) := UpValue[B][RK(C)]
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => {
-					val upvalue = di.closure.asInstanceOf[LuaInterpretedFunction].upvalues(b)
-					di.stack(a) = OperationHelper.getTable(state, upvalue.getValue, getRK(di.stack, k, c), -b - 1)
+				cont(di => '{
+					val upvalue = ${di}.closure.asInstanceOf[LuaInterpretedFunction].upvalues(${Expr(b)})
+					${di}.stack(${Expr(a)}) = OperationHelper.getTable(state, upvalue.getValue, getRK(${di}.stack, k, ${Expr(c)}), -${Expr(b)} - 1)
 				})
 
 
@@ -155,46 +188,46 @@ object LuaToScalaCompiler:
 				// A B C: R(A):= R(B)[RK(C)]
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => di.stack(a) = OperationHelper.getTable(state, di.stack(b), getRK(di.stack, k, c), b))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.getTable(state, ${di}.stack(${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}), ${Expr(b)})})
 
 
 			case OP_SETTABUP =>
 				// A B C: UpValue[A][RK(B)] := RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => {
-					val upvalue = di.closure.asInstanceOf[LuaInterpretedFunction].upvalues(a)
-					OperationHelper.setTable(state, upvalue.getValue, getRK(di.stack, k, b), getRK(di.stack, k, c), -b - 1)
+				cont(di => '{
+					val upvalue = ${di}.closure.asInstanceOf[LuaInterpretedFunction].upvalues(${Expr(a)});
+					OperationHelper.setTable(state, upvalue.getValue, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}), -${Expr(b)} - 1)
 				})
 
 
 			case OP_SETUPVAL => // A B: UpValue[B]:= R(A)
 				val index = GETARG_B(i)
-				cont(di => {
-					val upvalue = di.closure.asInstanceOf[LuaInterpretedFunction].upvalues(index)
-					upvalue.setValue(di.stack(a))
+				cont(di => '{
+					val upvalue = ${di}.closure.asInstanceOf[LuaInterpretedFunction].upvalues(${Expr(index)});
+					upvalue.setValue(${di}.stack(${Expr(a)}))
 				})
 
 			case OP_SETTABLE =>
 				// A B C: R(A)[RK(B)]:= RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => OperationHelper.setTable(state, di.stack(a), getRK(di.stack, k, b), getRK(di.stack, k, c), a))
+				cont(di => '{OperationHelper.setTable(state, ${di}.stack(${Expr(a)}), getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}), ${Expr(a)})})
 
 
 			case OP_NEWTABLE => // A B C: R(A):= {} (size = B,C)
 				val arraySize = luaO_fb2int(GETARG_B(i))
 				val hashSize = luaO_fb2int(GETARG_C(i))
-				cont(di => di.stack(a) = new LuaTable(arraySize, hashSize))
+				cont(di => '{${di}.stack(${Expr(a)}) = new LuaTable(arraySize, hashSize)})
 
 			case OP_SELF =>
 				// A B C: R(A+1):= R(B): R(A):= R(B)[RK(C)]
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => {
-					val o = di.stack(b)
-					di.stack(a + 1) = o
-					di.stack(a) = OperationHelper.getTable(state, o, getRK(di.stack, k, c), b)
+				cont(di => '{
+					val o = ${di}.stack(${Expr(b)})
+					${di}.stack(${Expr(a + 1)}) = o
+					${di}.stack(${Expr(a)}) = OperationHelper.getTable(state, o, getRK(${di}.stack, k, ${Expr(c)}), ${Expr(b)})
 				})
 
 
@@ -202,58 +235,58 @@ object LuaToScalaCompiler:
 				// A B C: R(A):= RK(B) + RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => di.stack(a) = OperationHelper.add(state, getRK(di.stack, k, b), getRK(di.stack, k, c)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.add(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}))})
 
 
 			case OP_SUB =>
 				// A B C: R(A):= RK(B) - RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => di.stack(a) = OperationHelper.sub(state, getRK(di.stack, k, b), getRK(di.stack, k, c)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.sub(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}))})
 
 
 			case OP_MUL =>
 				// A B C: R(A):= RK(B) * RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => di.stack(a) = OperationHelper.mul(state, getRK(di.stack, k, b), getRK(di.stack, k, c)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.mul(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}))})
 
 
 			case OP_DIV =>
 				// A B C: R(A):= RK(B) / RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => di.stack(a) = OperationHelper.div(state, getRK(di.stack, k, b), getRK(di.stack, k, c)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.div(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}))})
 
 
 			case OP_MOD =>
 				// A B C: R(A):= RK(B) % RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => di.stack(a) = OperationHelper.mod(state, getRK(di.stack, k, b), getRK(di.stack, k, c)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.mod(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}))})
 
 
 			case OP_POW =>
 				// A B C: R(A):= RK(B) ^ RK(C)
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				cont(di => di.stack(a) = OperationHelper.pow(state, getRK(di.stack, k, b), getRK(di.stack, k, c)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.pow(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)}))})
 
 
 			case OP_UNM =>
 				// A B: R(A):= -R(B)
 				val b = GETARG_B(i)
-				cont(di => di.stack(a) = OperationHelper.neg(state, getRK(di.stack, k, b)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.neg(state, getRK(${di}.stack, k, ${Expr(b)}))})
 
 
 			case OP_NOT => // A B: R(A):= not R(B)
 				val b = GETARG_B(i)
-				cont(di => di.stack(a) = if (di.stack(b).toBoolean) FALSE else TRUE)
+				cont(di => '{${di}.stack(${Expr(a)}) = if (${di}.stack(${Expr(b)}).toBoolean) FALSE else TRUE})
 
 			case OP_LEN =>
 				// A B: R(A):= length of R(B)
 				val b = GETARG_B(i)
-				cont(di => di.stack(a) = OperationHelper.length(state, di.stack(b)))
+				cont(di => '{${di}.stack(${Expr(a)}) = OperationHelper.length(state, ${di}.stack(${Expr(b)}))})
 
 
 			case OP_CONCAT =>
@@ -261,16 +294,16 @@ object LuaToScalaCompiler:
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
 
-				cont(di => {
-					di.top = c + 1
-					concat(state, di, di.stack, di.top, c - b + 1)
-					di.stack(a) = di.stack(b)
-					di.top = b
+				cont(di => '{
+					${di}.top = ${Expr(c + 1)}
+					concat(state, ${di}, ${di}.stack, ${di}.top, ${Expr(c - b + 1)})
+					${di}.stack(${Expr(a)}) = ${di}.stack(${Expr(b)})
+					${di}.top = ${Expr(b)}
 				})
 
 
 			case OP_JMP => // sBx: pc+=sBx
-				raw((thread, di, c) => c.programCounter += doJump(di, i, 1))
+				raw((thread, di, c) => '{${c}.programCounter += doJump(${di}, i, 1)})
 
 			case OP_EQ =>
 				// A B C: if ((RK(B) == RK(C)) ~= A) then pc++
@@ -279,11 +312,11 @@ object LuaToScalaCompiler:
 				val aNonZero = a != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((thread, di, cont) => {
-					if (OperationHelper.eq(state, getRK(di.stack, k, b), getRK(di.stack, k, c)) == aNonZero) {
+				raw((thread, di, cont) => '{
+					if (OperationHelper.eq(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)})) == ${Expr(aNonZero)}) {
 						// We assume the next instruction is a jump and read the branch from there.
-						cont.programCounter += doJump(di, nextInstruction, 2)
-					} else cont.programCounter += 2
+						${cont}.programCounter += doJump(${di}, ${Expr(nextInstruction)}, 2)
+					} else ${cont}.programCounter += 2
 				})
 
 
@@ -294,11 +327,11 @@ object LuaToScalaCompiler:
 				val aNonZero = a != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((thread, di, cont) => {
-					if (OperationHelper.lt(state, getRK(di.stack, k, b), getRK(di.stack, k, c)) == aNonZero) {
+				raw((thread, di, cont) => '{
+					if (OperationHelper.lt(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)})) == ${Expr(aNonZero)}) {
 						// We assume the next instruction is a jump and read the branch from there.
-						cont.programCounter += doJump(di, nextInstruction, 2)
-					} else cont.programCounter += 2
+						${cont}.programCounter += doJump(${di}, ${Expr(nextInstruction)}, 2)
+					} else ${cont}.programCounter += 2
 				})
 
 
@@ -309,11 +342,11 @@ object LuaToScalaCompiler:
 				val aNonZero = a != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((thread, di, cont) => {
-					if (OperationHelper.le(state, getRK(di.stack, k, b), getRK(di.stack, k, c)) == aNonZero) {
+				raw((thread, di, cont) => '{
+					if (OperationHelper.le(state, getRK(${di}.stack, k, ${Expr(b)}), getRK(${di}.stack, k, ${Expr(c)})) == ${Expr(aNonZero)}) {
 						// We assume the next instruction is a jump and read the branch from there.
-						cont.programCounter += doJump(di, nextInstruction, 2)
-					} else cont.programCounter += 2
+						${cont}.programCounter += doJump(${di}, ${Expr(nextInstruction)}, 2)
+					} else ${cont}.programCounter += 2
 				})
 
 
@@ -322,11 +355,11 @@ object LuaToScalaCompiler:
 				val cond = GETARG_C(i) != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((thread, di, cont) => {
-					if (di.stack(a).toBoolean == cond) {
+				raw((thread, di, cont) => '{
+					if (${di}.stack(${Expr(a)}).toBoolean == cond) {
 						// We assume the next instruction is a jump and read the branch from there.
-						cont.programCounter += doJump(di, nextInstruction, 2)
-					} else cont.programCounter += 2
+						${cont}.programCounter += doJump(${di}, ${Expr(nextInstruction)}, 2)
+					} else ${cont}.programCounter += 2
 				})
 
 			case OP_TESTSET =>
@@ -337,36 +370,36 @@ object LuaToScalaCompiler:
 				val cNonZero = c != 0
 				val nextInstruction = code(pc + 1)
 
-				raw((thread, di, cont) => {
-					val value = di.stack(b)
+				raw((thread, di, cont) => '{
+					val value = ${di}.stack(${Expr(b)})
 					if (value.toBoolean == cNonZero) {
-						di.stack(a) = value
+						${di}.stack(${Expr(a)}) = value
 						// We assume the next instruction is a jump and read the branch from there.
-						cont.programCounter += doJump(di, nextInstruction, 2)
-					} else cont.programCounter += 2
+						${cont}.programCounter += doJump(${di}, ${Expr(nextInstruction)}, 2)
+					} else ${cont}.programCounter += 2
 				})
 
 			case OP_CALL =>
 				// A B C: R(A), ... ,R(A+C-2):= R(A)(R(A+1), ... ,R(A+B-1))
 				val b = GETARG_B(i)
 				val c = GETARG_C(i)
-				raw((thread, di, cont) => {
-					val `val` = di.stack(a)
+				raw((thread, di, cont) => '{
+					val `val` = ${di}.stack(${Expr(a)})
 					if (`val`.isInstanceOf[LuaInterpretedFunction]) {
 						val function = `val`.asInstanceOf[LuaInterpretedFunction]
 						val newPrototype = function.p
 						val newStack = createStack(newPrototype)
-						val ds = thread.getDebugState
+						val ds = ${thread}.getDebugState
 						val newFrame = ds.pushInfo
-						val args = if (b > 0) setupStack(newPrototype, newStack, di.stack, a + 1, b - 1) // Exact args count
-						else setupStack(newPrototype, newStack, ValueFactory.varargsOfCopy(di.stack, a + 1, di.top - di.extras.count - (a + 1), di.extras)) // From previous top
+						val args = if (${Expr(b)} > 0) setupStack(newPrototype, newStack, ${di}.stack, ${Expr(a + 1)}, ${Expr(b - 1)}) // Exact args count
+						else setupStack(newPrototype, newStack, ValueFactory.varargsOfCopy(${di}.stack, ${Expr(a + 1)}, ${di}.top - ${di}.extras.count - ${Expr(a + 1)}, ${di}.extras)) // From previous top
 
 						setupFrame(ds, newFrame, function, args, newStack, 0)
-						cont.debugFrame = newFrame
-						cont.function = function
+						${cont}.debugFrame = newFrame
+						${cont}.function = function
 					} else {
-						nativeCall(state, di, di.stack, `val`, i, a, b, c)
-						cont.programCounter += 1
+						nativeCall(state, ${di}, ${di}.stack, `val`, i, ${Expr(a)}, ${Expr(b)}, ${Expr(c)})
+						${cont}.programCounter += 1
 					}
 				})
 
@@ -375,17 +408,17 @@ object LuaToScalaCompiler:
 				// A B C: return R(A)(R(A+1), ... ,R(A+B-1))
 				val b = GETARG_B(i)
 
-				raw((thread, di, cont) => {
-					val `val` = di.stack(a)
+				raw((thread, di, cont) => '{
+					val `val` = ${di}.stack(${Expr(a)})
 					var args: Varargs = null
-					b match {
+					${Expr(b)} match {
 						case 1 => args = NONE
-						case 2 => args = di.stack(a + 1)
-						case _ => val v = di.extras
+						case 2 => args = ${di}.stack(${Expr(a + 1)})
+						case _ => val v = ${di}.extras
 							args = if (b > 0) {
-								ValueFactory.varargsOfCopy(di.stack, a + 1, b - 1)
+								ValueFactory.varargsOfCopy(${di}.stack, ${Expr(a + 1)}, ${Expr(b - 1)})
 							} else {
-								ValueFactory.varargsOfCopy(di.stack, a + 1, di.top - v.count - (a + 1), v)
+								ValueFactory.varargsOfCopy(${di}.stack, ${Expr(a + 1)}, ${di}.top - v.count - ${Expr(a + 1)}, v)
 							} // exact arg count
 						// from prev top
 					}
@@ -393,14 +426,14 @@ object LuaToScalaCompiler:
 					var functionVal: LuaFunction = null
 					if (`val`.isInstanceOf[LuaFunction]) functionVal = `val`.asInstanceOf[LuaFunction]
 					else {
-						functionVal = Dispatch.getCallMetamethod(state, `val`, a)
+						functionVal = Dispatch.getCallMetamethod(state, `val`, ${Expr(a)})
 						args = ValueFactory.varargsOf(`val`, args)
 					}
 
 					if (functionVal.isInstanceOf[LuaInterpretedFunction]) {
-						val ds = thread.getDebugState
-						val flags = di.flags
-						di.cleanup()
+						val ds = ${thread}.getDebugState
+						val flags = ${di}.flags
+						${di}.cleanup()
 						ds.popInfo()
 
 						// FIXME: Return hook???!?
@@ -410,13 +443,13 @@ object LuaToScalaCompiler:
 						val di2 = if ((flags & FLAG_FRESH) != 0) ds.pushJavaInfo
 						else ds.pushInfo
 						setupCall(ds, di2, function, args, (flags & FLAG_FRESH) | FLAG_TAIL)
-						cont.debugFrame = di2
-						cont.function = function
+						${cont}.debugFrame = di2
+						${cont}.function = function
 					} else {
 						val v = Dispatch.invoke(state, functionVal, args)
-						di.top = a + v.count
-						di.extras = v
-						cont.programCounter += 1
+						${di}.top = ${Expr(a)} + v.count
+						${di}.extras = v
+						${cont}.programCounter += 1
 					}
 				})
 
@@ -424,29 +457,29 @@ object LuaToScalaCompiler:
 				// A B: return R(A), ... ,R(A+B-2) (see note)
 				val b = GETARG_B(i)
 
-				raw((thread, di, cont) => {
-					val flags = di.flags
-					val top = di.top
-					val v = di.extras
-					di.cleanup()
+				raw((thread, di, cont) => '{
+					val flags = ${di}.flags
+					val top = ${di}.top
+					val v = ${di}.extras
+					${di}.cleanup()
 
 					val ret = if (b > 0) {
-						ValueFactory.varargsOfCopy(di.stack, a, b - 1)
+						ValueFactory.varargsOfCopy(${di}.stack, ${Expr(a)}, ${Expr(b - 1)})
 					} else {
-						ValueFactory.varargsOfCopy(di.stack, a, top - v.count - a, v)
+						ValueFactory.varargsOfCopy(${di}.stack, ${Expr(a)}, top - v.count - ${Expr(a)}, v)
 					}
 
 					if ((flags & FLAG_FRESH) != 0) {
 						// If we're a fresh invocation then return to the parent.
-						cont.varargs = ret
+						${cont}.varargs = ret
 					} else {
-						val debugState = thread.getDebugState
-						debugState.onReturn(di, ret)
+						val debugState = ${thread}.getDebugState
+						debugState.onReturn(${di}, ret)
 						val di2 = debugState.getStackUnsafe
 						val function = di2.func.asInstanceOf[LuaInterpretedFunction]
 						resume(state, di2, function, ret)
-						cont.debugFrame = di2
-						cont.function = function
+						${cont}.debugFrame = di2
+						${cont}.function = function
 					}
 				})
 
@@ -454,10 +487,10 @@ object LuaToScalaCompiler:
 				// A sBx: R(A)+=R(A+2): if R(A) <?= R(A+1) then { pc+=sBx: R(A+3)=R(A) }
 				val offset = GETARG_sBx(i) + 1
 
-				raw((thread, di, cont) => {
-					val limit = di.stack(a + 1).checkDouble
-					val step = di.stack(a + 2).checkDouble
-					val value = di.stack(a).checkDouble
+				raw((thread, di, cont) => '{
+					val limit = ${di}.stack(${Expr(a + 1)}).checkDouble
+					val step = ${di}.stack(${Expr(a + 2)}).checkDouble
+					val value = ${di}.stack(${Expr(a)}).checkDouble
 					val idx = step + value
 
 					val cond = if (0 < step) {
@@ -468,11 +501,11 @@ object LuaToScalaCompiler:
 
 					if (cond) {
 						val v = valueOf(idx)
-						di.stack(a) = v
-						di.stack(a + 3) = v
-						cont.programCounter += offset
+						${di}.stack(${Expr(a)}) = v
+						${di}.stack(${Expr(a + 3)}) = v
+						${cont}.programCounter += ${Expr(offset)}
 					} else {
-						cont.programCounter += 1
+						${cont}.programCounter += 1
 					}
 				})
 
@@ -481,26 +514,26 @@ object LuaToScalaCompiler:
 				// A sBx: R(A)-=R(A+2): pc+=sBx
 				val offset = GETARG_sBx(i) + 1
 
-				raw((thread, di, cont) => {
-					val init = di.stack(a).checkNumber("'for' initial value must be a number")
-					val limit = di.stack(a + 1).checkNumber("'for' limit must be a number")
-					val step = di.stack(a + 2).checkNumber("'for' step must be a number")
-					di.stack(a) = valueOf(init.toDouble - step.toDouble)
-					di.stack(a + 1) = limit
-					di.stack(a + 2) = step
-					cont.programCounter += offset
+				raw((thread, di, cont) => '{
+					val init = ${di}.stack(${Expr(a)}).checkNumber("'for' initial value must be a number")
+					val limit = ${di}.stack(${Expr(a + 1)}).checkNumber("'for' limit must be a number")
+					val step = ${di}.stack(${Expr(a + 2)}).checkNumber("'for' step must be a number")
+					${di}.stack(${Expr(a)}) = valueOf(init.toDouble - step.toDouble)
+					${di}.stack(${Expr(a + 1)}) = limit
+					${di}.stack(${Expr(a + 2)}) = step
+					${cont}.programCounter += ${Expr(offset)}
 				})
 
 
 			case OP_TFORCALL =>
 				assert(GET_OPCODE(code(pc + 1)) == OP_TFORLOOP)
-				val cRange = GETARG_C(i) to 1 by -1
+				val cConst = GETARG_C(i)
 
-				cont(di => {
-					val varargs = ValueFactory.varargsOf(di.stack(a + 1), di.stack(a + 2))
-					val result = Dispatch.invoke(state, di.stack(a), varargs, a)
-					for (c <- cRange) {
-						di.stack(a + 2 + c) = result.arg(c)
+				cont(di => '{
+					val varargs = ValueFactory.varargsOf(${di}.stack(${Expr(a + 1)}), ${di}.stack(${Expr(a + 2)}))
+					val result = Dispatch.invoke(state, ${di}.stack(${Expr(a)}), varargs, ${Expr(a)})
+					for (c <- ${Expr(cConst)} to 1 by -1) {
+						${di}.stack(${Expr(a + 2)} + c) = result.arg(c)
 					}
 					// TODO: no fallthrough atm
 					// fallthrough to OP_TFORLOOP, avoiding an extra interpreter loop.
@@ -508,13 +541,13 @@ object LuaToScalaCompiler:
 
 			case OP_TFORLOOP =>
 				val offset = GETARG_sBx(i) + 1
-				raw((thread, di, cont) => {
-					val value = di.stack(a + 1)
+				raw((thread, di, cont) => '{
+					val value = ${di}.stack(${Expr(a + 1)})
 					if (!value.isNil) {
-						di.stack(a) = value
-						cont.programCounter += offset
+						${di}.stack(${Expr(a)}) = value
+						${cont}.programCounter += ${Expr(offset)}
 					} else {
-						cont.programCounter += 1
+						${cont}.programCounter += 1
 					}
 				})
 
@@ -527,31 +560,32 @@ object LuaToScalaCompiler:
 					case c => (c, 0)
 				}
 
-				val offset = (c - 1) * LFIELDS_PER_FLUSH
+				val offsetConst = (c - 1) * LFIELDS_PER_FLUSH
 
-				raw((thread, di, cont) => {
-					cont.programCounter += 1 + increment
-					val tbl = di.stack(a).checkTable
+				raw((thread, di, cont) => '{
+					val offset = ${Expr(offsetConst)}
+					${cont}.programCounter += ${Expr(1 + increment)}
+					val tbl = ${di}.stack(${Expr(a)}).checkTable
 
-					if (b == 0) {
-						val b = di.top - a - 1
-						val m = b - di.extras.count
+					if (${Expr(b)} == 0) {
+						val b = ${di}.top - ${Expr(a)} - 1
+						val m = b - ${di}.extras.count
 						tbl.presize(offset + b)
 
 						var j = 1
 						while (j <= m) {
-							tbl.rawset(offset + j, di.stack(a + j))
+							tbl.rawset(offset + j, ${di}.stack(${Expr(a)} + j))
 							j += 1
 						}
 
 						while (j <= b) {
-							tbl.rawset(offset + j, di.extras.arg(j - m))
+							tbl.rawset(offset + j, ${di}.extras.arg(j - m))
 							j += 1
 						}
 					} else {
-						tbl.presize(offset + b)
-						for (j <- 1 to b) {
-							tbl.rawset(offset + j, di.stack(a + j))
+						tbl.presize(offset + ${Expr(b)})
+						for (j <- 1 to ${Expr(b)}) {
+							tbl.rawset(offset + j, ${di}.stack(${Expr(a)} + j))
 						}
 					}
 				})
@@ -561,31 +595,31 @@ object LuaToScalaCompiler:
 				// A Bx: R(A):= closure(KPROTO[Bx], R(A), ... ,R(A+n))
 				val bx = GETARG_Bx(i)
 				val newp = p.children(bx)
-				cont(di => {
+				cont(di => '{
 					val newcl = new LuaInterpretedFunction(newp)
 					var j = 0
 					val nup = newp.upvalues
 					while (j < nup) {
 						val up = newp.getUpvalue(j)
 						newcl.upvalues(j) = if (up.fromLocal) {
-							di.getUpvalue(up.index)
-						} else di.closure.asInstanceOf[LuaInterpretedFunction].upvalues(up.index)
+							${di}.getUpvalue(up.index)
+						} else ${di}.closure.asInstanceOf[LuaInterpretedFunction].upvalues(up.index)
 
 						j += 1
 					}
-					di.stack(a) = newcl
+					${di}.stack(${Expr(a)}) = newcl
 				})
 
 
 			case OP_VARARG =>
 				// A B: R(A), R(A+1), ..., R(A+B-1) = vararg
 				val b = GETARG_B(i)
-				cont(di => {
-					if (b == 0) {
-						di.top = a + di.varargs.count
-						di.extras = di.varargs
-					} else for (j <- 1 until b) {
-						di.stack(a + j - 1) = di.varargs.arg(j)
+				cont(di => '{
+					if (${Expr(b == 0)}) {
+						${di}.top = ${Expr(a)} + ${di}.varargs.count
+						${di}.extras = ${di}.varargs
+					} else for (j <- 1 until ${Expr(b)}) {
+						${di}.stack(${Expr(a)} + j - 1) = ${di}.varargs.arg(j)
 					}
 				})
 
