@@ -10,6 +10,7 @@ import org.squiddev.cobalt.lib.StringLib
 import org.squiddev.cobalt.{LuaError, LuaState, LuaTable, OperationHelper, Print, Prototype, UnwindThrowable, ValueFactory, Varargs}
 
 import java.io.FileOutputStream
+import java.lang
 import scala.annotation.tailrec
 import scala.quoted.*
 import scala.util.Using
@@ -39,130 +40,13 @@ object LuaToScalaCompiler:
 		file.getName
 	}
 
-	def printOpcode(i: Int): String = GET_OPCODE(i) match {
-		case OP_MOVE =>
-			// A B: R(A):= R(B)
-			"MOVE"
-		case OP_LOADK =>
-			// A Bx: R(A):= Kst(Bx)
-			"LOADK"
-		case OP_LOADKX =>
-			// A: R(A) := Kst(extra arg)
-			"LOADKX"
-		case OP_LOADBOOL =>
-			// A B C: R(A):= (Bool)B: if (C) pc++
-			"LOADBOOL"
-		case OP_LOADNIL =>
-			// A B     R(A), R(A+1), ..., R(A+B) := nil
-			"LOADNIL"
-		case OP_GETUPVAL =>
-			// A B: R(A):= UpValue[B]
-			"GETUPVAL"
-		case OP_GETTABUP =>
-			// A B C: R(A) := UpValue[B][RK(C)]
-			"GETTABUP"
-		case OP_GETTABLE =>
-			// A B C: R(A):= R(B)[RK(C)]
-			"GETTABLE"
-		case OP_SETTABUP =>
-			// A B C: UpValue[A][RK(B)] := RK(C)
-			"SETTABUP"
-		case OP_SETUPVAL =>
-			// A B: UpValue[B]:= R(A)
-			"SETUPVAL"
-		case OP_SETTABLE =>
-			// A B C: R(A)[RK(B)]:= RK(C)
-			"SETTABLE"
-		case OP_NEWTABLE =>
-			// A B C: R(A):= {} (size = B,C)
-			"NEWTABLE"
-		case OP_SELF =>
-			// A B C: R(A+1):= R(B): R(A):= R(B)[RK(C)]
-			"SELF"
-		case OP_ADD =>
-			// A B C: R(A):= RK(B) + RK(C)
-			"ADD"
-		case OP_SUB =>
-			// A B C: R(A):= RK(B) - RK(C)
-			"SUB"
-		case OP_MUL =>
-			// A B C: R(A):= RK(B) * RK(C)
-			"MUL"
-		case OP_DIV =>
-			// A B C: R(A):= RK(B) / RK(C)
-			"DIV"
-		case OP_MOD =>
-			// A B C: R(A):= RK(B) % RK(C)
-			"MOD"
-		case OP_POW =>
-			// A B C: R(A):= RK(B) ^ RK(C)
-			"POW"
-		case OP_UNM =>
-			// A B: R(A):= -R(B)
-			"UNM"
-		case OP_NOT =>
-			// A B: R(A):= not R(B)
-			"NOT"
-		case OP_LEN =>
-			// A B: R(A):= length of R(B)
-			"LEN"
-		case OP_CONCAT =>
-			// A B C: R(A):= R(B).. ... ..R(C)
-			"CONCAT"
-		case OP_JMP =>
-			// sBx: pc+=sBx
-			"JMP"
-		case OP_EQ =>
-			// A B C: if ((RK(B) == RK(C)) ~= A) then pc++
-			"EQ"
-		case OP_LT =>
-			// A B C: if ((RK(B) <  RK(C)) ~= A) then pc++
-			"LT"
-		case OP_LE =>
-			// A B C: if ((RK(B) <= RK(C)) ~= A) then pc++
-			"LE"
-		case OP_TEST =>
-			// A C: if not (R(A) <=> C) then pc++
-			"TEST"
-		case OP_TESTSET =>
-			// A B C: if (R(B) <=> C) then R(A):= R(B) else pc++
-			"TESTSET"
-		case OP_CALL =>
-			// A B C: R(A), ... ,R(A+C-2):= R(A)(R(A+1), ... ,R(A+B-1)) */
-			"CALL"
-		case OP_TAILCALL =>
-			// A B C: return R(A)(R(A+1), ... ,R(A+B-1))
-			"TAILCALL"
-		case OP_RETURN =>
-			// A B: return R(A), ... ,R(A+B-2) (see note)
-			"RETURN"
-		case OP_FORLOOP =>
-			// A sBx: R(A)+=R(A+2): if R(A) <?= R(A+1) then { pc+=sBx: R(A+3)=R(A) }
-			"FORLOOP"
-		case OP_FORPREP =>
-			// A sBx: R(A)-=R(A+2): pc+=sBx
-			"FORPREP"
-		case OP_TFORCALL =>
-			"TFORCALL"
-		case OP_TFORLOOP =>
-			"TFORLOOP"
-		case OP_SETLIST =>
-			// A B C: R(A)[(C-1)*FPF+i]:= R(A+i), 1 <= i <= B
-			"SETLIST"
-		case OP_CLOSURE =>
-			// A Bx: R(A):= closure(KPROTO[Bx], R(A), ... ,R(A+n))
-			"CLOSURE"
-		case OP_VARARG =>
-			// A B: R(A), R(A+1), ..., R(A+B-1) = vararg
-			"VARARG"
-		case _ =>
-			assert(false, "Unknown opcode")
-			throw new IllegalStateException("Unknown opcode")
-	}
-
 	def show(p: Prototype, pc: Int): String = {
-		p.code
-				.map(LuaToScalaCompiler.printOpcode)
+		p.code.indices
+				.map(i => {
+					val sb = lang.StringBuilder()
+					Print.printOpcode(sb, p, i, true)
+					sb.toString
+				})
 				.zipWithIndex
 				.map((line, i) => s"${p.lineAt(i)}: " + (if (i == pc) {
 					line + s"    <============ pc = $pc"
