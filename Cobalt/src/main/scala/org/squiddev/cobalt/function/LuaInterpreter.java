@@ -154,8 +154,58 @@ final class LuaInterpreter {
 		else return ((x & 7) + 8) << (e - 1);
 	}
 
+	private static Varargs partialEval(final LuaState state, DebugFrame di, LuaInterpretedFunction function) throws LuaError, UnwindThrowable {
+		final DebugState ds = DebugState.get(state);
+		Prototype prototype = function.p;
+
+		// Initialize continuation object for tracking execution state
+		EvalCont cont = new EvalCont();
+		cont.programCounter = di.pc;
+
+		// Main execution loop
+		while (true) {
+			// Check for interruptions
+			if (state.isInterrupted()) state.handleInterrupt();
+
+			// Execute the current instruction
+			int pc = di.pc;
+			ds.onInstruction(di, pc);
+			assert pc == di.pc;
+
+			if (pc > 106) {
+				System.out.print("");
+			}
+
+			// Get or compile the instruction
+			UnwindableCallable callable = prototype.compiledInstructions[pc];
+			if (callable == null) {
+				// Compile the instruction if not already compiled
+				callable = LuaToScalaCompiler.partialEvalStep(state, prototype, pc);
+			}
+
+			callable.call(di, cont);
+			// Handle function switching (for calls and returns)
+			if (cont.debugFrame != null) {
+				di = cont.debugFrame;
+				function = cont.function;
+				prototype = function.p;
+
+				cont.programCounter = di.pc;
+				cont.debugFrame = null;
+				cont.function = null;
+			}
+
+			// If we have a return value, return it
+			if (cont.varargs != null) {
+				return cont.varargs;
+			}
+
+			di.pc = cont.programCounter;
+		}
+	}
+
 	static Varargs execute(final LuaState state, DebugFrame di, LuaInterpretedFunction function) throws LuaError, UnwindThrowable {
-		if (true) return LuaToScalaCompiler.execute(state, di, function);
+		if (true) return partialEval(state, di, function);
 
 		final DebugState ds = DebugState.get(state);
 
@@ -757,3 +807,4 @@ final class LuaInterpreter {
 		return err;
 	}
 }
+
