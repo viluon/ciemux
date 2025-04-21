@@ -73,12 +73,13 @@ public class PerformanceBenchmark {
 	public static void main(String... args) throws RunnerException {
 		Options opts = new OptionsBuilder()
 			.include("org.squiddev.cobalt.PerformanceBenchmark.*")
-			.warmupIterations(5)
-			.measurementIterations(5)
-			.measurementTime(TimeValue.milliseconds(12000))
+			.warmupIterations(3)
+			.warmupTime(TimeValue.seconds(9))
+			.measurementIterations(3)
+			.measurementTime(TimeValue.milliseconds(9000))
 			.jvmArgsPrepend("-server")
 			.resultFormat(ResultFormatType.JSON)
-			.forks(3)
+			.forks(2)
 			.build();
 		new Runner(opts).run();
 	}

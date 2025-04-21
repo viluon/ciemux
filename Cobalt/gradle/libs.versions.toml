@@ -36,6 +36,8 @@ junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", vers
 jmh = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 jmh-processor = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
 
+scala-staging = "org.scala-lang:scala3-staging_3:3.6.4"
+
 [bundles]
 asm = ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"]
 kotlin = ["kotlin-stdlib", "kotlin-coroutines"]

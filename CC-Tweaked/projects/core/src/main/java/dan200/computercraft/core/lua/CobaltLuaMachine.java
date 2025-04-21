@@ -20,9 +20,17 @@ import dan200.computercraft.core.util.SanitisedError;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.squiddev.cobalt.*;
+import org.squiddev.cobalt.Constants;
+import org.squiddev.cobalt.LuaError;
+import org.squiddev.cobalt.LuaState;
+import org.squiddev.cobalt.LuaTable;
+import org.squiddev.cobalt.LuaThread;
+import org.squiddev.cobalt.LuaValue;
+import org.squiddev.cobalt.ValueFactory;
+import org.squiddev.cobalt.Varargs;
 import org.squiddev.cobalt.compiler.CompileException;
 import org.squiddev.cobalt.compiler.LoadState;
+import org.squiddev.cobalt.compiler.LuaBytecodeFormat;
 import org.squiddev.cobalt.interrupt.InterruptAction;
 import org.squiddev.cobalt.lib.Bit32Lib;
 import org.squiddev.cobalt.lib.CoreLibraries;
@@ -30,7 +38,11 @@ import org.squiddev.cobalt.lib.CoreLibraries;
 import java.io.InputStream;
 import java.io.Serial;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public class CobaltLuaMachine implements ILuaMachine {
     private static final Logger LOG = LoggerFactory.getLogger(CobaltLuaMachine.class);
@@ -71,6 +83,7 @@ public class CobaltLuaMachine implements ILuaMachine {
                     LOG.error(Logging.VM_ERROR, "Error occurred in the Lua runtime. Computer will continue to execute:\n{}", msg.get(), e);
                 }
             })
+            .bytecodeFormat(LuaBytecodeFormat.instance())
             .build();
 
         // Set up our global table.

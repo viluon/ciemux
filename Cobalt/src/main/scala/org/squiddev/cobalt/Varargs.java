@@ -39,7 +39,7 @@ package org.squiddev.cobalt;
  * such as  {@code LuaValue.varargsOf(LuaValue, Varargs)}
  * or by taking a portion of the args using {@code Varargs.subargs(int start)}
  *
- * @see ValueFactory#varargsOf(LuaValue[])
+ * @see ValueFactory#varargsOfMany(LuaValue[])
  * @see ValueFactory#varargsOf(LuaValue, Varargs)
  * @see ValueFactory#varargsOf(LuaValue, LuaValue, Varargs)
  * @see ValueFactory#varargsOfCopy(LuaValue[], int, int)

@@ -27,6 +27,8 @@ package org.squiddev.cobalt;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.squiddev.cobalt.function.LocalVariable;
 import org.squiddev.cobalt.function.LuaInterpretedFunction;
+import org.squiddev.cobalt.function.UnwindableCallable;
+import org.squiddev.cobalt.function.WrappedCompiledInstruction;
 
 /**
  * Prototype representing compiled lua code.
@@ -49,6 +51,8 @@ public final class Prototype {
 	public final LuaValue[] constants;
 
 	public final int[] code;
+	public @Nullable WrappedCompiledInstruction[] compiledInstructions;
+	public @Nullable UnwindableCallable[] callableCache;
 
 	/**
 	 * Functions defined inside the function
@@ -77,7 +81,7 @@ public final class Prototype {
 
 	public Prototype(
 		LuaString source, LuaString shortSource,
-		LuaValue[] constants, int[] code, Prototype[] children, int parameters, boolean isVarArg, int maxStackSize, UpvalueInfo[] upvalues,
+		LuaValue[] constants, int[] code, WrappedCompiledInstruction[] compiledInstructions, UnwindableCallable[] callableCache, Prototype[] children, int parameters, boolean isVarArg, int maxStackSize, UpvalueInfo[] upvalues,
 		int lineDefined, int lastLineDefined, int[] lineInfo, int[] columnInfo, LocalVariable[] locals
 	) {
 		this.source = source;
@@ -85,6 +89,8 @@ public final class Prototype {
 
 		this.constants = constants;
 		this.code = code;
+		this.compiledInstructions = compiledInstructions;
+		this.callableCache = callableCache;
 		this.children = children;
 		this.parameters = parameters;
 		this.isVarArg = isVarArg;

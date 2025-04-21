@@ -51,7 +51,7 @@ public final class Dispatch {
 	public static LuaValue call(LuaState state, LuaValue function, LuaValue arg1, LuaValue arg2, LuaValue arg3, int stack) throws LuaError, UnwindThrowable {
 		return function instanceof LuaFunction func
 			? callImpl(state, func, arg1, arg2, arg3)
-			: invokeImpl(state, getCallMetamethod(state, function, stack), ValueFactory.varargsOf(function, arg1, arg2, arg3)).first();
+			: invokeImpl(state, getCallMetamethod(state, function, stack), ValueFactory.varargsOfMany(function, arg1, arg2, arg3)).first();
 	}
 
 	public static Varargs invoke(LuaState state, LuaValue function, Varargs args) throws LuaError, UnwindThrowable {

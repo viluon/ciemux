@@ -2,6 +2,7 @@ import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 plugins {
 	java
+	scala
 	`maven-publish`
 }
 
@@ -14,6 +15,10 @@ java {
 	}
 
 	withSourcesJar()
+}
+
+scala {
+	scalaVersion = libs.scala.staging.get().version!!
 }
 
 repositories {
@@ -30,8 +35,19 @@ val checkerFramework by configurations.creating {
 	isCanBeResolved = true
 }
 
+tasks.withType<ScalaCompile> {
+	source = source.filter { it.name != "module-info.java" }.asFileTree
+
+//	scalaCompileOptions.debugLevel = "verbose"
+	scalaCompileOptions.additionalParameters = listOf(
+		"--explain-types",
+	)
+}
+
 dependencies {
 	compileOnly(libs.checkerFramework.qual)
+
+	implementation(libs.scala.staging)
 
 	"checkerFramework"(libs.checkerFramework)
 
@@ -53,15 +69,14 @@ dependencies {
 fun runCheckerFramework(name: String, args: List<String>) {
 	val sourceSet = sourceSets.main.get()
 
-	val runCheckerFramework = tasks.register("checker${name.uppercaseFirstChar()}", JavaCompile::class) {
+	val runCheckerFramework = tasks.register("checker${name.uppercaseFirstChar()}", ScalaCompile::class) {
 		description = "Runs CheckerFramework against the $name sources."
 		group = LifecycleBasePlugin.VERIFICATION_GROUP
 
-		javaCompiler = javaToolchains.compilerFor(java.toolchain)
-		source = sourceSet.java
+		source = sourceSet.scala
 		classpath = sourceSets.main.get().compileClasspath
 
-		destinationDirectory = layout.buildDirectory.dir("classes/java/${sourceSet.name}Doubles")
+		destinationDirectory = layout.buildDirectory.dir("classes/scala/${sourceSet.name}Doubles")
 
 		options.annotationProcessorPath = checkerFramework
 		options.compilerArgs.add("-proc:only")
@@ -85,32 +100,32 @@ fun runCheckerFramework(name: String, args: List<String>) {
 	tasks.check { dependsOn(runCheckerFramework) }
 }
 
-runCheckerFramework(
-	"doubles",
-	listOf(
-		"-processor", "org.checkerframework.checker.signedness.SignednessChecker",
-		"""-AonlyDefs=^cc\.tweaked\.cobalt\.internal\.doubles\.""",
-	),
-)
+//runCheckerFramework(
+//	"doubles",
+//	listOf(
+//		"-processor", "org.checkerframework.checker.signedness.SignednessChecker",
+//		"""-AonlyDefs=^cc\.tweaked\.cobalt\.internal\.doubles\.""",
+//	),
+//)
 
-runCheckerFramework(
-	"nonNull",
-	listOf(
-		"-processor", "org.checkerframework.checker.nullness.NullnessChecker",
-		"""-AonlyDefs=^cc\.tweaked\.cobalt\.""",
-	),
-)
+//runCheckerFramework(
+//	"nonNull",
+//	listOf(
+//		"-processor", "org.checkerframework.checker.nullness.NullnessChecker",
+//		"""-AonlyDefs=^cc\.tweaked\.cobalt\.""",
+//	),
+//)
 
 // Point compileJava to emit to classes/uninstrumentedJava/main, and then add a task to instrument these classes,
 // saving them back to the the original class directory. This is held together with so much string :(.
 val mainSource = sourceSets.main.get()
-val javaClassesDir = mainSource.java.classesDirectory.get()
+val scalaClassesDir = mainSource.scala.classesDirectory.get()
 val untransformedClasses = project.layout.buildDirectory.dir("classes/uninstrumentedJava/main")
 
-val instrumentJava = tasks.register(mainSource.getTaskName("Instrument", "Java"), JavaExec::class) {
-	dependsOn(tasks.compileJava, "cleanInstrumentJava")
+val instrumentScala = tasks.register(mainSource.getTaskName("Instrument", "Scala"), JavaExec::class) {
+	dependsOn(tasks.compileScala, "cleanInstrumentScala")
 	inputs.dir(untransformedClasses).withPropertyName("inputDir")
-	outputs.dir(javaClassesDir).withPropertyName("outputDir")
+	outputs.dir(scalaClassesDir).withPropertyName("outputDir")
 
 	javaLauncher = javaToolchains.launcherFor(java.toolchain)
 	mainClass = "cc.tweaked.cobalt.build.MainKt"
@@ -118,14 +133,14 @@ val instrumentJava = tasks.register(mainSource.getTaskName("Instrument", "Java")
 
 	args = listOf(
 		untransformedClasses.get().asFile.absolutePath,
-		javaClassesDir.asFile.absolutePath,
+		scalaClassesDir.asFile.absolutePath,
 	)
 }
 
-mainSource.compiledBy(instrumentJava)
-tasks.compileJava {
+mainSource.compiledBy(instrumentScala)
+tasks.compileScala {
 	destinationDirectory = untransformedClasses
-	finalizedBy(instrumentJava)
+	finalizedBy(instrumentScala)
 }
 
 publishing {

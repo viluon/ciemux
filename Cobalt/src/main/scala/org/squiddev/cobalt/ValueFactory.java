@@ -174,7 +174,7 @@ public final class ValueFactory {
 	 * @see ValueFactory#varargsOf(LuaValue, Varargs)
 	 * @see ValueFactory#varargsOfCopy(LuaValue[], int, int)
 	 */
-	public static Varargs varargsOf(final LuaValue... v) {
+	public static Varargs varargsOfMany(final LuaValue... v) {
 		return switch (v.length) {
 			case 0 -> Constants.NONE;
 			case 1 -> v[0];
@@ -207,7 +207,7 @@ public final class ValueFactory {
 	 * @param offset number of initial values to skip in the array
 	 * @param length number of values to include from the array
 	 * @return {@link Varargs} wrapping the supplied values.
-	 * @see ValueFactory#varargsOf(LuaValue[])
+	 * @see ValueFactory#varargsOfMany(LuaValue[])
 	 * @see ValueFactory#varargsOfCopy(LuaValue[], int, int, Varargs)
 	 */
 	public static Varargs varargsOfCopy(final LuaValue[] v, final int offset, final int length) {

@@ -395,7 +395,7 @@ class StringMatch {
 			for (int i = 0; i < nlevels; ++i) {
 				v[i] = push_onecapture(i, soff, end);
 			}
-			return varargsOf(v);
+			return ValueFactory.varargsOfMany(v);
 		}
 
 		private LuaValue push_onecapture(int i, int soff, int end) throws LuaError {

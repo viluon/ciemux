@@ -203,7 +203,7 @@ public final class StringLib {
 		for (int i = 0; i < n; i++) {
 			v[i] = valueOf(s.charAt(posi + i - 1));
 		}
-		return varargsOf(v);
+		return varargsOfMany(v);
 	}
 
 	/**
@@ -241,7 +241,7 @@ public final class StringLib {
 	 *
 	 * @throws LuaError If the function cannot be dumped.
 	 */
-	static LuaValue dump(LuaState state, LuaValue arg1, LuaValue arg2) throws LuaError {
+	public static LuaValue dump(LuaState state, LuaValue arg1, LuaValue arg2) throws LuaError {
 		LuaFunction f = arg1.checkFunction();
 		boolean strip = arg2.optBoolean(false);
 		var bytecode = state.getBytecodeFormat();
