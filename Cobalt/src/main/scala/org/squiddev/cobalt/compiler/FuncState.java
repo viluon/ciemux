@@ -94,7 +94,7 @@ final class FuncState {
 		return new Prototype(
 			lexer.source, lexer.shortSource,
 			// Code
-			constants.toArray(new LuaValue[0]), LuaC.realloc(code, pc), null,
+			constants.toArray(new LuaValue[0]), LuaC.realloc(code, pc), null, null,
 			children.toArray(new Prototype[0]),
 			numParams, isVararg, maxStackSize, upvalues.toArray(Prototype.UpvalueInfo[]::new),
 			// Debug information
